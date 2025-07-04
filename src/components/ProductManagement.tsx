@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -152,6 +151,12 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
 
   const handleDeleteProduct = (id: string) => {
     setProducts(products.filter(p => p.id !== id));
+  };
+
+  const handleEditProductChange = (partialProduct: Partial<Product>) => {
+    if (editingProduct) {
+      setEditingProduct({ ...editingProduct, ...partialProduct });
+    }
   };
 
   const ProductForm = ({ product, onSave, onCancel }: { 
@@ -413,7 +418,7 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
                           </DialogHeader>
                           <ProductForm
                             product={editingProduct || product}
-                            onSave={setEditingProduct}
+                            onSave={handleEditProductChange}
                             onCancel={() => setEditingProduct(null)}
                           />
                           <div className="flex justify-end gap-2 pt-4 border-t">
