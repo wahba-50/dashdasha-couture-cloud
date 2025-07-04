@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, Users, Package, Clock, Search, Plus, ArrowLeft } from "lucide-react";
+import { ShoppingCart, Users, Package, Clock, Search, Plus, ArrowLeft, Scissors, Star, Shirt } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const WorkshopDashboard = () => {
@@ -105,13 +104,23 @@ const WorkshopDashboard = () => {
                 <p className="text-sm text-gray-600">لوحة تحكم الورشة - {workshop.type}</p>
               </div>
             </div>
-            <Button 
-              onClick={() => navigate('/new-order')}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Plus className="w-4 h-4 ml-2" />
-              طلب جديد
-            </Button>
+            <div className="flex items-center space-x-reverse space-x-2">
+              <Button 
+                onClick={() => navigate('/products')}
+                variant="outline"
+                className="hover:bg-green-50"
+              >
+                <Package className="w-4 h-4 ml-2" />
+                المنتجات
+              </Button>
+              <Button 
+                onClick={() => navigate('/new-order')}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Plus className="w-4 h-4 ml-2" />
+                طلب جديد
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -274,10 +283,37 @@ const WorkshopDashboard = () => {
           <TabsContent value="products">
             <Card>
               <CardHeader>
-                <CardTitle>إدارة المنتجات</CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle>إدارة المنتجات</CardTitle>
+                  <Button onClick={() => navigate('/products')}>
+                    عرض جميع المنتجات
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">إدارة الأقمشة والقصات والإكسسوارات</p>
+                <p className="text-gray-600 mb-4">إدارة الأقمشة والقصات والإكسسوارات والمصنعيات</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="p-4 bg-blue-50 rounded-lg text-center">
+                    <Package className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                    <h4 className="font-semibold">الأقمشة</h4>
+                    <p className="text-sm text-gray-600">12 صنف</p>
+                  </div>
+                  <div className="p-4 bg-green-50 rounded-lg text-center">
+                    <Scissors className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                    <h4 className="font-semibold">القصات</h4>
+                    <p className="text-sm text-gray-600">8 قصات</p>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg text-center">
+                    <Star className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                    <h4 className="font-semibold">الإكسسوارات</h4>
+                    <p className="text-sm text-gray-600">15 نوع</p>
+                  </div>
+                  <div className="p-4 bg-amber-50 rounded-lg text-center">
+                    <Shirt className="w-8 h-8 text-amber-600 mx-auto mb-2" />
+                    <h4 className="font-semibold">المصنعيات</h4>
+                    <p className="text-sm text-gray-600">6 خدمات</p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
