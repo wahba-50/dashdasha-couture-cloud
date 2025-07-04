@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, Users, Package, Plus, Search, Filter, Play, CheckCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ShoppingCart, Users, Package, Plus, Search, Play, CheckCircle, QrCode, Printer, Building2, BarChart3, Settings2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import SystemHeader from "@/components/SystemHeader";
 import StatsCard from "@/components/StatsCard";
+import ProductManagement from "@/components/ProductManagement";
 
 const WorkshopDashboard = () => {
   const navigate = useNavigate();
@@ -18,49 +20,64 @@ const WorkshopDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState('orders');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [isProductManagementOpen, setIsProductManagementOpen] = useState(false);
 
   const workshop = {
     id: workshopId,
     name: "ورشة الأناقة الكويتية",
-    type: "حريمي ورجالي"
+    type: "حريمي ورجالي",
+    address: "حولي، شارع تونس، مجمع الأناقة التجاري",
+    phone: "+965 2262 8945"
   };
 
   const [orders, setOrders] = useState([
     {
       id: 'ORD-001',
       customerName: 'أحمد محمد الكندري',
-      phone: '97712345678',
+      phone: '+96597712345678',
       items: 2,
       total: 45.500,
       status: 'جديد',
       deliveryDate: '2024-07-15',
       createdAt: '2024-07-04',
       qrCodes: ['QR001A', 'QR001B'],
-      cutter: null
+      cutter: null,
+      itemDetails: [
+        { qrCode: 'QR001A', fabric: 'قماش قطني فاخر', cut: 'قصة كلاسيكية' },
+        { qrCode: 'QR001B', fabric: 'قماش حريري', cut: 'قصة عصرية' }
+      ]
     },
     {
       id: 'ORD-002',
       customerName: 'فاطمة علي العتيبي',
-      phone: '97712345679',
+      phone: '+96597712345679',
       items: 1,
       total: 28.750,
       status: 'جاري الإنتاج',
       deliveryDate: '2024-07-12',
       createdAt: '2024-07-02',
       qrCodes: ['QR002A'],
-      cutter: 'محمد الخياط'
+      cutter: 'محمد الخياط',
+      itemDetails: [
+        { qrCode: 'QR002A', fabric: 'قماش كتان', cut: 'قصة فاخرة' }
+      ]
     },
     {
       id: 'ORD-003',
       customerName: 'خالد سعد المطيري',
-      phone: '97712345680',
+      phone: '+96597712345680',
       items: 3,
       total: 67.250,
       status: 'مكتمل',
       deliveryDate: '2024-07-08',
       createdAt: '2024-06-28',
       qrCodes: ['QR003A', 'QR003B', 'QR003C'],
-      cutter: 'أحمد القصاص'
+      cutter: 'أحمد القصاص',
+      itemDetails: [
+        { qrCode: 'QR003A', fabric: 'قماش قطني', cut: 'قصة كلاسيكية' },
+        { qrCode: 'QR003B', fabric: 'قماش حريري', cut: 'قصة عصرية' },
+        { qrCode: 'QR003C', fabric: 'قماش كتان', cut: 'قصة فاخرة' }
+      ]
     }
   ]);
 
@@ -68,27 +85,39 @@ const WorkshopDashboard = () => {
     {
       id: 1,
       name: 'أحمد محمد الكندري',
-      phone: '97712345678',
+      phone: '+96597712345678',
+      email: 'ahmed.k@example.com',
+      gender: 'ذكر',
       orders: 5,
       lastOrder: '2024-07-04',
       totalSpent: 234.750,
-      measurements: { chest: 95, waist: 85, shoulder: 45 }
+      measurements: { chest: 95, waist: 85, shoulder: 45, neck: 38, length: 145 },
+      address: {
+        country: 'الكويت',
+        state: 'حولي',
+        area: 'السالمية',
+        street: 'شارع المطاعم',
+        house: '123'
+      }
     },
     {
       id: 2,
       name: 'فاطمة علي العتيبي',
-      phone: '97712345679',
+      phone: '+96597712345679',
+      email: 'fatma.ali@example.com',
+      gender: 'أنثى',
       orders: 3,
       lastOrder: '2024-07-02',
       totalSpent: 156.250,
-      measurements: { chest: 88, waist: 78, shoulder: 40 }
+      measurements: { chest: 88, waist: 78, shoulder: 40, neck: 35, length: 140 },
+      address: {
+        country: 'الكويت',
+        state: 'العاصمة',
+        area: 'قرطبة',
+        street: 'شارع الخليج',
+        house: '456'
+      }
     }
-  ];
-
-  const products = [
-    { id: 1, name: 'قماش قطني فاخر', type: 'fabric', price: 12.500, stock: 50, unit: 'متر' },
-    { id: 2, name: 'قصة دشداشة كلاسيكية', type: 'cut', price: 15.750, stock: 100, unit: 'قطعة' },
-    { id: 3, name: 'أزرار ذهبية', type: 'accessory', price: 2.250, stock: 200, unit: 'عدد' }
   ];
 
   const stats = {
@@ -97,7 +126,9 @@ const WorkshopDashboard = () => {
     inProgress: orders.filter(o => o.status === 'جاري الإنتاج').length,
     completed: orders.filter(o => o.status === 'مكتمل').length,
     totalCustomers: customers.length,
-    totalRevenue: orders.reduce((sum, order) => sum + order.total, 0)
+    totalRevenue: orders.reduce((sum, order) => sum + order.total, 0),
+    avgOrderValue: orders.length > 0 ? orders.reduce((sum, order) => sum + order.total, 0) / orders.length : 0,
+    completionRate: orders.length > 0 ? (orders.filter(o => o.status === 'مكتمل').length / orders.length) * 100 : 0
   };
 
   const filteredOrders = orders.filter(order => {
@@ -109,47 +140,75 @@ const WorkshopDashboard = () => {
   });
 
   const filteredCustomers = customers.filter(customer =>
-    customer.name.includes(searchTerm) || customer.phone.includes(searchTerm)
-  );
-
-  const filteredProducts = products.filter(product =>
-    product.name.includes(searchTerm)
+    customer.name.includes(searchTerm) || 
+    customer.phone.includes(searchTerm) ||
+    (customer.email && customer.email.includes(searchTerm))
   );
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'جديد': return 'bg-blue-100 text-blue-800';
-      case 'جاري الإنتاج': return 'bg-yellow-100 text-yellow-800';
-      case 'مكتمل': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'جديد': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'جاري الإنتاج': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'مكتمل': return 'bg-green-100 text-green-800 border-green-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
   const handleStartProduction = (orderId: string) => {
-    const cutterName = prompt('أدخل اسم القصاص:');
-    if (cutterName) {
+    const cutterName = prompt('أدخل اسم القصاص المسؤول عن هذا الطلب:');
+    if (cutterName?.trim()) {
       setOrders(orders.map(order => 
         order.id === orderId 
-          ? { ...order, status: 'جاري الإنتاج', cutter: cutterName }
+          ? { ...order, status: 'جاري الإنتاج', cutter: cutterName.trim() }
           : order
       ));
+      alert(`تم بدء الإنتاج للطلب ${orderId} مع القصاص: ${cutterName}`);
     }
   };
 
   const handleCompleteProduction = (orderId: string) => {
-    setOrders(orders.map(order => 
-      order.id === orderId 
-        ? { ...order, status: 'مكتمل' }
-        : order
-    ));
-    // Here would be the logic to send WhatsApp/email notifications
-    alert('تم إرسال إشعار للعميل بإكتمال الطلب وخيارات الخدمات الإضافية');
+    if (confirm('هل أنت متأكد من إكتمال إنتاج هذا الطلب؟')) {
+      setOrders(orders.map(order => 
+        order.id === orderId 
+          ? { ...order, status: 'مكتمل' }
+          : order
+      ));
+      
+      // Mock external services notification
+      alert(`تم إكتمال الطلب ${orderId}!\n\nسيتم إرسال إشعار للعميل يتضمن:\n- خيارات التوصيل\n- خيارات المغسلة\n- خدمات إضافية أخرى`);
+    }
   };
 
   const handlePrintQR = (qrCodes: string[], orderDetails: any) => {
-    // Mock print functionality
-    console.log('Printing QR codes:', qrCodes, 'for order:', orderDetails);
-    alert(`تم طباعة ${qrCodes.length} كود QR للطلب ${orderDetails.id}`);
+    // Mock QR code printing with detailed information
+    const printData = {
+      orderNumber: orderDetails.id,
+      customerName: orderDetails.customerName,
+      qrCodes: qrCodes,
+      items: orderDetails.itemDetails,
+      workshopName: workshop.name,
+      workshopPhone: workshop.phone,
+      printDate: new Date().toLocaleDateString('ar-KW')
+    };
+    
+    console.log('Printing QR codes with details:', printData);
+    
+    // In a real application, this would generate and print actual QR codes
+    alert(`تم إرسال ${qrCodes.length} كود QR للطباعة:\n\n` +
+          `الطلب: ${orderDetails.id}\n` +
+          `العميل: ${orderDetails.customerName}\n` +
+          `الأكواد: ${qrCodes.join(', ')}\n\n` +
+          'سيتم طباعة كل كود مع تفاصيل القطعة المقابلة (بدون الأسعار)');
+  };
+
+  const handleViewOrderDetails = (order: any) => {
+    // This would typically open a detailed order view
+    console.log('View order details:', order);
+  };
+
+  const handleViewCustomerDetails = (customer: any) => {
+    // This would typically open customer details with measurements and previous orders
+    console.log('View customer details:', customer);
   };
 
   return (
@@ -159,19 +218,21 @@ const WorkshopDashboard = () => {
         subtitle={`لوحة تحكم الورشة - ${workshop.type}`}
         showBackButton={true}
         actions={
-          <Button 
-            onClick={() => navigate('/new-order')}
-            className="bg-primary hover:bg-primary/90"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            {t('order.new')}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => navigate('/new-order')}
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              طلب جديد
+            </Button>
+          </div>
         }
       />
 
       <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6 sm:mb-8">
+        {/* Enhanced Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4 mb-6 sm:mb-8">
           <StatsCard
             title="إجمالي الطلبات"
             value={stats.totalOrders}
@@ -182,7 +243,7 @@ const WorkshopDashboard = () => {
             title="طلبات جديدة"
             value={stats.newOrders}
             icon={ShoppingCart}
-            gradient="bg-gradient-to-r from-yellow-500 to-yellow-600"
+            gradient="bg-gradient-to-r from-amber-500 to-amber-600"
           />
           <StatsCard
             title="جاري الإنتاج"
@@ -205,19 +266,31 @@ const WorkshopDashboard = () => {
           <StatsCard
             title="الإيرادات"
             value={`${stats.totalRevenue.toFixed(3)} د.ك`}
-            icon={ShoppingCart}
+            icon={BarChart3}
             gradient="bg-gradient-to-r from-teal-500 to-teal-600"
+          />
+          <StatsCard
+            title="متوسط الطلب"
+            value={`${stats.avgOrderValue.toFixed(3)} د.ك`}
+            icon={BarChart3}
+            gradient="bg-gradient-to-r from-indigo-500 to-indigo-600"
+          />
+          <StatsCard
+            title="معدل الإنجاز"
+            value={`${stats.completionRate.toFixed(1)}%`}
+            icon={CheckCircle}
+            gradient="bg-gradient-to-r from-emerald-500 to-emerald-600"
           />
         </div>
 
-        {/* Main Content */}
+        {/* Main Content Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto">
             <TabsTrigger value="orders" className="text-xs sm:text-sm py-2">
-              {t('dashboard.orders')}
+              الطلبات ({stats.totalOrders})
             </TabsTrigger>
             <TabsTrigger value="customers" className="text-xs sm:text-sm py-2">
-              {t('dashboard.customers')}
+              العملاء ({stats.totalCustomers})
             </TabsTrigger>
             <TabsTrigger value="products" className="text-xs sm:text-sm py-2">
               المنتجات
@@ -225,19 +298,23 @@ const WorkshopDashboard = () => {
             <TabsTrigger value="reports" className="text-xs sm:text-sm py-2">
               التقارير
             </TabsTrigger>
+            <TabsTrigger value="settings" className="text-xs sm:text-sm py-2">
+              الإعدادات
+            </TabsTrigger>
           </TabsList>
 
-          {/* Search and Filter */}
+          {/* Search and Filter Bar */}
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
             <div className="relative flex-1 w-full">
               <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder={`${t('common.search')}...`}
+                placeholder={`البحث في ${selectedTab === 'orders' ? 'الطلبات' : selectedTab === 'customers' ? 'العملاء' : 'المحتوى'}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pr-10"
               />
             </div>
+            
             {selectedTab === 'orders' && (
               <div className="flex flex-wrap gap-2">
                 {['all', 'جديد', 'جاري الإنتاج', 'مكتمل'].map((status) => (
@@ -255,83 +332,133 @@ const WorkshopDashboard = () => {
             )}
           </div>
 
+          {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>الطلبات ({filteredOrders.length})</CardTitle>
+                <CardTitle className="flex items-center justify-between">
+                  <span>الطلبات ({filteredOrders.length})</span>
+                  <Badge variant="secondary" className="text-xs">
+                    إجمالي القيمة: {filteredOrders.reduce((sum, order) => sum + order.total, 0).toFixed(3)} د.ك
+                  </Badge>
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {filteredOrders.map((order) => (
-                    <div key={order.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex flex-wrap items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-lg">#{order.id}</h3>
-                            <Badge className={getStatusColor(order.status)}>
-                              {order.status}
-                            </Badge>
+                    <Card key={order.id} className="border hover:shadow-md transition-all duration-200">
+                      <CardContent className="p-4">
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                          <div className="flex-1 space-y-3">
+                            {/* Order Header */}
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="font-bold text-lg text-primary">#{order.id}</h3>
+                              <Badge className={`${getStatusColor(order.status)} border`}>
+                                {order.status}
+                              </Badge>
+                              {order.cutter && (
+                                <Badge variant="outline" className="text-xs">
+                                  القصاص: {order.cutter}
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            {/* Customer Info */}
+                            <div className="space-y-1">
+                              <p className="font-medium text-gray-800">{order.customerName}</p>
+                              <p className="text-sm text-gray-600">{order.phone}</p>
+                            </div>
+                            
+                            {/* Order Details */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                              <div>
+                                <span className="text-gray-500">القطع:</span>
+                                <p className="font-semibold">{order.items}</p>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">المجموع:</span>
+                                <p className="font-semibold text-primary">{order.total.toFixed(3)} د.ك</p>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">التسليم:</span>
+                                <p className="font-semibold">{order.deliveryDate}</p>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">التاريخ:</span>
+                                <p className="font-semibold">{order.createdAt}</p>
+                              </div>
+                            </div>
+                            
+                            {/* QR Codes */}
+                            <div className="flex flex-wrap gap-1">
+                              {order.qrCodes.map(qr => (
+                                <Badge key={qr} variant="outline" className="text-xs font-mono">
+                                  {qr}
+                                </Badge>
+                              ))}
+                            </div>
                           </div>
-                          <p className="text-gray-600 mb-1">{order.customerName}</p>
-                          <p className="text-sm text-gray-500">{order.phone}</p>
-                          {order.cutter && (
-                            <p className="text-sm text-blue-600">القصاص: {order.cutter}</p>
-                          )}
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mt-2">
-                            <span>{order.items} قطعة</span>
-                            <span>{order.total.toFixed(3)} د.ك</span>
-                            <span>التسليم: {order.deliveryDate}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handlePrintQR(order.qrCodes, order)}
-                            className="w-full sm:w-auto"
-                          >
-                            طباعة QR
-                          </Button>
                           
-                          {order.status === 'جديد' && (
+                          {/* Action Buttons */}
+                          <div className="flex flex-col sm:flex-row lg:flex-col gap-2 lg:w-48">
                             <Button 
                               size="sm" 
-                              onClick={() => handleStartProduction(order.id)}
-                              className="w-full sm:w-auto"
+                              variant="outline"
+                              onClick={() => handlePrintQR(order.qrCodes, order)}
+                              className="w-full"
                             >
-                              <Play className="w-4 h-4 mr-1" />
-                              بدء الإنتاج
+                              <QrCode className="w-3 h-3 mr-1" />
+                              طباعة الأكواد
                             </Button>
-                          )}
-                          
-                          {order.status === 'جاري الإنتاج' && (
+                            
+                            {order.status === 'جديد' && (
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleStartProduction(order.id)}
+                                className="w-full bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Play className="w-3 h-3 mr-1" />
+                                بدء الإنتاج
+                              </Button>
+                            )}
+                            
+                            {order.status === 'جاري الإنتاج' && (
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleCompleteProduction(order.id)}
+                                className="w-full bg-green-600 hover:bg-green-700"
+                              >
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                إنتهاء الإنتاج
+                              </Button>
+                            )}
+                            
                             <Button 
                               size="sm" 
-                              onClick={() => handleCompleteProduction(order.id)}
-                              className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+                              variant="outline"
+                              onClick={() => handleViewOrderDetails(order)}
+                              className="w-full"
                             >
-                              <CheckCircle className="w-4 h-4 mr-1" />
-                              انتهاء الإنتاج
+                              عرض التفاصيل
                             </Button>
-                          )}
-                          
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            className="w-full sm:w-auto"
-                          >
-                            عرض التفاصيل
-                          </Button>
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   ))}
+                  
+                  {filteredOrders.length === 0 && (
+                    <div className="text-center py-12 text-gray-500">
+                      <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>لا توجد طلبات {statusFilter !== 'all' ? `بحالة "${statusFilter}"` : ''}</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* Customers Tab */}
           <TabsContent value="customers">
             <Card>
               <CardHeader>
@@ -340,90 +467,117 @@ const WorkshopDashboard = () => {
               <CardContent>
                 <div className="space-y-4">
                   {filteredCustomers.map((customer) => (
-                    <div key={customer.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg">{customer.name}</h3>
-                          <p className="text-sm text-gray-600">{customer.phone}</p>
-                          <div className="flex flex-wrap gap-4 text-sm text-gray-600 mt-2">
-                            <span>الطلبات: {customer.orders}</span>
-                            <span>آخر طلب: {customer.lastOrder}</span>
-                            <span>إجمالي الإنفاق: {customer.totalSpent.toFixed(3)} د.ك</span>
+                    <Card key={customer.id} className="border hover:shadow-md transition-all duration-200">
+                      <CardContent className="p-4">
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                          <div className="flex-1 space-y-3">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-bold text-lg">{customer.name}</h3>
+                              <Badge variant="outline" className="text-xs">
+                                {customer.gender}
+                              </Badge>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                              <div>
+                                <span className="text-gray-500">الهاتف:</span>
+                                <p className="font-medium">{customer.phone}</p>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">البريد:</span>
+                                <p className="font-medium">{customer.email}</p>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">العنوان:</span>
+                                <p className="font-medium">{customer.address.area}، {customer.address.state}</p>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">آخر طلب:</span>
+                                <p className="font-medium">{customer.lastOrder}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm bg-gray-50 p-3 rounded-lg">
+                              <div className="text-center">
+                                <p className="text-gray-500">الطلبات</p>
+                                <p className="font-bold text-primary">{customer.orders}</p>
+                              </div>
+                              <div className="text-center">
+                                <p className="text-gray-500">إجمالي الإنفاق</p>
+                                <p className="font-bold text-green-600">{customer.totalSpent.toFixed(3)} د.ك</p>
+                              </div>
+                              <div className="text-center">
+                                <p className="text-gray-500">متوسط الطلب</p>
+                                <p className="font-bold">{(customer.totalSpent / customer.orders).toFixed(3)} د.ك</p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col sm:flex-row gap-2 lg:w-48">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => handleViewCustomerDetails(customer)}
+                              className="w-full"
+                            >
+                              عرض القياسات
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="w-full"
+                            >
+                              الطلبات السابقة
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline">
-                            عرض القياسات
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            الطلبات السابقة
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   ))}
+                  
+                  {filteredCustomers.length === 0 && (
+                    <div className="text-center py-12 text-gray-500">
+                      <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>لا توجد عملاء</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* Products Tab */}
           <TabsContent value="products">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <span>إدارة المنتجات ({filteredProducts.length})</span>
-                  <Button size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    إضافة منتج
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredProducts.map((product) => (
-                    <div key={product.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-semibold">{product.name}</h4>
-                        <Badge variant="secondary">{product.type}</Badge>
-                      </div>
-                      <div className="space-y-1 text-sm text-gray-600">
-                        <p>السعر: {product.price.toFixed(3)} د.ك/{product.unit}</p>
-                        <p>المخزون: {product.stock} {product.unit}</p>
-                      </div>
-                      <div className="flex gap-2 mt-3">
-                        <Button size="sm" variant="outline" className="flex-1">
-                          تعديل
-                        </Button>
-                        <Button size="sm" variant="outline" className="flex-1">
-                          إدارة المخزون
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <ProductManagement />
           </TabsContent>
 
+          {/* Reports Tab */}
           <TabsContent value="reports">
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               <Card>
                 <CardHeader>
-                  <CardTitle>تقرير المبيعات</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    تقرير المبيعات
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
                     <div className="flex justify-between">
                       <span>مبيعات اليوم:</span>
-                      <span className="font-bold">45.750 د.ك</span>
+                      <span className="font-bold text-primary">45.750 د.ك</span>
                     </div>
                     <div className="flex justify-between">
                       <span>مبيعات الأسبوع:</span>
-                      <span className="font-bold">234.500 د.ك</span>
+                      <span className="font-bold text-primary">234.500 د.ك</span>
                     </div>
                     <div className="flex justify-between">
                       <span>مبيعات الشهر:</span>
-                      <span className="font-bold">1,245.750 د.ك</span>
+                      <span className="font-bold text-primary">1,245.750 د.ك</span>
+                    </div>
+                    <div className="flex justify-between border-t pt-3">
+                      <span>النمو الشهري:</span>
+                      <span className="font-bold text-green-600">+12.5%</span>
                     </div>
                   </div>
                 </CardContent>
@@ -431,22 +585,121 @@ const WorkshopDashboard = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>تقرير الخامات</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="w-5 h-5" />
+                    تقرير المخزون
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span>الأكثر استخداماً:</span>
-                      <span className="font-bold">قماش قطني</span>
+                      <span>الأقمشة المتوفرة:</span>
+                      <span className="font-bold">120 متر</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>الإكسسوارات:</span>
+                      <span className="font-bold">85 قطعة</span>
                     </div>
                     <div className="flex justify-between">
                       <span>تحتاج تجديد:</span>
                       <span className="font-bold text-red-600">5 عناصر</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>إجمالي القيمة:</span>
-                      <span className="font-bold">2,890.250 د.ك</span>
+                    <div className="flex justify-between border-t pt-3">
+                      <span>قيمة المخزون:</span>
+                      <span className="font-bold text-primary">2,890.250 د.ك</span>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    تقرير العملاء
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span>عملاء جدد (هذا الشهر):</span>
+                      <span className="font-bold text-green-600">8</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>عملاء متكررون:</span>
+                      <span className="font-bold">15</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>متوسط الطلبات للعميل:</span>
+                      <span className="font-bold">3.2</span>
+                    </div>
+                    <div className="flex justify-between border-t pt-3">
+                      <span>معدل الاحتفاظ:</span>
+                      <span className="font-bold text-primary">78%</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings">
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="w-5 h-5" />
+                    معلومات الورشة
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-gray-600">اسم الورشة:</span>
+                      <p className="font-semibold">{workshop.name}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">نوع الخدمة:</span>
+                      <p className="font-semibold">{workshop.type}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">العنوان:</span>
+                      <p className="font-semibold">{workshop.address}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">الهاتف:</span>
+                      <p className="font-semibold">{workshop.phone}</p>
+                    </div>
+                  </div>
+                  <Button variant="outline" className="w-full">
+                    <Settings2 className="w-4 h-4 mr-2" />
+                    تعديل المعلومات
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings2 className="w-5 h-5" />
+                    إعدادات النظام
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <Button variant="outline" className="w-full justify-start">
+                      إدارة القياسات
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      إعدادات الطباعة
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      إعدادات الإشعارات
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      نسخ احتياطي للبيانات
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
