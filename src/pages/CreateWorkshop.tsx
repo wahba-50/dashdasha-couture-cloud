@@ -211,7 +211,7 @@ const CreateWorkshop = () => {
                 {formData.enableAdditionalServices && (
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                     <p className="text-sm text-blue-700">
-                      سيتم ربط هذه الورشة بالخدمات الخارجية المتاحة في النظام مثل إدارة المخزون والتقارير المتقدمة.
+                      سيتم ربط هذه الورشة بالخدمات الخارجية المتاحة في النظام مثل خدمة المغسلة الآلية وخدمة التوصيل السريع.
                     </p>
                   </div>
                 )}
