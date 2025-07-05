@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Scissors, Crown, Sparkles, User, Lock, Settings } from 'lucide-react';
+import { Crown, Shield, Database, Users, User, Lock, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageToggle from '@/components/LanguageToggle';
 
-const Landing = () => {
+const SystemOwnerLanding = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -32,35 +32,32 @@ const Landing = () => {
     
     // Simulate login process
     setTimeout(() => {
-      // For demo purposes, navigate to workshop dashboard
-      // In real implementation, you'd validate credentials and get workshop ID
-      const workshopId = 'demo-workshop';
-      navigate(`/workshop/${workshopId}/dashboard`);
+      navigate('/system');
       setIsLoading(false);
     }, 1000);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50" dir={dir}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800" dir={dir}>
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+      <header className="bg-black/20 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <Crown className="h-8 w-8 text-blue-600" />
-              <h1 className="text-2xl font-bold text-gray-900">{t('system.name')}</h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <LanguageToggle />
+            <div className="flex items-center gap-4">
               <Button 
-                variant="outline" 
-                onClick={() => navigate('/system')}
-                className="flex items-center gap-2"
+                variant="ghost" 
+                size="icon"
+                onClick={() => navigate('/')}
+                className="text-white hover:bg-white/10"
               >
-                <Settings className="w-4 h-4" />
-                {t('system.owner.login')}
+                <ArrowLeft className="w-5 h-5" />
               </Button>
+              <div className="flex items-center space-x-2 space-x-reverse">
+                <Crown className="h-8 w-8 text-amber-400" />
+                <h1 className="text-2xl font-bold text-white">{t('system.name')}</h1>
+              </div>
             </div>
+            <LanguageToggle />
           </div>
         </div>
       </header>
@@ -72,38 +69,38 @@ const Landing = () => {
             <div className="mb-8">
               <div className={`flex ${dir === 'rtl' ? 'justify-center lg:justify-end' : 'justify-center lg:justify-start'} mb-6`}>
                 <div className="relative">
-                  <div className="absolute inset-0 bg-blue-600/20 rounded-full blur-xl"></div>
-                  <div className="relative bg-white rounded-full p-6 shadow-lg">
-                    <Scissors className="h-16 w-16 text-blue-600" />
+                  <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-xl"></div>
+                  <div className="relative bg-white/10 backdrop-blur-sm rounded-full p-6 border border-white/20">
+                    <Shield className="h-16 w-16 text-amber-400" />
                   </div>
                 </div>
               </div>
               
-              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                {t('system.title')}
-                <span className="text-blue-600 block">{t('system.name')}</span>
+              <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+                {t('system.subtitle')}
+                <span className="text-amber-400 block">{t('system.owner.login')}</span>
               </h2>
               
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              <p className="text-xl text-gray-300 mb-8 leading-relaxed">
                 {t('system.description')}
               </p>
             </div>
 
             {/* Features */}
             <div className="grid sm:grid-cols-2 gap-6 mb-8">
-              <div className={`flex items-center space-x-3 space-x-reverse bg-white/60 rounded-lg p-4`}>
-                <Sparkles className="h-8 w-8 text-amber-500 flex-shrink-0" />
+              <div className={`flex items-center space-x-3 space-x-reverse bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20`}>
+                <Database className="h-8 w-8 text-blue-400 flex-shrink-0" />
                 <div className={dir === 'rtl' ? 'text-right' : 'text-left'}>
-                  <h3 className="font-semibold text-gray-900">{t('nav.orders')}</h3>
-                  <p className="text-gray-600 text-sm">{t('order.viewDetails')}</p>
+                  <h3 className="font-semibold text-white">{t('dashboard.workshops')}</h3>
+                  <p className="text-gray-300 text-sm">{t('workshop.details')}</p>
                 </div>
               </div>
               
-              <div className={`flex items-center space-x-3 space-x-reverse bg-white/60 rounded-lg p-4`}>
-                <User className="h-8 w-8 text-green-500 flex-shrink-0" />
+              <div className={`flex items-center space-x-3 space-x-reverse bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20`}>
+                <Users className="h-8 w-8 text-green-400 flex-shrink-0" />
                 <div className={dir === 'rtl' ? 'text-right' : 'text-left'}>
-                  <h3 className="font-semibold text-gray-900">{t('nav.customers')}</h3>
-                  <p className="text-gray-600 text-sm">{t('customer.measurements')}</p>
+                  <h3 className="font-semibold text-white">{t('dashboard.customers')}</h3>
+                  <p className="text-gray-300 text-sm">{t('customer.measurements')}</p>
                 </div>
               </div>
             </div>
@@ -111,13 +108,18 @@ const Landing = () => {
 
           {/* Login Form */}
           <div className="order-1 lg:order-2">
-            <Card className="w-full max-w-md mx-auto shadow-2xl border-0">
+            <Card className="w-full max-w-md mx-auto shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
               <CardHeader className="text-center pb-6">
+                <div className="flex justify-center mb-4">
+                  <div className="bg-gradient-to-r from-amber-400 to-amber-600 rounded-full p-3">
+                    <Shield className="h-8 w-8 text-white" />
+                  </div>
+                </div>
                 <CardTitle className="text-2xl font-bold text-gray-900">
-                  {t('auth.loginTitle')}
+                  {t('system.owner.login')}
                 </CardTitle>
                 <CardDescription className="text-gray-600">
-                  {t('auth.loginDescription')}
+                  {t('system.subtitle')}
                 </CardDescription>
               </CardHeader>
               
@@ -165,7 +167,7 @@ const Landing = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg py-3 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-lg py-3 transition-all duration-200 shadow-lg hover:shadow-xl"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -182,7 +184,7 @@ const Landing = () => {
                 <div className="mt-6 text-center">
                   <p className="text-sm text-gray-600">
                     {t('auth.help')}{' '}
-                    <button className="text-blue-600 hover:text-blue-800 font-medium">
+                    <button className="text-amber-600 hover:text-amber-800 font-medium">
                       {t('auth.support')}
                     </button>
                   </p>
@@ -194,10 +196,10 @@ const Landing = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 mt-16">
+      <footer className="bg-black/20 backdrop-blur-sm text-white py-8 mt-16 border-t border-gray-700">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center mb-4">
-            <Crown className={`h-6 w-6 text-blue-400 ${dir === 'rtl' ? 'ml-2' : 'mr-2'}`} />
+            <Crown className={`h-6 w-6 text-amber-400 ${dir === 'rtl' ? 'ml-2' : 'mr-2'}`} />
             <span className="text-lg font-semibold">{t('system.name')}</span>
           </div>
           <p className="text-gray-400">
@@ -209,4 +211,4 @@ const Landing = () => {
   );
 };
 
-export default Landing;
+export default SystemOwnerLanding;

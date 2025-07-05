@@ -1,7 +1,6 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-type Language = 'ar' | 'en';
+type Language = 'ar' | 'en' | 'ur' | 'hi';
 
 interface LanguageContextType {
   language: Language;
@@ -12,9 +11,16 @@ interface LanguageContextType {
 
 const translations = {
   ar: {
-    // System Owner Dashboard
+    // System branding
+    'system.name': 'دشداشة كلاود',
     'system.title': 'نظام إدارة ورش الدشاديش',
     'system.subtitle': 'لوحة تحكم مالك النظام',
+    'system.owner.login': 'تسجيل دخول مالك النظام',
+    'system.workshop.login': 'تسجيل دخول الورشة',
+    'system.description': 'حلول سحابية متكاملة لإدارة ورش تفصيل الدشاديش الكويتية بكفاءة وأناقة',
+    'system.copyright': '© 2025 جميع الحقوق محفوظة - نظام إدارة ورش الدشاديش',
+    
+    // Dashboard
     'dashboard.workshops': 'الورش',
     'dashboard.customers': 'العملاء',
     'dashboard.orders': 'الطلبات',
@@ -73,6 +79,16 @@ const translations = {
     'measurement.length': 'الطول',
     'measurement.sleeve': 'الكم',
     
+    // Auth
+    'auth.username': 'اسم المستخدم أو رقم الورشة',
+    'auth.password': 'كلمة المرور',
+    'auth.login': 'دخول إلى النظام',
+    'auth.loading': 'جاري التحميل...',
+    'auth.help': 'هل تحتاج مساعدة؟',
+    'auth.support': 'اتصل بالدعم',
+    'auth.loginTitle': 'تسجيل الدخول',
+    'auth.loginDescription': 'ادخل بيانات الورشة للوصول إلى النظام',
+    
     // Common
     'common.save': 'حفظ',
     'common.cancel': 'إلغاء',
@@ -101,9 +117,16 @@ const translations = {
     'nav.settings': 'الإعدادات',
   },
   en: {
-    // System Owner Dashboard
+    // System branding
+    'system.name': 'Dshdasha Cloud',
     'system.title': 'Dshdasha Workshop Management System',
     'system.subtitle': 'System Owner Dashboard',
+    'system.owner.login': 'System Owner Login',
+    'system.workshop.login': 'Workshop Login',
+    'system.description': 'Comprehensive cloud solutions for managing Kuwaiti dshdasha tailoring workshops with efficiency and elegance',
+    'system.copyright': '© 2025 All Rights Reserved - Dshdasha Workshop Management System',
+    
+    // Dashboard
     'dashboard.workshops': 'Workshops',
     'dashboard.customers': 'Customers',
     'dashboard.orders': 'Orders',
@@ -162,6 +185,16 @@ const translations = {
     'measurement.length': 'Length',
     'measurement.sleeve': 'Sleeve',
     
+    // Auth
+    'auth.username': 'Username or Workshop ID',
+    'auth.password': 'Password',
+    'auth.login': 'Login to System',
+    'auth.loading': 'Loading...',
+    'auth.help': 'Need help?',
+    'auth.support': 'Contact Support',
+    'auth.loginTitle': 'Login',
+    'auth.loginDescription': 'Enter workshop credentials to access the system',
+    
     // Common
     'common.save': 'Save',
     'common.cancel': 'Cancel',
@@ -188,6 +221,218 @@ const translations = {
     'nav.products': 'Products',
     'nav.reports': 'Reports',
     'nav.settings': 'Settings',
+  },
+  ur: {
+    // System branding
+    'system.name': 'دشداشہ کلاؤڈ',
+    'system.title': 'دشداشہ ورکشاپ منیجمنٹ سسٹم',
+    'system.subtitle': 'سسٹم مالک ڈیش بورڈ',
+    'system.owner.login': 'سسٹم مالک لاگ ان',
+    'system.workshop.login': 'ورکشاپ لاگ ان',
+    'system.description': 'کویتی دشداشہ ٹیلرنگ ورکشاپس کے لیے جامع کلاؤڈ حل',
+    'system.copyright': '© 2025 تمام حقوق محفوظ ہیں - دشداشہ ورکشاپ منیجمنٹ سسٹم',
+    
+    // Dashboard
+    'dashboard.workshops': 'ورکشاپس',
+    'dashboard.customers': 'گاہک',
+    'dashboard.orders': 'آرڈرز',
+    'dashboard.externalServices': 'بیرونی خدمات',
+    'workshop.add': 'نیا ورکشاپ شامل کریں',
+    'workshop.name': 'ورکشاپ کا نام',
+    'workshop.type': 'سروس کی قسم',
+    'workshop.address': 'پتہ',
+    'workshop.status': 'حالت',
+    'workshop.users': 'صارفین',
+    'workshop.enter': 'ورکشاپ میں داخل ہوں',
+    'workshop.details': 'تفصیلات دیکھیں',
+    'workshop.active': 'فعال',
+    'workshop.inactive': 'غیر فعال',
+    'workshop.type.male': 'مردانہ',
+    'workshop.type.female': 'خواتین',
+    'workshop.type.both': 'مردانہ اور خواتین',
+    
+    // Order Management
+    'order.new': 'نیا آرڈر',
+    'order.number': 'آرڈر نمبر',
+    'order.customer': 'گاہک',
+    'order.status.new': 'نیا',
+    'order.status.production': 'تیاری میں',
+    'order.status.completed': 'مکمل',
+    'order.delivery': 'ڈیلیوری کی تاریخ',
+    'order.total': 'کل',
+    'order.items': 'اشیاء',
+    'order.startProduction': 'پروڈکشن شروع کریں',
+    'order.endProduction': 'پروڈکشن ختم کریں',
+    'order.viewDetails': 'تفصیلات دیکھیں',
+    
+    // Customer Management
+    'customer.new': 'نیا گاہک',
+    'customer.existing': 'موجودہ گاہک',
+    'customer.name': 'گاہک کا نام',
+    'customer.phone': 'فون نمبر',
+    'customer.email': 'ای میل',
+    'customer.gender': 'جنس',
+    'customer.age': 'عمر',
+    'customer.address': 'پتہ',
+    'customer.country': 'ملک',
+    'customer.state': 'ریاست',
+    'customer.area': 'علاقہ',
+    'customer.street': 'گلی',
+    'customer.house': 'گھر نمبر',
+    'customer.measurements': 'پیمائش',
+    'customer.search': 'گاہک تلاش کریں',
+    'customer.orders.previous': 'پچھلے آرڈرز',
+    
+    // Measurements
+    'measurement.chest': 'چھاتی',
+    'measurement.waist': 'کمر',
+    'measurement.shoulder': 'کندھا',
+    'measurement.neck': 'گردن',
+    'measurement.length': 'لمبائی',
+    'measurement.sleeve': 'آستین',
+    
+    // Auth
+    'auth.username': 'صارف نام یا ورکشاپ آئی ڈی',
+    'auth.password': 'پاس ورڈ',
+    'auth.login': 'سسٹم میں لاگ ان',
+    'auth.loading': 'لوڈ ہو رہا ہے...',
+    'auth.help': 'مدد چاہیے؟',
+    'auth.support': 'سپورٹ سے رابطہ کریں',
+    'auth.loginTitle': 'لاگ ان',
+    'auth.loginDescription': 'سسٹم تک رسائی کے لیے ورکشاپ کی تفصیلات درج کریں',
+    
+    // Common
+    'common.save': 'محفوظ کریں',
+    'common.cancel': 'منسوخ کریں',
+    'common.next': 'اگلا',
+    'common.previous': 'پچھلا',
+    'common.search': 'تلاش',
+    'common.add': 'شامل کریں',
+    'common.edit': 'تبدیل کریں',
+    'common.delete': 'حذف کریں',
+    'common.view': 'دیکھیں',
+    'common.print': 'پرنٹ کریں',
+    'common.create': 'بنائیں',
+    'common.update': 'اپ ڈیٹ کریں',
+    'common.required': 'ضروری',
+    'common.optional': 'اختیاری',
+    'common.male': 'مرد',
+    'common.female': 'عورت',
+    'common.currency': 'KWD',
+    
+    // Navigation
+    'nav.dashboard': 'ڈیش بورڈ',
+    'nav.orders': 'آرڈرز',
+    'nav.customers': 'گاہک',
+    'nav.products': 'پروڈکٹس',
+    'nav.reports': 'رپورٹس',
+    'nav.settings': 'سیٹنگز',
+  },
+  hi: {
+    // System branding
+    'system.name': 'दशदाशा क्लाउड',
+    'system.title': 'दशदाशा वर्कशॉप प्रबंधन सिस्टम',
+    'system.subtitle': 'सिस्टम मालिक डैशबोर्ड',
+    'system.owner.login': 'सिस्टम मालिक लॉगिन',
+    'system.workshop.login': 'वर्कशॉप लॉगिन',
+    'system.description': 'कुवैती दशदाशा टेलरिंग वर्कशॉप के लिए व्यापक क्लाउड समाधान',
+    'system.copyright': '© 2025 सभी अधिकार सुरक्षित - दशदाशा वर्कशॉप प्रबंधन सिस्टम',
+    
+    // Dashboard
+    'dashboard.workshops': 'वर्कशॉप',
+    'dashboard.customers': 'ग्राहक',
+    'dashboard.orders': 'ऑर्डर',
+    'dashboard.externalServices': 'बाहरी सेवाएं',
+    'workshop.add': 'नई वर्कशॉप जोड़ें',
+    'workshop.name': 'वर्कशॉप का नाम',
+    'workshop.type': 'सेवा प्रकार',
+    'workshop.address': 'पता',
+    'workshop.status': 'स्थिति',
+    'workshop.users': 'उपयोगकर्ता',
+    'workshop.enter': 'वर्कशॉप में प्रवेश',
+    'workshop.details': 'विवरण देखें',
+    'workshop.active': 'सक्रिय',
+    'workshop.inactive': 'निष्क्रिय',
+    'workshop.type.male': 'पुरुष',
+    'workshop.type.female': 'महिला',
+    'workshop.type.both': 'पुरुष और महिला',
+    
+    // Order Management
+    'order.new': 'नया ऑर्डर',
+    'order.number': 'ऑर्डर संख्या',
+    'order.customer': 'ग्राहक',
+    'order.status.new': 'नया',
+    'order.status.production': 'उत्पादन में',
+    'order.status.completed': 'पूर्ण',
+    'order.delivery': 'डिलीवरी तिथि',
+    'order.total': 'कुल',
+    'order.items': 'वस्तुएं',
+    'order.startProduction': 'उत्पादन शुरू करें',
+    'order.endProduction': 'उत्पादन समाप्त करें',
+    'order.viewDetails': 'विवरण देखें',
+    
+    // Customer Management
+    'customer.new': 'नया ग्राहक',
+    'customer.existing': 'मौजूदा ग्राहक',
+    'customer.name': 'ग्राहक का नाम',
+    'customer.phone': 'फोन नंबर',
+    'customer.email': 'ईमेल',
+    'customer.gender': 'लिंग',
+    'customer.age': 'आयु',
+    'customer.address': 'पता',
+    'customer.country': 'देश',
+    'customer.state': 'राज्य',
+    'customer.area': 'क्षेत्र',
+    'customer.street': 'गली',
+    'customer.house': 'घर संख्या',
+    'customer.measurements': 'माप',
+    'customer.search': 'ग्राहक खोजें',
+    'customer.orders.previous': 'पिछले ऑर्डर',
+    
+    // Measurements
+    'measurement.chest': 'छाती',
+    'measurement.waist': 'कमर',
+    'measurement.shoulder': 'कंधा',
+    'measurement.neck': 'गर्दन',
+    'measurement.length': 'लंबाई',
+    'measurement.sleeve': 'आस्तीन',
+    
+    // Auth
+    'auth.username': 'उपयोगकर्ता नाम या वर्कशॉप आईडी',
+    'auth.password': 'पासवर्ड',
+    'auth.login': 'सिस्टम में लॉगिन',
+    'auth.loading': 'लोड हो रहा है...',
+    'auth.help': 'मदद चाहिए?',
+    'auth.support': 'सहायता से संपर्क करें',
+    'auth.loginTitle': 'लॉगिन',
+    'auth.loginDescription': 'सिस्टम तक पहुंच के लिए वर्कशॉप विवरण दर्ज करें',
+    
+    // Common
+    'common.save': 'सेव करें',
+    'common.cancel': 'रद्द करें',
+    'common.next': 'अगला',
+    'common.previous': 'पिछला',
+    'common.search': 'खोज',
+    'common.add': 'जोड़ें',
+    'common.edit': 'संपादित करें',
+    'common.delete': 'हटाएं',
+    'common.view': 'देखें',
+    'common.print': 'प्रिंट करें',
+    'common.create': 'बनाएं',
+    'common.update': 'अपडेट करें',
+    'common.required': 'आवश्यक',
+    'common.optional': 'वैकल्पिक',
+    'common.male': 'पुरुष',
+    'common.female': 'महिला',
+    'common.currency': 'KWD',
+    
+    // Navigation
+    'nav.dashboard': 'डैशबोर्ड',
+    'nav.orders': 'ऑर्डर',
+    'nav.customers': 'ग्राहक',
+    'nav.products': 'उत्पाद',
+    'nav.reports': 'रिपोर्ट',
+    'nav.settings': 'सेटिंग',
   }
 };
 
@@ -212,11 +457,11 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     return translations[language][key] || key;
   };
 
-  const dir = language === 'ar' ? 'rtl' : 'ltr';
+  const dir = (language === 'ar' || language === 'ur') ? 'rtl' : 'ltr';
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, dir }}>
-      <div dir={dir} className={language === 'ar' ? 'font-arabic' : 'font-english'}>
+      <div dir={dir} className={language === 'ar' ? 'font-arabic' : language === 'ur' ? 'font-arabic' : 'font-english'}>
         {children}
       </div>
     </LanguageContext.Provider>
