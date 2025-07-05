@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, User, Phone, MapPin, History, Ruler, Repeat } from "lucide-react";
+import { Search, User, Phone, MapPin, History, Ruler } from "lucide-react";
 import CustomerMeasurements from './CustomerMeasurements';
 
 // Mock customer data - in real app this would come from Supabase
@@ -103,24 +103,21 @@ const mockCustomers = [
 
 interface CustomerSearchProps {
   onCustomerSelect: (customer: any) => void;
-  onReorder?: (order: any) => void;
-  showReorderOption?: boolean;
 }
 
-const CustomerSearch = ({ onCustomerSelect, onReorder, showReorderOption = false }: CustomerSearchProps) => {
+const CustomerSearch = ({ onCustomerSelect }: CustomerSearchProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
 
-  // Simulate elastic search - now includes order number search
+  // Simulate elastic search
   useEffect(() => {
     if (searchTerm.length >= 2) {
       const results = mockCustomers.filter(customer =>
         customer.name.includes(searchTerm) ||
         customer.phone.includes(searchTerm) ||
-        customer.email?.includes(searchTerm) ||
-        customer.orderHistory.some(order => order.id.includes(searchTerm))
+        customer.email?.includes(searchTerm)
       );
       setSearchResults(results);
     } else {
@@ -142,13 +139,6 @@ const CustomerSearch = ({ onCustomerSelect, onReorder, showReorderOption = false
     }
   };
 
-  const handleReorderClick = (order: any) => {
-    if (onReorder) {
-      onReorder(order);
-      setShowDetails(false);
-    }
-  };
-
   return (
     <>
       <Card className="mb-6">
@@ -165,7 +155,7 @@ const CustomerSearch = ({ onCustomerSelect, onReorder, showReorderOption = false
               <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="ابحث بالاسم أو رقم الهاتف أو رقم الطلب..."
+                placeholder="ابحث بالاسم أو رقم الهاتف أو البريد الإلكتروني..."
                 className="pr-10"
               />
             </div>
@@ -300,7 +290,7 @@ const CustomerSearch = ({ onCustomerSelect, onReorder, showReorderOption = false
                 readOnly={true}
               />
 
-              {/* Order History with Reorder Option */}
+              {/* Order History */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -312,32 +302,15 @@ const CustomerSearch = ({ onCustomerSelect, onReorder, showReorderOption = false
                   <div className="space-y-3">
                     {selectedCustomer.orderHistory.map((order: any) => (
                       <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <p className="font-medium">{order.id}</p>
-                            <div className="text-left">
-                              <p className="font-bold">{order.total.toFixed(3)} د.ك</p>
-                              <Badge variant={order.status === 'مكتمل' ? 'default' : 'secondary'}>
-                                {order.status}
-                              </Badge>
-                            </div>
-                          </div>
+                        <div>
+                          <p className="font-medium">{order.id}</p>
                           <p className="text-sm text-gray-600">{order.date}</p>
-                          
-                          {showReorderOption && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="mt-2"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleReorderClick(order);
-                              }}
-                            >
-                              <Repeat className="w-3 h-3 mr-1" />
-                              إعادة طلب
-                            </Button>
-                          )}
+                        </div>
+                        <div className="text-left">
+                          <p className="font-bold">{order.total.toFixed(3)} د.ك</p>
+                          <Badge variant={order.status === 'مكتمل' ? 'default' : 'secondary'}>
+                            {order.status}
+                          </Badge>
                         </div>
                       </div>
                     ))}
