@@ -39,6 +39,17 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerData | null>(null);
   const [showPreviousOrders, setShowPreviousOrders] = useState(false);
+  const [showCustomerDetails, setShowCustomerDetails] = useState(false);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [showReorderModal, setShowReorderModal] = useState(false);
+  const [reorderData, setReorderData] = useState<{
+    pieces: number;
+    deliveryDate: string;
+  }>({
+    pieces: 1,
+    deliveryDate: ''
+  });
   
   // Form data for new customer
   const [formData, setFormData] = useState<Partial<CustomerData>>({
@@ -224,6 +235,46 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
       
       onNext({ ...selectedCustomer, isNew: false });
     }
+  };
+
+  const handleViewCustomerDetails = () => {
+    setShowCustomerDetails(true);
+  };
+
+  const handleViewOrderDetails = (order: any) => {
+    setSelectedOrder(order);
+    setShowOrderDetails(true);
+  };
+
+  const handleReorder = (order: any) => {
+    setSelectedOrder(order);
+    setReorderData({
+      pieces: 1,
+      deliveryDate: ''
+    });
+    setShowReorderModal(true);
+  };
+
+  const handleConfirmReorder = () => {
+    if (!reorderData.deliveryDate) {
+      alert('الرجاء تحديد موعد التسليم');
+      return;
+    }
+    
+    const newOrder = {
+      ...selectedOrder,
+      id: `ORD-${Date.now().toString().slice(-6)}`,
+      date: new Date().toISOString().split('T')[0],
+      pieces: reorderData.pieces,
+      deliveryDate: reorderData.deliveryDate,
+      status: 'جديد'
+    };
+    
+    console.log('Reorder created:', newOrder);
+    alert(`تم إنشاء الطلب الجديد بنجاح!\nرقم الطلب: ${newOrder.id}\nعدد القطع: ${reorderData.pieces}\nموعد التسليم: ${reorderData.deliveryDate}`);
+    
+    setShowReorderModal(false);
+    setShowPreviousOrders(false);
   };
 
   return (
@@ -523,7 +574,7 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
                       </div>
                     )}
 
-                    {/* Previous Orders Button */}
+                    {/* Action Buttons */}
                     <div className="flex gap-2">
                       <Dialog open={showPreviousOrders} onOpenChange={setShowPreviousOrders}>
                         <DialogTrigger asChild>
@@ -598,10 +649,20 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
                                       <Button 
                                         size="sm" 
                                         variant="outline"
+                                        onClick={() => handleViewOrderDetails(order)}
                                         className="w-full"
                                       >
                                         <Eye className="w-3 h-3 mr-1" />
                                         تفاصيل الطلب
+                                      </Button>
+                                      <Button 
+                                        size="sm" 
+                                        variant="default"
+                                        onClick={() => handleReorder(order)}
+                                        className="w-full bg-green-600 hover:bg-green-700"
+                                      >
+                                        <Copy className="w-3 h-3 mr-1" />
+                                        اعادة الطلب
                                       </Button>
                                     </div>
                                   </div>
@@ -612,7 +673,7 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
                         </DialogContent>
                       </Dialog>
                       
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={handleViewCustomerDetails}>
                         <Eye className="w-4 h-4 mr-2" />
                         عرض التفاصيل
                       </Button>
@@ -623,6 +684,173 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Customer Details Modal */}
+        <Dialog open={showCustomerDetails} onOpenChange={setShowCustomerDetails}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>تفاصيل العميل - {selectedCustomer?.name}</DialogTitle>
+            </DialogHeader>
+            {selectedCustomer && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold mb-2">المعلومات الشخصية</h4>
+                    <div className="space-y-2 text-sm">
+                      <p><span className="text-gray-600">الاسم:</span> {selectedCustomer.name}</p>
+                      <p><span className="text-gray-600">الهاتف:</span> {selectedCustomer.phone}</p>
+                      {selectedCustomer.email && <p><span className="text-gray-600">البريد:</span> {selectedCustomer.email}</p>}
+                      <p><span className="text-gray-600">الجنس:</span> {selectedCustomer.gender}</p>
+                      {selectedCustomer.age && <p><span className="text-gray-600">العمر:</span> {selectedCustomer.age}</p>}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-2">العنوان</h4>
+                    <div className="space-y-2 text-sm">
+                      <p><span className="text-gray-600">الدولة:</span> {selectedCustomer.address?.country}</p>
+                      <p><span className="text-gray-600">المحافظة:</span> {selectedCustomer.address?.state}</p>
+                      <p><span className="text-gray-600">المنطقة:</span> {selectedCustomer.address?.area}</p>
+                      <p><span className="text-gray-600">الشارع:</span> {selectedCustomer.address?.street}</p>
+                      <p><span className="text-gray-600">رقم المنزل:</span> {selectedCustomer.address?.house}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {selectedCustomer.measurements && (
+                  <div>
+                    <h4 className="font-semibold mb-2">القياسات</h4>
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                      {Object.entries(selectedCustomer.measurements).map(([key, value]) => {
+                        const field = measurementFields[selectedCustomer.gender === 'ذكر' ? 'male' : 'female']
+                          .find(f => f.key === key);
+                        return field ? (
+                          <div key={key} className="bg-gray-50 p-3 rounded text-center">
+                            <p className="text-xs text-gray-600">{field.label}</p>
+                            <p className="font-semibold text-lg">{value}</p>
+                          </div>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Order Details Modal */}
+        <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>تفاصيل الطلب - {selectedOrder?.id}</DialogTitle>
+            </DialogHeader>
+            {selectedOrder && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="bg-gray-50 p-3 rounded">
+                    <p className="text-xs text-gray-600">رقم الطلب</p>
+                    <p className="font-semibold">{selectedOrder.id}</p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded">
+                    <p className="text-xs text-gray-600">التاريخ</p>
+                    <p className="font-semibold">{selectedOrder.date}</p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded">
+                    <p className="text-xs text-gray-600">عدد القطع</p>
+                    <p className="font-semibold">{selectedOrder.items}</p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded">
+                    <p className="text-xs text-gray-600">المجموع</p>
+                    <p className="font-semibold text-primary">{selectedOrder.total.toFixed(3)} د.ك</p>
+                  </div>
+                </div>
+                
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold mb-3">قياسات هذا الطلب</h4>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                    {Object.entries(selectedOrder.measurements).map(([key, value]) => {
+                      const field = measurementFields[selectedCustomer?.gender === 'ذكر' ? 'male' : 'female']
+                        .find(f => f.key === key);
+                      return field ? (
+                        <div key={key} className="bg-white p-2 rounded text-center">
+                          <p className="text-xs text-gray-600">{field.label}</p>
+                          <p className="font-semibold">{value}</p>
+                        </div>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+
+                <div className="bg-amber-50 p-4 rounded-lg">
+                  <h4 className="font-semibold mb-2">حالة الطلب</h4>
+                  <Badge className={selectedOrder.status === 'مكتمل' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}>
+                    {selectedOrder.status}
+                  </Badge>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Reorder Modal */}
+        <Dialog open={showReorderModal} onOpenChange={setShowReorderModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>اعادة الطلب - {selectedOrder?.id}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="pieces">عدد القطع</Label>
+                <Input
+                  id="pieces"
+                  type="number"
+                  min="1"
+                  value={reorderData.pieces}
+                  onChange={(e) => setReorderData({
+                    ...reorderData,
+                    pieces: parseInt(e.target.value) || 1
+                  })}
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="deliveryDate">موعد التسليم المطلوب</Label>
+                <Input
+                  id="deliveryDate"
+                  type="date"
+                  value={reorderData.deliveryDate}
+                  onChange={(e) => setReorderData({
+                    ...reorderData,
+                    deliveryDate: e.target.value
+                  })}
+                  className="mt-1"
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded">
+                <h4 className="font-medium mb-2">ملخص الطلب الجديد</h4>
+                <div className="text-sm space-y-1">
+                  <p><span className="text-gray-600">عدد القطع:</span> {reorderData.pieces}</p>
+                  <p><span className="text-gray-600">التكلفة المتوقعة:</span> {(selectedOrder?.total * reorderData.pieces || 0).toFixed(3)} د.ك</p>
+                  {reorderData.deliveryDate && (
+                    <p><span className="text-gray-600">موعد التسليم:</span> {new Date(reorderData.deliveryDate).toLocaleDateString('ar-KW')}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button onClick={handleConfirmReorder} className="flex-1">
+                  تأكيد اعادة الطلب
+                </Button>
+                <Button variant="outline" onClick={() => setShowReorderModal(false)} className="flex-1">
+                  إلغاء
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Navigation */}
         <div className="flex justify-end pt-4 border-t">
