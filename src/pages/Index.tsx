@@ -6,11 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Building2, Users, ShoppingCart, Plus, Eye, Search, Filter, Phone, Mail, MapPin, Ruler, Calendar, User } from "lucide-react";
+import { Building2, Users, ShoppingCart, Plus, Eye, Search, Filter, Phone, Mail, MapPin, Ruler, Calendar, User, Power, PowerOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import SystemHeader from "@/components/SystemHeader";
 import StatsCard from "@/components/StatsCard";
+import WorkshopDetailsModal from "@/components/WorkshopDetailsModal";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -19,8 +20,9 @@ const Index = () => {
   const [selectedTab, setSelectedTab] = useState('workshops');
   const [showServiceDialog, setShowServiceDialog] = useState(false);
   const [selectedCustomerForDetails, setSelectedCustomerForDetails] = useState<any>(null);
+  const [selectedWorkshopForDetails, setSelectedWorkshopForDetails] = useState<any>(null);
 
-  const [workshops] = useState([
+  const [workshops, setWorkshops] = useState([
     {
       id: 1,
       name: "ورشة الأناقة الكويتية",
@@ -225,7 +227,8 @@ const Index = () => {
       'جديد': 'bg-blue-100 text-blue-800',
       'جاري الإنتاج': 'bg-yellow-100 text-yellow-800',
       'مكتمل': 'bg-green-100 text-green-800',
-      'نشط': 'bg-green-100 text-green-800'
+      'نشط': 'bg-green-100 text-green-800',
+      'غير نشط': 'bg-red-100 text-red-800'
     };
     return variants[status] || 'bg-gray-100 text-gray-800';
   };
@@ -238,12 +241,24 @@ const Index = () => {
         break;
       case 'view':
         if (workshopId) {
-          alert(`عرض تفاصيل الورشة رقم ${workshopId} - هذه الميزة قيد التطوير`);
+          const workshop = workshops.find(w => w.id === workshopId);
+          setSelectedWorkshopForDetails(workshop);
         }
         break;
       case 'enter':
         if (workshopId) {
           navigate(`/workshop/${workshopId}/dashboard`);
+        }
+        break;
+      case 'toggle':
+        if (workshopId) {
+          setWorkshops(prevWorkshops => 
+            prevWorkshops.map(workshop => 
+              workshop.id === workshopId 
+                ? { ...workshop, status: workshop.status === 'نشط' ? 'غير نشط' : 'نشط' }
+                : workshop
+            )
+          );
         }
         break;
       default:
@@ -407,7 +422,26 @@ const Index = () => {
                           </Button>
                           <Button 
                             size="sm" 
+                            variant="outline"
+                            onClick={() => handleWorkshopAction('toggle', workshop.id)}
+                            className={`w-full sm:w-auto ${workshop.status === 'نشط' ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700'}`}
+                          >
+                            {workshop.status === 'نشط' ? (
+                              <>
+                                <PowerOff className="w-4 h-4 mr-1" />
+                                إيقاف
+                              </>
+                            ) : (
+                              <>
+                                <Power className="w-4 h-4 mr-1" />
+                                تفعيل
+                              </>
+                            )}
+                          </Button>
+                          <Button 
+                            size="sm" 
                             onClick={() => handleWorkshopAction('enter', workshop.id)}
+                            disabled={workshop.status !== 'نشط'}
                             className="w-full sm:w-auto"
                           >
                             {t('workshop.enter')}
@@ -642,6 +676,13 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Workshop Details Modal */}
+      <WorkshopDetailsModal
+        workshop={selectedWorkshopForDetails}
+        isOpen={!!selectedWorkshopForDetails}
+        onClose={() => setSelectedWorkshopForDetails(null)}
+      />
 
       {/* Customer Details Dialog */}
       <Dialog open={!!selectedCustomerForDetails} onOpenChange={() => setSelectedCustomerForDetails(null)}>
