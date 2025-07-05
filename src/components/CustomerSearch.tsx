@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, User, Phone, MapPin, History, Ruler } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Search, User, Phone, MapPin, History, Ruler, RotateCcw } from "lucide-react";
 import CustomerMeasurements from './CustomerMeasurements';
 
 // Mock customer data - in real app this would come from Supabase
@@ -110,6 +110,10 @@ const CustomerSearch = ({ onCustomerSelect }: CustomerSearchProps) => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [showReorderDialog, setShowReorderDialog] = useState(false);
+  const [selectedOrderForReorder, setSelectedOrderForReorder] = useState<any>(null);
+  const [reorderQuantity, setReorderQuantity] = useState('');
+  const [reorderDeliveryDate, setReorderDeliveryDate] = useState('');
 
   // Simulate elastic search
   useEffect(() => {
@@ -137,6 +141,44 @@ const CustomerSearch = ({ onCustomerSelect }: CustomerSearchProps) => {
       setSearchTerm('');
       setSearchResults([]);
     }
+  };
+
+  const handleReorder = (order: any) => {
+    setSelectedOrderForReorder(order);
+    setReorderQuantity('');
+    setReorderDeliveryDate('');
+    setShowReorderDialog(true);
+  };
+
+  const handleConfirmReorder = () => {
+    if (!selectedOrderForReorder || !reorderQuantity || !reorderDeliveryDate) {
+      alert('يرجى ملء جميع الحقول');
+      return;
+    }
+
+    const newOrder = {
+      ...selectedOrderForReorder,
+      id: `ORD-${Date.now()}`, // Generate new order ID
+      items: parseInt(reorderQuantity),
+      deliveryDate: reorderDeliveryDate,
+      createdAt: new Date().toISOString().split('T')[0],
+      status: 'جديد',
+      total: selectedOrderForReorder.total * (parseInt(reorderQuantity) / selectedOrderForReorder.items) // Adjust total based on quantity
+    };
+
+    console.log('New reorder created:', newOrder);
+    alert(`تم إنشاء طلب جديد برقم ${newOrder.id}\nالكمية: ${reorderQuantity}\nتاريخ التسليم: ${reorderDeliveryDate}`);
+    
+    setShowReorderDialog(false);
+    setShowDetails(false);
+    setSearchTerm('');
+    setSearchResults([]);
+    
+    // Pass the reordered data to parent component
+    onCustomerSelect({
+      ...selectedCustomer,
+      newOrder: newOrder
+    });
   };
 
   return (
@@ -302,15 +344,26 @@ const CustomerSearch = ({ onCustomerSelect }: CustomerSearchProps) => {
                   <div className="space-y-3">
                     {selectedCustomer.orderHistory.map((order: any) => (
                       <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div>
+                        <div className="flex-1">
                           <p className="font-medium">{order.id}</p>
                           <p className="text-sm text-gray-600">{order.date}</p>
                         </div>
-                        <div className="text-left">
+                        <div className="text-center">
                           <p className="font-bold">{order.total.toFixed(3)} د.ك</p>
                           <Badge variant={order.status === 'مكتمل' ? 'default' : 'secondary'}>
                             {order.status}
                           </Badge>
+                        </div>
+                        <div className="ml-4">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleReorder(order)}
+                            className="flex items-center gap-1"
+                          >
+                            <RotateCcw className="w-3 h-3" />
+                            إعادة طلب
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -323,6 +376,65 @@ const CustomerSearch = ({ onCustomerSelect }: CustomerSearchProps) => {
                   اختيار هذا العميل
                 </Button>
                 <Button variant="outline" onClick={() => setShowDetails(false)} className="flex-1">
+                  إلغاء
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Reorder Dialog */}
+      <Dialog open={showReorderDialog} onOpenChange={setShowReorderDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RotateCcw className="w-5 h-5" />
+              إعادة طلب
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedOrderForReorder && (
+            <div className="space-y-4">
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="font-medium">الطلب الأصلي: {selectedOrderForReorder.id}</p>
+                <p className="text-sm text-gray-600">التاريخ: {selectedOrderForReorder.date}</p>
+                <p className="text-sm text-gray-600">القيمة: {selectedOrderForReorder.total.toFixed(3)} د.ك</p>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="reorder-quantity">عدد القطع *</Label>
+                  <Input
+                    id="reorder-quantity"
+                    type="number"
+                    min="1"
+                    value={reorderQuantity}
+                    onChange={(e) => setReorderQuantity(e.target.value)}
+                    placeholder="أدخل عدد القطع"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="reorder-delivery">تاريخ التسليم المتوقع *</Label>
+                  <Input
+                    id="reorder-delivery"
+                    type="date"
+                    value={reorderDeliveryDate}
+                    onChange={(e) => setReorderDeliveryDate(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button onClick={handleConfirmReorder} className="flex-1">
+                  تأكيد إعادة الطلب
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowReorderDialog(false)}
+                  className="flex-1"
+                >
                   إلغاء
                 </Button>
               </div>
