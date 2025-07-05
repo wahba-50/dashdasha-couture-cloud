@@ -72,9 +72,62 @@ const NewOrder = () => {
     // Here you would typically save to database
     console.log('Order created:', order);
     
-    // Show success and navigate back
+    // Show success and navigate to orders page
     alert(`تم إنشاء الطلب بنجاح!\nرقم الطلب: ${orderNumber}`);
-    navigate(-1);
+    navigate('/workshop-dashboard'); // Navigate to orders page
+  };
+
+  const handlePrintInvoice = () => {
+    window.print();
+  };
+
+  const handleDownloadPDF = () => {
+    // Create a simple PDF download using the browser's print to PDF functionality
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>فاتورة - ${generateOrderNumber()}</title>
+            <style>
+              body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; }
+              .header { text-align: center; margin-bottom: 30px; }
+              .customer-info, .items-list { margin-bottom: 20px; }
+              .total { font-size: 18px; font-weight: bold; text-align: right; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>نظام إدارة ورش الدشاديش</h1>
+              <p>ورشة النموذج - الكويت</p>
+              <p>التاريخ: ${new Date().toLocaleDateString('ar-KW')}</p>
+            </div>
+            <div class="customer-info">
+              <h3>بيانات العميل</h3>
+              <p>الاسم: ${orderData.customer?.name}</p>
+              <p>الهاتف: ${orderData.customer?.phone}</p>
+            </div>
+            <div class="items-list">
+              <h3>تفاصيل القطع (${orderData.items.length})</h3>
+              ${orderData.items.map((item: any, index: number) => `
+                <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                  <p><strong>قطعة #${index + 1}</strong> - ${item.totalPrice.toFixed(3)} د.ك</p>
+                  <p>القماش: ${item.fabricType === 'customer' ? 'قماش العميل' : item.fabric?.name}</p>
+                  <p>القصة: ${item.cut.name}</p>
+                </div>
+              `).join('')}
+            </div>
+            <div class="total">
+              <p>المجموع الفرعي: ${calculateSubtotal().toFixed(3)} د.ك</p>
+              ${orderData.discount.value > 0 ? `<p>الخصم: -${calculateDiscount().toFixed(3)} د.ك</p>` : ''}
+              <p><strong>المجموع النهائي: ${calculateTotal().toFixed(3)} د.ك</strong></p>
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
   };
 
   const steps = [
@@ -311,11 +364,11 @@ const NewOrder = () => {
                       <CheckCircle className="w-5 h-5 mr-2" />
                       إنشاء الطلب والفاتورة
                     </Button>
-                    <Button variant="outline" size="lg" className="sm:w-auto">
+                    <Button variant="outline" size="lg" className="sm:w-auto" onClick={handlePrintInvoice}>
                       <Printer className="w-4 h-4 mr-2" />
                       طباعة الفاتورة
                     </Button>
-                    <Button variant="outline" size="lg" className="sm:w-auto">
+                    <Button variant="outline" size="lg" className="sm:w-auto" onClick={handleDownloadPDF}>
                       <Download className="w-4 h-4 mr-2" />
                       تحميل PDF
                     </Button>
