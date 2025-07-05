@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,6 +60,91 @@ const NewOrder = () => {
     return `ORD-${Date.now().toString().slice(-6)}`;
   };
 
+  const handlePrintInvoice = () => {
+    const printContent = document.querySelector('.invoice-content');
+    if (printContent) {
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>فاتورة الطلب</title>
+              <style>
+                body { font-family: Arial, sans-serif; direction: rtl; }
+                .invoice-content { padding: 20px; }
+                .text-center { text-align: center; }
+                .text-xl { font-size: 1.25rem; }
+                .text-lg { font-size: 1.125rem; }
+                .font-bold { font-weight: bold; }
+                .mb-4 { margin-bottom: 1rem; }
+                .mb-6 { margin-bottom: 1.5rem; }
+                .space-y-3 > * + * { margin-top: 0.75rem; }
+                .flex { display: flex; }
+                .justify-between { justify-content: space-between; }
+                .text-primary { color: #3b82f6; }
+                .text-red-600 { color: #dc2626; }
+                .border-t { border-top: 1px solid #e5e7eb; padding-top: 0.75rem; }
+                @media print {
+                  body { margin: 0; }
+                  .invoice-content { padding: 0; }
+                }
+              </style>
+            </head>
+            <body>
+              ${printContent.innerHTML}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+      }
+    }
+  };
+
+  const handleDownloadPDF = () => {
+    // Simple PDF generation using browser's print to PDF
+    const printContent = document.querySelector('.invoice-content');
+    if (printContent) {
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>فاتورة الطلب - PDF</title>
+              <style>
+                body { font-family: Arial, sans-serif; direction: rtl; margin: 0; padding: 20px; }
+                .invoice-content { max-width: 800px; margin: 0 auto; }
+                .text-center { text-align: center; }
+                .text-xl { font-size: 1.25rem; }
+                .text-lg { font-size: 1.125rem; }
+                .font-bold { font-weight: bold; }
+                .mb-4 { margin-bottom: 1rem; }
+                .mb-6 { margin-bottom: 1.5rem; }
+                .space-y-3 > * + * { margin-top: 0.75rem; }
+                .flex { display: flex; }
+                .justify-between { justify-content: space-between; }
+                .text-primary { color: #3b82f6; }
+                .text-red-600 { color: #dc2626; }
+                .border-t { border-top: 1px solid #e5e7eb; padding-top: 0.75rem; }
+              </style>
+            </head>
+            <body>
+              ${printContent.innerHTML}
+              <script>
+                window.onload = function() {
+                  setTimeout(function() {
+                    window.print();
+                  }, 500);
+                };
+              </script>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+      }
+    }
+  };
+
   const handleCreateOrder = () => {
     const orderNumber = generateOrderNumber();
     const order = {
@@ -72,9 +158,13 @@ const NewOrder = () => {
     // Here you would typically save to database
     console.log('Order created:', order);
     
-    // Show success and navigate back
+    // Show success message
     alert(`تم إنشاء الطلب بنجاح!\nرقم الطلب: ${orderNumber}`);
-    navigate(-1);
+    
+    // Navigate to workshop dashboard (orders page)
+    // Assuming we're coming from a workshop context, navigate to the dashboard
+    const workshopId = 'default'; // You might want to get this from context or URL params
+    navigate(`/workshop/${workshopId}/dashboard`);
   };
 
   const steps = [
@@ -264,7 +354,7 @@ const NewOrder = () => {
                   </div>
 
                   {/* Final Invoice */}
-                  <div className="bg-white border-2 border-primary rounded-lg p-6">
+                  <div className="invoice-content bg-white border-2 border-primary rounded-lg p-6">
                     <div className="text-center mb-6">
                       <h2 className="text-xl font-bold text-primary">نظام إدارة ورش الدشاديش</h2>
                       <p className="text-gray-600">ورشة النموذج - الكويت</p>
@@ -311,11 +401,11 @@ const NewOrder = () => {
                       <CheckCircle className="w-5 h-5 mr-2" />
                       إنشاء الطلب والفاتورة
                     </Button>
-                    <Button variant="outline" size="lg" className="sm:w-auto">
+                    <Button variant="outline" size="lg" className="sm:w-auto" onClick={handlePrintInvoice}>
                       <Printer className="w-4 h-4 mr-2" />
                       طباعة الفاتورة
                     </Button>
-                    <Button variant="outline" size="lg" className="sm:w-auto">
+                    <Button variant="outline" size="lg" className="sm:w-auto" onClick={handleDownloadPDF}>
                       <Download className="w-4 h-4 mr-2" />
                       تحميل PDF
                     </Button>
