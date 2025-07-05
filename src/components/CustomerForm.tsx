@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User, Phone, Mail, Users, MapPin, Home, UserPlus, Search } from "lucide-react";
+import CustomerSearch from './CustomerSearch';
+import CustomerMeasurements from './CustomerMeasurements';
 
 interface CustomerData {
   name: string;
@@ -19,6 +22,17 @@ interface CustomerData {
     street: string;
     houseNumber: string;
   };
+  measurements: {
+    chest: string;
+    waist: string;
+    shoulder: string;
+    length: string;
+    armLength: string;
+    neckCircumference: string;
+    armOpening: string;
+    bottomWidth: string;
+    notes: string;
+  };
 }
 
 interface CustomerFormProps {
@@ -27,7 +41,6 @@ interface CustomerFormProps {
 
 const CustomerForm = ({ onNext }: CustomerFormProps) => {
   const [isNewCustomer, setIsNewCustomer] = useState(true);
-  const [searchPhone, setSearchPhone] = useState('');
   const [customerData, setCustomerData] = useState<CustomerData>({
     name: '',
     phone: '',
@@ -40,6 +53,17 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
       block: '',
       street: '',
       houseNumber: ''
+    },
+    measurements: {
+      chest: '',
+      waist: '',
+      shoulder: '',
+      length: '',
+      armLength: '',
+      neckCircumference: '',
+      armOpening: '',
+      bottomWidth: '',
+      notes: ''
     }
   });
 
@@ -110,26 +134,16 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
     }
   };
 
-  const handleSearchCustomer = () => {
-    // Mock search functionality - in real app, this would search the database
-    if (searchPhone.trim()) {
-      // Mock customer data
-      const mockCustomer: CustomerData = {
-        name: 'أحمد محمد',
-        phone: searchPhone,
-        email: 'ahmed@example.com',
-        gender: 'male',
-        age: 35,
-        address: {
-          country: 'الكويت',
-          governorate: 'الأحمدي',
-          block: '1',
-          street: '10',
-          houseNumber: '15'
-        }
-      };
-      setCustomerData(mockCustomer);
-    }
+  const handleCustomerSelect = (selectedCustomer: any) => {
+    setCustomerData({
+      name: selectedCustomer.name,
+      phone: selectedCustomer.phone,
+      email: selectedCustomer.email || '',
+      gender: selectedCustomer.gender || '',
+      age: selectedCustomer.age,
+      address: selectedCustomer.address,
+      measurements: selectedCustomer.measurements
+    });
   };
 
   const kuwaitGovernorates = [
@@ -174,24 +188,7 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
 
         {/* Existing Customer Search */}
         {!isNewCustomer && (
-          <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-            <Label htmlFor="searchPhone" className="flex items-center gap-2 mb-2">
-              <Search className="w-4 h-4" />
-              البحث برقم الهاتف
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                id="searchPhone"
-                value={searchPhone}
-                onChange={(e) => setSearchPhone(e.target.value)}
-                placeholder="أدخل رقم الهاتف للبحث"
-                className="flex-1"
-              />
-              <Button type="button" onClick={handleSearchCustomer}>
-                بحث
-              </Button>
-            </div>
-          </div>
+          <CustomerSearch onCustomerSelect={handleCustomerSelect} />
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -271,8 +268,8 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
                   <SelectValue placeholder="اختر الجنس" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="male">ذكر</SelectItem>
-                  <SelectItem value="female">أنثى</SelectItem>
+                  <SelectItem value="ذكر">ذكر</SelectItem>
+                  <SelectItem value="أنثى">أنثى</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -358,6 +355,14 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
                 {errors.houseNumber && <p className="text-red-500 text-sm mt-1">{errors.houseNumber}</p>}
               </div>
             </div>
+          </div>
+
+          {/* Customer Measurements */}
+          <div className="border-t pt-6">
+            <CustomerMeasurements
+              measurements={customerData.measurements}
+              onMeasurementsChange={(measurements) => setCustomerData(prev => ({ ...prev, measurements }))}
+            />
           </div>
 
           <div className="flex justify-end pt-4">
