@@ -191,7 +191,38 @@ const WorkshopDashboard = () => {
   };
 
   const handleViewCustomerDetails = (customer: any) => {
-    console.log('View customer details:', customer);
+    // Create a dialog or modal to show customer measurements and details
+    const measurementsText = `
+قياسات العميل: ${customer.name}
+
+الصدر: ${customer.measurements.chest} سم
+الخصر: ${customer.measurements.waist} سم
+الكتف: ${customer.measurements.shoulder} سم
+الرقبة: ${customer.measurements.neck} سم
+الطول: ${customer.measurements.length} سم
+
+العنوان الكامل:
+${customer.address.country} - ${customer.address.state}
+${customer.address.area} - ${customer.address.street}
+منزل رقم: ${customer.address.house}
+    `;
+    
+    alert(measurementsText);
+  };
+
+  const handleViewCustomerOrders = (customer: any) => {
+    // Show customer's previous orders
+    const customerOrders = orders.filter(order => order.customerName === customer.name);
+    const ordersText = customerOrders.length > 0 
+      ? customerOrders.map(order => `
+الطلب: ${order.id}
+التاريخ: ${order.createdAt}
+القيمة: ${order.total.toFixed(3)} د.ك
+الحالة: ${order.status}
+      `).join('\n---\n')
+      : 'لا توجد طلبات سابقة لهذا العميل';
+    
+    alert(`الطلبات السابقة للعميل: ${customer.name}\n\n${ordersText}`);
   };
 
   return (
@@ -498,7 +529,7 @@ const WorkshopDashboard = () => {
                             </div>
                           </div>
                           
-                          <div className="flex flex-col sm:flex-row gap-2 lg:w-48">
+                          <div className="flex flex-col gap-2 w-full lg:w-48">
                             <Button 
                               size="sm" 
                               variant="outline" 
@@ -510,6 +541,7 @@ const WorkshopDashboard = () => {
                             <Button 
                               size="sm" 
                               variant="outline"
+                              onClick={() => handleViewCustomerOrders(customer)}
                               className="w-full"
                             >
                               الطلبات السابقة

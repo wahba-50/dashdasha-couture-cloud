@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -340,15 +339,6 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
           placeholder="وصف المنتج..."
           rows={3}
         />
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-2 pt-4">
-        <Button onClick={() => onSave(product)} className="flex-1">
-          حفظ المنتج
-        </Button>
-        <Button variant="outline" onClick={onCancel} className="flex-1">
-          إلغاء
-        </Button>
       </div>
     </div>
   );
