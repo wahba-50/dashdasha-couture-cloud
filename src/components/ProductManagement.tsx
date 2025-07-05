@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, Package, Scissors, Shirt, Wrench, Search, Filter } from "lucide-react";
+import { Plus, Edit, Trash2, Package, Scissors, Shirt, Wrench, Search, Filter, Upload, Image } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Product {
@@ -49,7 +50,8 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
       description: 'قماش قطني عالي الجودة مناسب للدشاديش الصيفية',
       category: 'قطني',
       color: 'أبيض',
-      material: 'قطن 100%'
+      material: 'قطن 100%',
+      image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
     },
     {
       id: '2',
@@ -59,7 +61,8 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
       price: 15.750,
       unit: 'قطعة',
       stock: 100,
-      description: 'قصة تقليدية كويتية أنيقة'
+      description: 'قصة تقليدية كويتية أنيقة',
+      image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
     },
     {
       id: '3',
@@ -69,7 +72,8 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
       price: 2.250,
       unit: 'عدد',
       stock: 200,
-      description: 'أزرار معدنية ذهبية فاخرة'
+      description: 'أزرار معدنية ذهبية فاخرة',
+      image: 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
     },
     {
       id: '4',
@@ -93,7 +97,8 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
     description: '',
     category: '',
     color: '',
-    material: ''
+    material: '',
+    image: ''
   });
 
   const productTypes = [
@@ -111,6 +116,22 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
     return matchesType && matchesSearch;
   });
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, isEditing: boolean = false) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageUrl = e.target?.result as string;
+        if (isEditing && editingProduct) {
+          setEditingProduct({ ...editingProduct, image: imageUrl });
+        } else {
+          setNewProduct({ ...newProduct, image: imageUrl });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleAddProduct = () => {
     if (newProduct.name && newProduct.price) {
       const product: Product = {
@@ -124,7 +145,8 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
         description: newProduct.description,
         category: newProduct.category,
         color: newProduct.color,
-        material: newProduct.material
+        material: newProduct.material,
+        image: newProduct.image
       };
       
       setProducts([...products, product]);
@@ -138,7 +160,8 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
         description: '',
         category: '',
         color: '',
-        material: ''
+        material: '',
+        image: ''
       });
       setIsAddingProduct(false);
     }
@@ -159,10 +182,11 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
     }
   };
 
-  const ProductForm = ({ product, onSave, onCancel }: { 
+  const ProductForm = ({ product, onSave, onCancel, isEditing = false }: { 
     product: Partial<Product>, 
     onSave: (product: Partial<Product>) => void,
-    onCancel: () => void 
+    onCancel: () => void,
+    isEditing?: boolean
   }) => (
     <div className="space-y-4 p-1">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -226,6 +250,37 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
               <SelectItem value="كيلو">كيلو</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+      </div>
+
+      {/* Image Upload Section */}
+      <div>
+        <Label htmlFor="image">صورة المنتج</Label>
+        <div className="mt-2 space-y-3">
+          {product.image && (
+            <div className="relative w-32 h-32 mx-auto">
+              <img 
+                src={product.image} 
+                alt={product.name} 
+                className="w-full h-full object-cover rounded-lg border"
+              />
+            </div>
+          )}
+          <div className="flex items-center justify-center">
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <Upload className="w-8 h-8 mb-2 text-gray-500" />
+                <p className="text-sm text-gray-500">انقر لرفع صورة</p>
+                <p className="text-xs text-gray-500">PNG, JPG حتى 10MB</p>
+              </div>
+              <input 
+                type="file" 
+                className="hidden" 
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e, isEditing)}
+              />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -332,17 +387,6 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
         </Dialog>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-        <Input
-          placeholder="البحث في المنتجات..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pr-10"
-        />
-      </div>
-
       {/* Product Categories Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
@@ -365,10 +409,24 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
 
         {productTypes.map(type => (
           <TabsContent key={type.value} value={type.value} className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filteredProducts.map(product => (
                 <Card key={product.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
+                    {/* Product Image */}
+                    <div className="w-full h-40 mb-3 bg-gray-100 rounded-lg overflow-hidden">
+                      {product.image ? (
+                        <img 
+                          src={product.image} 
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <Image className="w-12 h-12" />
+                        </div>
+                      )}
+                    </div>
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex-1 min-w-0">
                         <CardTitle className="text-base truncate">{product.name}</CardTitle>
@@ -407,7 +465,12 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
                     <div className="flex gap-2 pt-2">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button size="sm" variant="outline" className="flex-1">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="flex-1"
+                            onClick={() => setEditingProduct(product)}
+                          >
                             <Edit className="w-3 h-3 mr-1" />
                             تعديل
                           </Button>
@@ -420,6 +483,7 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
                             product={editingProduct || product}
                             onSave={handleEditProductChange}
                             onCancel={() => setEditingProduct(null)}
+                            isEditing={true}
                           />
                           <div className="flex justify-end gap-2 pt-4 border-t">
                             <Button onClick={() => editingProduct && handleEditProduct(editingProduct)}>

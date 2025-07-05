@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -285,34 +286,36 @@ const WorkshopDashboard = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Search and Filter Bar */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <div className="relative flex-1 w-full">
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder={`البحث في ${selectedTab === 'orders' ? 'الطلبات' : selectedTab === 'customers' ? 'العملاء' : 'المحتوى'}...`}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pr-10"
-              />
-            </div>
-            
-            {selectedTab === 'orders' && (
-              <div className="flex flex-wrap gap-2">
-                {['all', 'جديد', 'جاري الإنتاج', 'مكتمل'].map((status) => (
-                  <Button
-                    key={status}
-                    variant={statusFilter === status ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setStatusFilter(status)}
-                    className="text-xs"
-                  >
-                    {status === 'all' ? 'الكل' : status}
-                  </Button>
-                ))}
+          {/* Search and Filter Bar - Only for orders and customers */}
+          {(selectedTab === 'orders' || selectedTab === 'customers') && (
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              <div className="relative flex-1 w-full">
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder={`البحث في ${selectedTab === 'orders' ? 'الطلبات' : 'العملاء'}...`}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pr-10"
+                />
               </div>
-            )}
-          </div>
+              
+              {selectedTab === 'orders' && (
+                <div className="flex flex-wrap gap-2">
+                  {['all', 'جديد', 'جاري الإنتاج', 'مكتمل'].map((status) => (
+                    <Button
+                      key={status}
+                      variant={statusFilter === status ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setStatusFilter(status)}
+                      className="text-xs"
+                    >
+                      {status === 'all' ? 'الكل' : status}
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-6">
