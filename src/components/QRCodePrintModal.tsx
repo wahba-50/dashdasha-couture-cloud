@@ -23,37 +23,11 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
       const urls: { [key: string]: string } = {};
       
       for (const item of order.itemDetails || []) {
-        // Create comprehensive data for QR code including client measurements
-        const qrData = {
-          orderId: order.id,
-          itemCode: item.qrCode,
-          customerName: order.customerName,
-          customerPhone: order.phone,
-          fabric: item.fabric,
-          cut: item.cut,
-          deliveryDate: order.deliveryDate,
-          createdAt: order.createdAt,
-          workshopName: "ورشة الأناقة الكويتية",
-          workshopPhone: "+965 2262 8945",
-          workshopAddress: "حولي، شارع تونس، مجمع الأناقة التجاري",
-          // Add sample client measurements (in real app, this would come from customer data)
-          measurements: {
-            chest: 95,
-            waist: 85,
-            shoulder: 45,
-            neck: 38,
-            length: 145,
-            sleeve: 60,
-            armhole: 42
-          },
-          status: order.status,
-          cutter: order.cutter || null,
-          totalAmount: order.total,
-          timestamp: new Date().toISOString()
-        };
-
+        // Create URL that points to the piece details page
+        const pieceUrl = `${window.location.origin}/piece/${item.qrCode}`;
+        
         try {
-          const qrCodeDataURL = await QRCode.toDataURL(JSON.stringify(qrData), {
+          const qrCodeDataURL = await QRCode.toDataURL(pieceUrl, {
             width: 200,
             margin: 1,
             color: {
@@ -175,7 +149,7 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
                   <div className="mt-4 pt-3 border-t text-xs text-center text-gray-500 print:border-black print:text-black">
                     <p>تاريخ الطباعة: {new Date().toLocaleDateString('ar-KW')}</p>
                     <p className="font-semibold">قطعة {index + 1} من {order.items}</p>
-                    <p className="mt-1 text-[10px]">امسح الكود للحصول على جميع التفاصيل والقياسات</p>
+                    <p className="mt-1 text-[10px]">امسح الكود لعرض جميع التفاصيل والقياسات</p>
                   </div>
                 </CardContent>
               </Card>
@@ -185,7 +159,7 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
           {/* Print Footer */}
           <div className="hidden print:block mt-8 text-center text-xs">
             <p>شكراً لثقتكم بنا - ورشة الأناقة الكويتية</p>
-            <p className="mt-1">الأكواد تحتوي على جميع تفاصيل القطع وقياسات العميل</p>
+            <p className="mt-1">امسح الأكواد بالهاتف لعرض جميع تفاصيل القطع وقياسات العميل</p>
           </div>
         </div>
       </DialogContent>
