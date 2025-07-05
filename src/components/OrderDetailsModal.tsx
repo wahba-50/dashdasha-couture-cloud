@@ -1,0 +1,160 @@
+
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { User, Phone, MapPin, Calendar, Package, Scissors } from "lucide-react";
+
+interface OrderDetailsModalProps {
+  order: any;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) => {
+  if (!order) return null;
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'جديد': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'جاري الإنتاج': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'مكتمل': return 'bg-green-100 text-green-800 border-green-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+            <Package className="w-6 h-6" />
+            تفاصيل الطلب #{order.id}
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-6">
+          {/* Order Status */}
+          <div className="flex items-center justify-between">
+            <Badge className={`${getStatusColor(order.status)} border text-lg px-4 py-2`}>
+              {order.status}
+            </Badge>
+            {order.cutter && (
+              <Badge variant="outline" className="text-sm">
+                <Scissors className="w-4 h-4 mr-1" />
+                القصاص: {order.cutter}
+              </Badge>
+            )}
+          </div>
+
+          {/* Customer Information */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <User className="w-5 h-5" />
+                معلومات العميل
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-600">الاسم:</span>
+                  <span className="font-medium">{order.customerName}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-600">الهاتف:</span>
+                  <span className="font-medium">{order.phone}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Order Information */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Package className="w-5 h-5" />
+                معلومات الطلب
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <Calendar className="w-6 h-6 mx-auto mb-2 text-blue-600" />
+                  <p className="text-sm text-gray-600">تاريخ الطلب</p>
+                  <p className="font-semibold">{order.createdAt}</p>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <Calendar className="w-6 h-6 mx-auto mb-2 text-green-600" />
+                  <p className="text-sm text-gray-600">تاريخ التسليم</p>
+                  <p className="font-semibold">{order.deliveryDate}</p>
+                </div>
+                <div className="text-center p-4 bg-amber-50 rounded-lg">
+                  <Package className="w-6 h-6 mx-auto mb-2 text-amber-600" />
+                  <p className="text-sm text-gray-600">عدد القطع</p>
+                  <p className="font-semibold">{order.items}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Item Details */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4">تفاصيل القطع</h3>
+              <div className="space-y-4">
+                {order.itemDetails?.map((item: any, index: number) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <Badge variant="outline" className="font-mono">
+                        {item.qrCode}
+                      </Badge>
+                      <span className="text-sm text-gray-500">قطعة {index + 1}</span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">نوع القماش:</span>
+                        <p className="font-medium">{item.fabric}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">نوع القصة:</span>
+                        <p className="font-medium">{item.cut}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* QR Codes Summary */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4">أكواد QR</h3>
+              <div className="flex flex-wrap gap-2">
+                {order.qrCodes?.map((qr: string) => (
+                  <Badge key={qr} variant="outline" className="font-mono">
+                    {qr}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Order Total */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center text-lg">
+                <span className="font-semibold">إجمالي الطلب:</span>
+                <span className="font-bold text-primary text-xl">
+                  {order.total?.toFixed(3)} د.ك
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default OrderDetailsModal;

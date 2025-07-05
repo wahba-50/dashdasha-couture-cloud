@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import SystemHeader from "@/components/SystemHeader";
 import StatsCard from "@/components/StatsCard";
 import ProductManagement from "@/components/ProductManagement";
+import OrderDetailsModal from "@/components/OrderDetailsModal";
+import QRCodePrintModal from "@/components/QRCodePrintModal";
 
 const WorkshopDashboard = () => {
   const navigate = useNavigate();
@@ -21,11 +22,13 @@ const WorkshopDashboard = () => {
   const [selectedTab, setSelectedTab] = useState('orders');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isProductManagementOpen, setIsProductManagementOpen] = useState(false);
+  const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<any>(null);
+  const [selectedOrderForPrint, setSelectedOrderForPrint] = useState<any>(null);
 
   const workshop = {
     id: workshopId,
     name: "ورشة الأناقة الكويتية",
-    type: "حريمي ورجالي",
+    type: "حريمي ورجالي", 
     address: "حولي، شارع تونس، مجمع الأناقة التجاري",
     phone: "+965 2262 8945"
   };
@@ -174,40 +177,19 @@ const WorkshopDashboard = () => {
           : order
       ));
       
-      // Mock external services notification
       alert(`تم إكتمال الطلب ${orderId}!\n\nسيتم إرسال إشعار للعميل يتضمن:\n- خيارات التوصيل\n- خيارات المغسلة\n- خدمات إضافية أخرى`);
     }
   };
 
-  const handlePrintQR = (qrCodes: string[], orderDetails: any) => {
-    // Mock QR code printing with detailed information
-    const printData = {
-      orderNumber: orderDetails.id,
-      customerName: orderDetails.customerName,
-      qrCodes: qrCodes,
-      items: orderDetails.itemDetails,
-      workshopName: workshop.name,
-      workshopPhone: workshop.phone,
-      printDate: new Date().toLocaleDateString('ar-KW')
-    };
-    
-    console.log('Printing QR codes with details:', printData);
-    
-    // In a real application, this would generate and print actual QR codes
-    alert(`تم إرسال ${qrCodes.length} كود QR للطباعة:\n\n` +
-          `الطلب: ${orderDetails.id}\n` +
-          `العميل: ${orderDetails.customerName}\n` +
-          `الأكواد: ${qrCodes.join(', ')}\n\n` +
-          'سيتم طباعة كل كود مع تفاصيل القطعة المقابلة (بدون الأسعار)');
+  const handlePrintQR = (order: any) => {
+    setSelectedOrderForPrint(order);
   };
 
   const handleViewOrderDetails = (order: any) => {
-    // This would typically open a detailed order view
-    console.log('View order details:', order);
+    setSelectedOrderForDetails(order);
   };
 
   const handleViewCustomerDetails = (customer: any) => {
-    // This would typically open customer details with measurements and previous orders
     console.log('View customer details:', customer);
   };
 
@@ -404,7 +386,7 @@ const WorkshopDashboard = () => {
                             <Button 
                               size="sm" 
                               variant="outline"
-                              onClick={() => handlePrintQR(order.qrCodes, order)}
+                              onClick={() => handlePrintQR(order)}
                               className="w-full"
                             >
                               <QrCode className="w-3 h-3 mr-1" />
@@ -707,6 +689,20 @@ const WorkshopDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Order Details Modal */}
+      <OrderDetailsModal
+        order={selectedOrderForDetails}
+        isOpen={!!selectedOrderForDetails}
+        onClose={() => setSelectedOrderForDetails(null)}
+      />
+
+      {/* QR Code Print Modal */}
+      <QRCodePrintModal
+        order={selectedOrderForPrint}
+        isOpen={!!selectedOrderForPrint}
+        onClose={() => setSelectedOrderForPrint(null)}
+      />
     </div>
   );
 };
