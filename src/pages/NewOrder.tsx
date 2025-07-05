@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ArrowRight, ArrowLeft, Receipt, Download, Printer, CheckCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import SystemHeader from "@/components/SystemHeader";
 import CustomerForm from "@/components/CustomerForm";
@@ -13,6 +13,8 @@ import OrderForm from "@/components/OrderForm";
 
 const NewOrder = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const workshopId = searchParams.get('workshopId');
   const { t } = useLanguage();
   const [currentStep, setCurrentStep] = useState(1);
   const [orderData, setOrderData] = useState<any>({
@@ -177,19 +179,43 @@ const NewOrder = () => {
   const handleCreateOrder = () => {
     const orderNumber = generateOrderNumber();
     const order = {
-      ...orderData,
-      orderNumber,
-      createdAt: new Date().toISOString(),
+      id: orderNumber,
+      customerName: orderData.customer.name,
+      phone: orderData.customer.phone,
+      items: orderData.items.length,
+      total: calculateTotal(),
       status: 'جديد',
-      total: calculateTotal()
+      deliveryDate: orderData.deliveryDate,
+      createdAt: new Date().toISOString().split('T')[0],
+      qrCodes: orderData.items.map((item: any) => item.qrCode),
+      cutter: null,
+      customerMeasurements: orderData.customer.measurements || {},
+      itemDetails: orderData.items.map((item: any, index: number) => ({
+        qrCode: item.qrCode,
+        fabric: item.fabricType === 'customer' ? 'قماش العميل' : item.fabric?.name,
+        cut: item.cut?.name
+      })),
+      workshopId: workshopId,
+      discount: orderData.discount,
+      notes: orderData.notes,
+      fullOrderData: orderData
     };
     
-    // Here you would typically save to database
-    console.log('Order created:', order);
+    // Save to localStorage for now (in real app, this would be saved to database)
+    const existingOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
+    existingOrders.push(order);
+    localStorage.setItem('workshopOrders', JSON.stringify(existingOrders));
     
-    // Show success and navigate back
+    console.log('Order created and saved:', order);
+    
+    // Show success and navigate back to workshop dashboard
     alert(`تم إنشاء الطلب بنجاح!\nرقم الطلب: ${orderNumber}`);
-    navigate(-1);
+    
+    if (workshopId) {
+      navigate(`/workshop/${workshopId}/dashboard`);
+    } else {
+      navigate(-1);
+    }
   };
 
   const steps = [
