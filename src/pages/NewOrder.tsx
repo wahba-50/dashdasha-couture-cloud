@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -330,16 +329,6 @@ const NewOrder = () => {
         {/* Navigation Buttons */}
         {currentStep < 3 && (
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentStep === 1}
-              className="w-full sm:w-auto order-2 sm:order-1"
-            >
-              <ArrowRight className="w-4 h-4 mr-2" />
-              <span>{t('common.previous')}</span>
-            </Button>
-            
             {currentStep === 1 && (
               <div className="text-center text-sm text-gray-600 order-1 sm:order-2">
                 املأ بيانات العميل للمتابعة
