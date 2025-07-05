@@ -59,6 +59,121 @@ const NewOrder = () => {
     return `ORD-${Date.now().toString().slice(-6)}`;
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownloadPDF = () => {
+    // Create a printable version and trigger print dialog
+    // This will allow users to save as PDF through browser's print dialog
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      const invoiceHTML = generateInvoiceHTML();
+      printWindow.document.write(invoiceHTML);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
+    }
+  };
+
+  const generateInvoiceHTML = () => {
+    return `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>فاتورة - ${generateOrderNumber()}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; direction: rtl; }
+          .invoice-header { text-align: center; margin-bottom: 30px; }
+          .invoice-header h1 { color: #2563eb; margin-bottom: 5px; }
+          .customer-info, .items-section, .totals-section { margin: 20px 0; }
+          .customer-info { background: #f8f9fa; padding: 15px; border-radius: 8px; }
+          table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
+          th { background-color: #f8f9fa; }
+          .totals { text-align: left; }
+          .total-final { font-size: 18px; font-weight: bold; color: #2563eb; }
+          @media print { body { margin: 0; } }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-header">
+          <h1>نظام إدارة ورش الدشاديش</h1>
+          <p>ورشة النموذج - الكويت</p>
+          <p>التاريخ: ${new Date().toLocaleDateString('ar-KW')}</p>
+          <p>رقم الطلب: ${generateOrderNumber()}</p>
+        </div>
+        
+        <div class="customer-info">
+          <h3>بيانات العميل</h3>
+          <p><strong>الاسم:</strong> ${orderData.customer?.name || ''}</p>
+          <p><strong>الهاتف:</strong> ${orderData.customer?.phone || ''}</p>
+          ${orderData.customer?.email ? `<p><strong>البريد:</strong> ${orderData.customer.email}</p>` : ''}
+          ${orderData.customer?.gender ? `<p><strong>الجنس:</strong> ${orderData.customer.gender}</p>` : ''}
+        </div>
+        
+        <div class="items-section">
+          <h3>تفاصيل القطع (${orderData.items.length})</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>القطعة</th>
+                <th>القماش</th>
+                <th>القصة</th>
+                <th>السعر</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${orderData.items.map((item: any, index: number) => `
+                <tr>
+                  <td>قطعة #${index + 1}</td>
+                  <td>${item.fabricType === 'customer' ? 'قماش العميل' : item.fabric?.name || ''}</td>
+                  <td>${item.cut?.name || ''}</td>
+                  <td>${item.totalPrice?.toFixed(3) || '0.000'} د.ك</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="totals-section">
+          <table class="totals">
+            <tr>
+              <td><strong>المجموع الفرعي:</strong></td>
+              <td><strong>${calculateSubtotal().toFixed(3)} د.ك</strong></td>
+            </tr>
+            ${orderData.discount.value > 0 ? `
+            <tr>
+              <td>الخصم (${orderData.discount.type === 'percentage' ? `${orderData.discount.value}%` : 'مبلغ ثابت'}):</td>
+              <td style="color: red;">-${calculateDiscount().toFixed(3)} د.ك</td>
+            </tr>
+            ` : ''}
+            <tr class="total-final">
+              <td><strong>المجموع النهائي:</strong></td>
+              <td><strong>${calculateTotal().toFixed(3)} د.ك</strong></td>
+            </tr>
+          </table>
+          
+          ${orderData.deliveryDate ? `
+          <div style="text-align: center; margin-top: 20px; padding: 10px; background: #fff3cd; border-radius: 5px;">
+            <strong>موعد التسليم المتوقع: ${new Date(orderData.deliveryDate).toLocaleDateString('ar-KW')}</strong>
+          </div>
+          ` : ''}
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px; font-size: 14px; color: #666;">
+          شكراً لثقتكم بنا - نظام إدارة ورش الدشاديش
+        </div>
+      </body>
+      </html>
+    `;
+  };
+
   const handleCreateOrder = () => {
     const orderNumber = generateOrderNumber();
     const order = {
@@ -311,11 +426,11 @@ const NewOrder = () => {
                       <CheckCircle className="w-5 h-5 mr-2" />
                       إنشاء الطلب والفاتورة
                     </Button>
-                    <Button variant="outline" size="lg" className="sm:w-auto">
+                    <Button variant="outline" size="lg" className="sm:w-auto" onClick={handlePrint}>
                       <Printer className="w-4 h-4 mr-2" />
                       طباعة الفاتورة
                     </Button>
-                    <Button variant="outline" size="lg" className="sm:w-auto">
+                    <Button variant="outline" size="lg" className="sm:w-auto" onClick={handleDownloadPDF}>
                       <Download className="w-4 h-4 mr-2" />
                       تحميل PDF
                     </Button>
