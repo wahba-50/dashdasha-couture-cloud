@@ -54,6 +54,8 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
   const { t, language } = useLanguage();
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [isAddingItem, setIsAddingItem] = useState(false);
+  const [isEditingItem, setIsEditingItem] = useState(false);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [currentItem, setCurrentItem] = useState<Partial<OrderItem>>({
     fabricType: 'workshop'
   });
@@ -130,6 +132,48 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
       setCurrentItem({ fabricType: 'workshop' });
       setIsAddingItem(false);
     }
+  };
+
+  const handleEditItem = (item: OrderItem) => {
+    setCurrentItem({
+      id: item.id,
+      qrCode: item.qrCode,
+      fabricType: item.fabricType,
+      fabric: item.fabric,
+      cut: item.cut,
+      accessories: item.accessories,
+      labors: item.labors
+    });
+    setEditingItemId(item.id);
+    setIsEditingItem(true);
+  };
+
+  const handleUpdateItem = () => {
+    if (currentItem.fabric && currentItem.cut && editingItemId) {
+      const updatedItem: OrderItem = {
+        id: editingItemId,
+        qrCode: currentItem.qrCode!,
+        fabricType: currentItem.fabricType!,
+        fabric: currentItem.fabric,
+        cut: currentItem.cut,
+        accessories: currentItem.accessories || [],
+        labors: currentItem.labors || [],
+        totalPrice: calculateItemTotal(currentItem)
+      };
+      
+      setOrderItems(orderItems.map(item => 
+        item.id === editingItemId ? updatedItem : item
+      ));
+      setCurrentItem({ fabricType: 'workshop' });
+      setIsEditingItem(false);
+      setEditingItemId(null);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setCurrentItem({ fabricType: 'workshop' });
+    setIsEditingItem(false);
+    setEditingItemId(null);
   };
 
   const handleCopyItem = (item: OrderItem) => {
@@ -561,7 +605,11 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
                         </div>
                       </div>
                       
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-wrap">
+                        <Button size="sm" variant="outline" onClick={() => handleEditItem(item)}>
+                          <Eye className="w-3 h-3 mr-1" />
+                          تعديل
+                        </Button>
                         <Button size="sm" variant="outline" onClick={() => handleCopyItem(item)}>
                           <Copy className="w-3 h-3 mr-1" />
                           نسخ
@@ -652,7 +700,27 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
         </CardContent>
       </Card>
 
-      {/* Navigation */}
+      {/* Edit Item Dialog */}
+      <Dialog open={isEditingItem} onOpenChange={setIsEditingItem}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>تعديل القطعة</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <ItemBuilder />
+            <div className="flex gap-2">
+              <Button onClick={handleUpdateItem} disabled={!currentItem.fabric || !currentItem.cut} className="flex-1">
+                حفظ التعديلات
+              </Button>
+              <Button variant="outline" onClick={handleCancelEdit} className="flex-1">
+                إلغاء
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Navigation - Remove duplicate buttons */}
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <Button variant="outline" onClick={onPrevious} className="flex-1 sm:flex-none">
           السابق
