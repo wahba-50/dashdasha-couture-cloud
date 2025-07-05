@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,6 +56,7 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
   const [currentItem, setCurrentItem] = useState<Partial<OrderItem>>({
     fabricType: 'workshop'
   });
+  const [editingItem, setEditingItem] = useState<OrderItem | null>(null);
 
   // Mock data - in real app this would come from ProductManagement
   const workshopFabrics = [
@@ -241,7 +241,7 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Scissors className="w-5 h-5" />
-            اختiار القصة
+            اختيار القصة
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -480,9 +480,12 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
       
       <div className="flex gap-2">
         <Button onClick={handleAddItem} disabled={!currentItem.fabric || !currentItem.cut} className="flex-1">
-          إضافة القطعة
+          {editingItem ? 'حفظ التعديل' : 'إضافة القطعة'}
         </Button>
-        <Button variant="outline" onClick={() => setIsAddingItem(false)} className="flex-1">
+        <Button variant="outline" onClick={() => {
+          setIsAddingItem(false);
+          setEditingItem(null);
+        }} className="flex-1">
           إلغاء
         </Button>
       </div>
@@ -510,7 +513,7 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
               </DialogTrigger>
               <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>إنشاء قطعة جديدة</DialogTitle>
+                  <DialogTitle>{editingItem ? 'تعديل القطعة' : 'إنشاء قطعة جديدة'}</DialogTitle>
                 </DialogHeader>
                 <ItemBuilder />
               </DialogContent>
