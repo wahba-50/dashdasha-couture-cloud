@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Scissors, Crown, Sparkles, User, Lock, Settings } from 'lucide-react';
+import { Scissors, Crown, Sparkles, User, Lock } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageToggle from '@/components/LanguageToggle';
 
@@ -50,17 +50,7 @@ const Landing = () => {
               <Crown className="h-8 w-8 text-blue-600" />
               <h1 className="text-2xl font-bold text-gray-900">{t('system.name')}</h1>
             </div>
-            <div className="flex items-center gap-3">
-              <LanguageToggle />
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/system')}
-                className="flex items-center gap-2"
-              >
-                <Settings className="w-4 h-4" />
-                {t('system.owner.login')}
-              </Button>
-            </div>
+            <LanguageToggle />
           </div>
         </div>
       </header>

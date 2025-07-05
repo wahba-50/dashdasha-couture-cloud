@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Crown, Shield, Database, Users, User, Lock, ArrowLeft } from 'lucide-react';
+import { Crown, Shield, Database, Users, Mail, Lock, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageToggle from '@/components/LanguageToggle';
 
 const SystemOwnerLanding = () => {
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -126,20 +126,20 @@ const SystemOwnerLanding = () => {
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="username" className={`${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
-                      {t('auth.username')}
+                    <Label htmlFor="email" className={`${dir === 'rtl' ? 'text-right' : 'text-left'}`}>
+                      {language === 'ar' ? 'البريد الإلكتروني' : language === 'ur' ? 'ای میل' : language === 'hi' ? 'ईमेल' : 'Email'}
                     </Label>
                     <div className="relative">
-                      <User className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-gray-400`} />
+                      <Mail className={`absolute ${dir === 'rtl' ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-gray-400`} />
                       <Input
-                        id="username"
-                        name="username"
-                        type="text"
+                        id="email"
+                        name="email"
+                        type="email"
                         required
-                        value={formData.username}
+                        value={formData.email}
                         onChange={handleInputChange}
                         className={`${dir === 'rtl' ? 'pr-10 text-right' : 'pl-10 text-left'}`}
-                        placeholder={t('auth.username')}
+                        placeholder={language === 'ar' ? 'البريد الإلكتروني' : language === 'ur' ? 'ای میل' : language === 'hi' ? 'ईमेल' : 'Email'}
                         dir={dir}
                       />
                     </div>
