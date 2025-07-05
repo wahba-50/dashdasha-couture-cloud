@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -232,13 +231,14 @@ const Index = () => {
   };
 
   const handleWorkshopAction = (action: string, workshopId?: number) => {
+    console.log(`Workshop action: ${action}, ID: ${workshopId}`);
     switch (action) {
       case 'add':
         navigate('/workshop/new');
         break;
       case 'view':
         if (workshopId) {
-          navigate(`/workshop/${workshopId}`);
+          alert(`عرض تفاصيل الورشة رقم ${workshopId} - هذه الميزة قيد التطوير`);
         }
         break;
       case 'enter':

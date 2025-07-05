@@ -10,6 +10,7 @@ import SystemOwnerLanding from "./pages/SystemOwnerLanding";
 import Index from "./pages/Index";
 import WorkshopDashboard from "./pages/WorkshopDashboard";
 import NewOrder from "./pages/NewOrder";
+import CreateWorkshop from "./pages/CreateWorkshop";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/system-owner-login" element={<SystemOwnerLanding />} />
             <Route path="/system" element={<Index />} />
+            <Route path="/workshop/new" element={<CreateWorkshop />} />
             <Route path="/workshop/:workshopId/dashboard" element={<WorkshopDashboard />} />
             <Route path="/new-order" element={<NewOrder />} />
             <Route path="*" element={<NotFound />} />
