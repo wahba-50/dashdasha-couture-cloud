@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +33,7 @@ const WorkshopDashboard = () => {
     phone: "+965 2262 8945"
   };
 
+  // Load orders from localStorage and merge with default orders
   const [orders, setOrders] = useState([
     {
       id: 'ORD-001',
@@ -112,6 +112,24 @@ const WorkshopDashboard = () => {
     }
   ]);
 
+  // Load orders from localStorage on component mount
+  useEffect(() => {
+    const savedOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
+    // Filter orders for this specific workshop
+    const workshopOrders = savedOrders.filter((order: any) => 
+      order.workshopId === workshopId || !order.workshopId // Include orders without workshopId for backward compatibility
+    );
+    
+    if (workshopOrders.length > 0) {
+      // Merge with existing default orders, avoiding duplicates
+      setOrders(prevOrders => {
+        const existingIds = prevOrders.map(order => order.id);
+        const newOrders = workshopOrders.filter((order: any) => !existingIds.includes(order.id));
+        return [...prevOrders, ...newOrders];
+      });
+    }
+  }, [workshopId]);
+
   const customers = [
     {
       id: 1,
@@ -188,22 +206,43 @@ const WorkshopDashboard = () => {
   const handleStartProduction = (orderId: string) => {
     const cutterName = prompt('أدخل اسم القصاص المسؤول عن هذا الطلب:');
     if (cutterName?.trim()) {
-      setOrders(orders.map(order => 
+      const updatedOrders = orders.map(order => 
         order.id === orderId 
           ? { ...order, status: 'جاري الإنتاج', cutter: cutterName.trim() }
           : order
-      ));
+      );
+      setOrders(updatedOrders);
+      
+      // Update localStorage
+      const savedOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
+      const updatedSavedOrders = savedOrders.map((order: any) => 
+        order.id === orderId 
+          ? { ...order, status: 'جاري الإنتاج', cutter: cutterName.trim() }
+          : order
+      );
+      localStorage.setItem('workshopOrders', JSON.stringify(updatedSavedOrders));
+      
       alert(`تم بدء الإنتاج للطلب ${orderId} مع القصاص: ${cutterName}`);
     }
   };
 
   const handleCompleteProduction = (orderId: string) => {
     if (confirm('هل أنت متأكد من إكتمال إنتاج هذا الطلب؟')) {
-      setOrders(orders.map(order => 
+      const updatedOrders = orders.map(order => 
         order.id === orderId 
           ? { ...order, status: 'مكتمل' }
           : order
-      ));
+      );
+      setOrders(updatedOrders);
+      
+      // Update localStorage
+      const savedOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
+      const updatedSavedOrders = savedOrders.map((order: any) => 
+        order.id === orderId 
+          ? { ...order, status: 'مكتمل' }
+          : order
+      );
+      localStorage.setItem('workshopOrders', JSON.stringify(updatedSavedOrders));
       
       alert(`تم إكتمال الطلب ${orderId}!\n\nسيتم إرسال إشعار للعميل يتضمن:\n- خيارات التوصيل\n- خيارات المغسلة\n- خدمات إضافية أخرى`);
     }
@@ -261,7 +300,7 @@ ${customer.address.area} - ${customer.address.street}
         actions={
           <div className="flex gap-2">
             <Button 
-              onClick={() => navigate('/new-order')}
+              onClick={() => navigate(`/new-order?workshopId=${workshopId}`)}
               className="bg-primary hover:bg-primary/90"
             >
               <Plus className="w-4 h-4 mr-2" />
