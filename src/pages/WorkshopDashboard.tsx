@@ -46,6 +46,15 @@ const WorkshopDashboard = () => {
       createdAt: '2024-07-04',
       qrCodes: ['QR001A', 'QR001B'],
       cutter: null,
+      customerMeasurements: {
+        chest: 95,
+        waist: 85,
+        shoulder: 45,
+        neck: 38,
+        length: 145,
+        sleeve: 60,
+        armhole: 42
+      },
       itemDetails: [
         { qrCode: 'QR001A', fabric: 'قماش قطني فاخر', cut: 'قصة كلاسيكية' },
         { qrCode: 'QR001B', fabric: 'قماش حريري', cut: 'قصة عصرية' }
@@ -62,6 +71,15 @@ const WorkshopDashboard = () => {
       createdAt: '2024-07-02',
       qrCodes: ['QR002A'],
       cutter: 'محمد الخياط',
+      customerMeasurements: {
+        chest: 88,
+        waist: 78,
+        shoulder: 40,
+        neck: 35,
+        length: 140,
+        sleeve: 55,
+        armhole: 38
+      },
       itemDetails: [
         { qrCode: 'QR002A', fabric: 'قماش كتان', cut: 'قصة فاخرة' }
       ]
@@ -77,6 +95,15 @@ const WorkshopDashboard = () => {
       createdAt: '2024-06-28',
       qrCodes: ['QR003A', 'QR003B', 'QR003C'],
       cutter: 'أحمد القصاص',
+      customerMeasurements: {
+        chest: 98,
+        waist: 88,
+        shoulder: 47,
+        neck: 40,
+        length: 148,
+        sleeve: 62,
+        armhole: 44
+      },
       itemDetails: [
         { qrCode: 'QR003A', fabric: 'قماش قطني', cut: 'قصة كلاسيكية' },
         { qrCode: 'QR003B', fabric: 'قماش حريري', cut: 'قصة عصرية' },

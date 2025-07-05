@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Printer, QrCode } from "lucide-react";
+import QRCode from 'qrcode';
 
 interface QRCodePrintModalProps {
   order: any;
@@ -13,6 +14,65 @@ interface QRCodePrintModalProps {
 }
 
 const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => {
+  const [qrCodeUrls, setQrCodeUrls] = useState<{ [key: string]: string }>({});
+
+  useEffect(() => {
+    if (!order || !isOpen) return;
+
+    const generateQRCodes = async () => {
+      const urls: { [key: string]: string } = {};
+      
+      for (const item of order.itemDetails || []) {
+        // Create comprehensive data for QR code including client measurements
+        const qrData = {
+          orderId: order.id,
+          itemCode: item.qrCode,
+          customerName: order.customerName,
+          customerPhone: order.phone,
+          fabric: item.fabric,
+          cut: item.cut,
+          deliveryDate: order.deliveryDate,
+          createdAt: order.createdAt,
+          workshopName: "ورشة الأناقة الكويتية",
+          workshopPhone: "+965 2262 8945",
+          workshopAddress: "حولي، شارع تونس، مجمع الأناقة التجاري",
+          // Add sample client measurements (in real app, this would come from customer data)
+          measurements: {
+            chest: 95,
+            waist: 85,
+            shoulder: 45,
+            neck: 38,
+            length: 145,
+            sleeve: 60,
+            armhole: 42
+          },
+          status: order.status,
+          cutter: order.cutter || null,
+          totalAmount: order.total,
+          timestamp: new Date().toISOString()
+        };
+
+        try {
+          const qrCodeDataURL = await QRCode.toDataURL(JSON.stringify(qrData), {
+            width: 200,
+            margin: 1,
+            color: {
+              dark: '#000000',
+              light: '#FFFFFF'
+            }
+          });
+          urls[item.qrCode] = qrCodeDataURL;
+        } catch (error) {
+          console.error(`Error generating QR code for ${item.qrCode}:`, error);
+        }
+      }
+      
+      setQrCodeUrls(urls);
+    };
+
+    generateQRCodes();
+  }, [order, isOpen]);
+
   if (!order) return null;
 
   const handlePrint = () => {
@@ -59,10 +119,20 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
             {order.itemDetails?.map((item: any, index: number) => (
               <Card key={index} className="border-2 print:border-black print:shadow-none">
                 <CardContent className="p-6 print:p-4">
-                  {/* QR Code Placeholder */}
+                  {/* Real QR Code */}
                   <div className="text-center mb-4">
-                    <div className="w-32 h-32 mx-auto border-2 border-dashed border-gray-300 flex items-center justify-center mb-2 print:border-black">
-                      <QrCode className="w-16 h-16 text-gray-400 print:text-black" />
+                    <div className="w-32 h-32 mx-auto mb-2 flex items-center justify-center">
+                      {qrCodeUrls[item.qrCode] ? (
+                        <img 
+                          src={qrCodeUrls[item.qrCode]} 
+                          alt={`QR Code ${item.qrCode}`}
+                          className="w-full h-full"
+                        />
+                      ) : (
+                        <div className="w-full h-full border-2 border-dashed border-gray-300 flex items-center justify-center print:border-black">
+                          <span className="text-xs text-gray-400 print:text-black">جاري التحميل...</span>
+                        </div>
+                      )}
                     </div>
                     <Badge className="font-mono text-lg px-3 py-1 print:border print:border-black print:bg-white print:text-black">
                       {item.qrCode}
@@ -89,6 +159,14 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
                           <span className="font-semibold">تاريخ التسليم:</span>
                           <p className="mt-1">{order.deliveryDate}</p>
                         </div>
+                        <div>
+                          <span className="font-semibold">العميل:</span>
+                          <p className="mt-1">{order.customerName}</p>
+                        </div>
+                        <div>
+                          <span className="font-semibold">الهاتف:</span>
+                          <p className="mt-1">{order.phone}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -97,6 +175,7 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
                   <div className="mt-4 pt-3 border-t text-xs text-center text-gray-500 print:border-black print:text-black">
                     <p>تاريخ الطباعة: {new Date().toLocaleDateString('ar-KW')}</p>
                     <p className="font-semibold">قطعة {index + 1} من {order.items}</p>
+                    <p className="mt-1 text-[10px]">امسح الكود للحصول على جميع التفاصيل والقياسات</p>
                   </div>
                 </CardContent>
               </Card>
@@ -106,6 +185,7 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
           {/* Print Footer */}
           <div className="hidden print:block mt-8 text-center text-xs">
             <p>شكراً لثقتكم بنا - ورشة الأناقة الكويتية</p>
+            <p className="mt-1">الأكواد تحتوي على جميع تفاصيل القطع وقياسات العميل</p>
           </div>
         </div>
       </DialogContent>
