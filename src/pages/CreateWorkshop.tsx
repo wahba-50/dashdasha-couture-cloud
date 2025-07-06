@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -69,7 +68,7 @@ const CreateWorkshop = () => {
     console.log('Creating workshop:', formData);
     // Here you would typically send the data to your backend
     alert('تم إنشاء الورشة بنجاح!');
-    navigate('/system');
+    navigate('/');
   };
 
   return (
@@ -80,7 +79,7 @@ const CreateWorkshop = () => {
         actions={
           <Button 
             variant="outline"
-            onClick={() => navigate('/system')}
+            onClick={() => navigate('/')}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             العودة
@@ -266,7 +265,7 @@ const CreateWorkshop = () => {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => navigate('/system')}
+                  onClick={() => navigate('/')}
                   className="flex-1"
                 >
                   إلغاء
