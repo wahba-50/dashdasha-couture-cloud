@@ -10,10 +10,36 @@ const SystemCustomersTab = () => {
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    // Load system-wide customers
+  const loadSystemCustomers = () => {
+    console.log('🔄 Loading system-wide customers...');
     const systemCustomers = JSON.parse(localStorage.getItem('systemCustomers') || '[]');
+    console.log('📋 System customers loaded:', systemCustomers.length);
     setCustomers(systemCustomers);
+  };
+
+  useEffect(() => {
+    loadSystemCustomers();
+    
+    // Listen for customer updates
+    const handleCustomerAdded = () => {
+      console.log('🔔 Customer added event received in SystemCustomersTab, reloading...');
+      setTimeout(loadSystemCustomers, 100);
+    };
+    
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'systemCustomers') {
+        console.log('🔔 System customers storage changed, reloading...');
+        setTimeout(loadSystemCustomers, 50);
+      }
+    };
+
+    window.addEventListener('customerAdded', handleCustomerAdded);
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('customerAdded', handleCustomerAdded);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const filteredCustomers = customers.filter((customer: any) =>

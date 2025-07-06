@@ -132,9 +132,16 @@ const WorkshopDashboard = () => {
 
   // Function to reload customers from localStorage
   const reloadCustomers = () => {
-    console.log('Reloading customers for workshop:', workshopId);
-    const workshopCustomers = JSON.parse(localStorage.getItem(`workshopCustomers_${workshopId}`) || '[]');
-    console.log('Raw workshop customers from storage:', workshopCustomers);
+    console.log('🔄 Reloading customers for workshop:', workshopId);
+    
+    if (!workshopId) {
+      console.error('❌ No workshopId available for loading customers');
+      return;
+    }
+    
+    const storageKey = `workshopCustomers_${workshopId}`;
+    const workshopCustomers = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    console.log('📋 Raw workshop customers from storage:', workshopCustomers.length, 'customers');
     
     // Convert to the format expected by the existing UI
     const formattedCustomers = workshopCustomers.map((customer: any) => ({
@@ -150,7 +157,7 @@ const WorkshopDashboard = () => {
       address: customer.address || {}
     }));
     
-    console.log('Formatted customers for display:', formattedCustomers);
+    console.log('✅ Formatted customers for display:', formattedCustomers.length);
     setCustomers(formattedCustomers);
   };
 
@@ -172,74 +179,64 @@ const WorkshopDashboard = () => {
     }
   }, [workshopId]);
 
-  // Load customers from localStorage on component mount and when tab changes
+  // Enhanced customer loading and refresh system
   useEffect(() => {
-    console.log('Loading customers, selectedTab:', selectedTab);
+    console.log('🔄 Setting up customer loading for workshop:', workshopId);
     reloadCustomers();
-  }, [workshopId, selectedTab]);
+  }, [workshopId]);
 
   // Enhanced event listeners for customer updates
   useEffect(() => {
-    console.log('Setting up customer refresh event listeners for workshop:', workshopId);
+    if (!workshopId) return;
+    
+    console.log('🔄 Setting up customer refresh event listeners for workshop:', workshopId);
     
     const handleStorageChange = (e: StorageEvent) => {
-      console.log('Storage event detected:', e.key);
-      if (e.key === `workshopCustomers_${workshopId}`) {
-        console.log('Workshop customers storage changed, reloading...');
+      const storageKey = `workshopCustomers_${workshopId}`;
+      if (e.key === storageKey) {
+        console.log('🔔 Storage event detected for workshop customers, reloading...');
         setTimeout(reloadCustomers, 50);
       }
     };
 
     const handleCustomerAdded = (e: any) => {
-      console.log('Customer added event received:', e.detail);
       if (e.detail?.workshopId === workshopId) {
-        console.log('Customer added for this workshop, reloading customers...');
+        console.log('🔔 Customer added/updated event received for this workshop, reloading...');
         setTimeout(reloadCustomers, 50);
       }
     };
 
-    const handleCustomStorageEvent = (e: any) => {
-      console.log('Custom storage event received:', e.detail);
-      if (e.detail?.key === `workshopCustomers_${workshopId}`) {
-        console.log('Custom storage event for workshop customers, reloading...');
+    const handleWorkshopCustomersUpdated = (e: any) => {
+      if (e.detail?.workshopId === workshopId) {
+        console.log('🔔 Workshop customers updated event received, reloading...');
         setTimeout(reloadCustomers, 50);
       }
     };
 
-    // Add multiple event listeners to ensure we catch customer updates
+    // Add multiple event listeners
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('customerAdded', handleCustomerAdded);
-    window.addEventListener('storage', handleCustomStorageEvent);
+    window.addEventListener('workshopCustomersUpdated', handleWorkshopCustomersUpdated);
     
-    // Also add a periodic check to ensure customers are loaded
-    const intervalId = setInterval(() => {
-      const currentCustomerCount = customers.length;
-      const storageCustomerCount = JSON.parse(localStorage.getItem(`workshopCustomers_${workshopId}`) || '[]').length;
-      if (currentCustomerCount !== storageCustomerCount) {
-        console.log('Customer count mismatch detected, reloading...', { current: currentCustomerCount, storage: storageCustomerCount });
-        reloadCustomers();
-      }
-    }, 2000);
-
+    // Force refresh when customers tab is selected
+    if (selectedTab === 'customers') {
+      console.log('🔄 Customers tab selected, forcing refresh...');
+      setTimeout(reloadCustomers, 100);
+    }
+    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('customerAdded', handleCustomerAdded);
-      window.removeEventListener('storage', handleCustomStorageEvent);
-      clearInterval(intervalId);
+      window.removeEventListener('workshopCustomersUpdated', handleWorkshopCustomersUpdated);
     };
-  }, [workshopId, customers.length]);
+  }, [workshopId, selectedTab]);
 
-  // Force reload customers when component becomes visible
+  // Force reload when tab changes to customers
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && selectedTab === 'customers') {
-        console.log('Page became visible, reloading customers...');
-        reloadCustomers();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    if (selectedTab === 'customers') {
+      console.log('🔄 Switched to customers tab, reloading...');
+      setTimeout(reloadCustomers, 100);
+    }
   }, [selectedTab]);
 
   const filteredOrders = orders.filter(order => {
@@ -718,6 +715,7 @@ ${customer.address?.block || 'غير محدد'} - ${customer.address?.street || 
                     <div className="text-center py-12 text-gray-500">
                       <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
                       <p>لا توجد عملاء</p>
+                      <p className="text-sm mt-2">سيظهر العملاء هنا بعد إنشاء طلبات جديدة</p>
                     </div>
                   )}
                 </div>
