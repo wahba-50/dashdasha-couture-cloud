@@ -130,6 +130,30 @@ const WorkshopDashboard = () => {
   // Load customers from new storage location
   const [customers, setCustomers] = useState([]);
 
+  // Function to reload customers from localStorage
+  const reloadCustomers = () => {
+    console.log('Reloading customers for workshop:', workshopId);
+    const workshopCustomers = JSON.parse(localStorage.getItem(`workshopCustomers_${workshopId}`) || '[]');
+    console.log('Loaded workshop customers from storage:', workshopCustomers);
+    
+    // Convert to the format expected by the existing UI
+    const formattedCustomers = workshopCustomers.map((customer: any) => ({
+      id: customer.id,
+      name: customer.name,
+      phone: customer.phone,
+      email: customer.email || '',
+      gender: customer.gender || '',
+      orders: customer.orders || 0,
+      lastOrder: customer.lastOrder || customer.createdAt,
+      totalSpent: customer.totalSpent || 0,
+      measurements: customer.measurements || {},
+      address: customer.address || {}
+    }));
+    
+    console.log('Formatted customers:', formattedCustomers);
+    setCustomers(formattedCustomers);
+  };
+
   // Load orders from localStorage on component mount
   useEffect(() => {
     const savedOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
@@ -148,67 +172,35 @@ const WorkshopDashboard = () => {
     }
   }, [workshopId]);
 
-  // Load customers from localStorage on component mount
+  // Load customers from localStorage on component mount and when tab changes
   useEffect(() => {
-    const workshopCustomers = JSON.parse(localStorage.getItem(`workshopCustomers_${workshopId}`) || '[]');
+    console.log('Loading customers, selectedTab:', selectedTab);
+    reloadCustomers();
+  }, [workshopId, selectedTab]);
+
+  // Add event listener for storage changes to refresh customers when new ones are added
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === `workshopCustomers_${workshopId}`) {
+        console.log('Storage changed for workshop customers, reloading...');
+        reloadCustomers();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
     
-    // Convert to the format expected by the existing UI
-    const formattedCustomers = workshopCustomers.map((customer: any) => ({
-      id: customer.id,
-      name: customer.name,
-      phone: customer.phone,
-      email: customer.email || '',
-      gender: customer.gender || '',
-      orders: customer.orders || 0,
-      lastOrder: customer.lastOrder || customer.createdAt,
-      totalSpent: customer.totalSpent || 0,
-      measurements: customer.measurements || {},
-      address: customer.address || {}
-    }));
-    
-    // Add default customers if no customers exist
-    if (formattedCustomers.length === 0) {
-      setCustomers([
-        {
-          id: 1,
-          name: 'أحمد محمد الكندري',
-          phone: '+96597712345678',
-          email: 'ahmed.k@example.com',
-          gender: 'ذكر',
-          orders: 5,
-          lastOrder: '2024-07-04',
-          totalSpent: 234.750,
-          measurements: { chest: 95, waist: 85, shoulder: 45, neck: 38, length: 145 },
-          address: {
-            country: 'الكويت',
-            state: 'حولي',
-            area: 'السالمية',
-            street: 'شارع المطاعم',
-            house: '123'
-          }
-        },
-        {
-          id: 2,
-          name: 'فاطمة علي العتيبي',
-          phone: '+96597712345679',
-          email: 'fatma.ali@example.com',
-          gender: 'أنثى',
-          orders: 3,
-          lastOrder: '2024-07-02',
-          totalSpent: 156.250,
-          measurements: { chest: 88, waist: 78, shoulder: 40, neck: 35, length: 140 },
-          address: {
-            country: 'الكويت',
-            state: 'العاصمة',
-            area: 'قرطبة',
-            street: 'شارع الخليج',
-            house: '456'
-          }
-        }
-      ]);
-    } else {
-      setCustomers(formattedCustomers);
-    }
+    // Also listen for custom events when customers are added from the same window
+    const handleCustomerAdded = () => {
+      console.log('Customer added event received, reloading customers...');
+      reloadCustomers();
+    };
+
+    window.addEventListener('customerAdded', handleCustomerAdded);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('customerAdded', handleCustomerAdded);
+    };
   }, [workshopId]);
 
   const filteredOrders = orders.filter(order => {
@@ -292,16 +284,16 @@ const WorkshopDashboard = () => {
     const measurementsText = `
 قياسات العميل: ${customer.name}
 
-الصدر: ${customer.measurements.chest} سم
-الخصر: ${customer.measurements.waist} سم
-الكتف: ${customer.measurements.shoulder} سم
-الرقبة: ${customer.measurements.neck} سم
-الطول: ${customer.measurements.length} سم
+الصدر: ${customer.measurements.chest || 'غير محدد'} سم
+الخصر: ${customer.measurements.waist || 'غير محدد'} سم
+الكتف: ${customer.measurements.shoulder || 'غير محدد'} سم
+الرقبة: ${customer.measurements.neckCircumference || 'غير محدد'} سم
+الطول: ${customer.measurements.length || 'غير محدد'} سم
 
 العنوان الكامل:
-${customer.address.country} - ${customer.address.state}
-${customer.address.area} - ${customer.address.street}
-منزل رقم: ${customer.address.house}
+${customer.address?.country || 'غير محدد'} - ${customer.address?.governorate || 'غير محدد'}
+${customer.address?.block || 'غير محدد'} - ${customer.address?.street || 'غير محدد'}
+منزل رقم: ${customer.address?.houseNumber || 'غير محدد'}
     `;
     
     alert(measurementsText);
@@ -621,7 +613,7 @@ ${customer.address.area} - ${customer.address.street}
                             <div className="flex items-center gap-2">
                               <h3 className="font-bold text-lg">{customer.name}</h3>
                               <Badge variant="outline" className="text-xs">
-                                {customer.gender}
+                                {customer.gender || 'غير محدد'}
                               </Badge>
                             </div>
                             
@@ -632,11 +624,11 @@ ${customer.address.area} - ${customer.address.street}
                               </div>
                               <div>
                                 <span className="text-gray-500">البريد:</span>
-                                <p className="font-medium">{customer.email}</p>
+                                <p className="font-medium">{customer.email || 'غير محدد'}</p>
                               </div>
                               <div>
-                                <span className="text-gray-500">العنوان:</span>
-                                <p className="font-medium">{customer.address?.area || 'غير محدد'}، {customer.address?.state || 'غير محدد'}</p>
+                                <span className="text-gray-500">المحافظة:</span>
+                                <p className="font-medium">{customer.address?.governorate || 'غير محدد'}</p>
                               </div>
                               <div>
                                 <span className="text-gray-500">آخر طلب:</span>

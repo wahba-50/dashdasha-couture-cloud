@@ -173,11 +173,21 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
       localStorage.setItem('systemCustomers', JSON.stringify(systemCustomers));
       console.log('System customers updated:', systemCustomers);
       
+      // Dispatch custom event to notify other components that a customer was added
+      window.dispatchEvent(new CustomEvent('customerAdded', { 
+        detail: { customer: customerRecord, workshopId } 
+      }));
+      
       console.log('تم حفظ العميل الجديد:', customerRecord.name);
     } else {
       // Update existing customer
       workshopCustomers[existingCustomerIndex] = { ...workshopCustomers[existingCustomerIndex], ...customerRecord };
       localStorage.setItem(`workshopCustomers_${workshopId}`, JSON.stringify(workshopCustomers));
+      
+      // Dispatch custom event for customer update as well
+      window.dispatchEvent(new CustomEvent('customerAdded', { 
+        detail: { customer: customerRecord, workshopId } 
+      }));
       
       console.log('تم تحديث بيانات العميل:', customerRecord.name);
     }
