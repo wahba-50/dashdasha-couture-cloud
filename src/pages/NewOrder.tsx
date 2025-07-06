@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, ArrowLeft, Receipt, Share, Printer, CheckCircle } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -539,7 +541,7 @@ const NewOrder = () => {
         <div className="flex items-center justify-center mb-6 sm:mb-8 overflow-x-auto">
           <div className="flex items-center gap-4 min-w-max px-4">
             {steps.map((step, index) => (
-              <React.Fragment key={step.number}>
+              <div key={step.number} className="flex items-center">
                 <div className="flex flex-col items-center">
                   <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-semibold text-sm ${
                     step.number <= currentStep 
@@ -559,7 +561,7 @@ const NewOrder = () => {
                     step.completed ? 'bg-primary' : 'bg-gray-200'
                   }`} />
                 )}
-              </React.Fragment>
+              </div>
             ))}
           </div>
         </div>
@@ -695,9 +697,9 @@ const NewOrder = () => {
                     
                     <div className="mt-4">
                       <Label htmlFor="notes">ملاحظات إضافية</Label>
-                      <textarea
+                      <Textarea
                         id="notes"
-                        className="w-full mt-1 p-2 border rounded-md"
+                        className="w-full mt-1"
                         rows={3}
                         value={orderData.notes}
                         onChange={(e) => setOrderData({...orderData, notes: e.target.value})}
