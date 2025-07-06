@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ShoppingCart, Users, Package, Plus, Search, Play, CheckCircle, QrCode, Printer, Building2, BarChart3, Settings2 } from "lucide-react";
+import { ShoppingCart, Users, Package, Plus, Search, Play, CheckCircle, QrCode, Printer, Building2, BarChart3, CreditCard, Banknote } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import SystemHeader from "@/components/SystemHeader";
@@ -46,6 +46,11 @@ const WorkshopDashboard = () => {
       createdAt: '2024-07-04',
       qrCodes: ['QR001A', 'QR001B'],
       cutter: null,
+      payment: {
+        type: 'cash',
+        receivedAmount: 20.000,
+        remainingAmount: 25.500
+      },
       customerMeasurements: {
         chest: 95,
         waist: 85,
@@ -71,6 +76,11 @@ const WorkshopDashboard = () => {
       createdAt: '2024-07-02',
       qrCodes: ['QR002A'],
       cutter: 'محمد الخياط',
+      payment: {
+        type: 'online',
+        receivedAmount: 28.750,
+        remainingAmount: 0.000
+      },
       customerMeasurements: {
         chest: 88,
         waist: 78,
@@ -95,6 +105,11 @@ const WorkshopDashboard = () => {
       createdAt: '2024-06-28',
       qrCodes: ['QR003A', 'QR003B', 'QR003C'],
       cutter: 'أحمد القصاص',
+      payment: {
+        type: 'cash',
+        receivedAmount: 50.000,
+        remainingAmount: 17.250
+      },
       customerMeasurements: {
         chest: 98,
         waist: 88,
@@ -461,6 +476,38 @@ ${customer.address.area} - ${customer.address.street}
                                 <p className="font-semibold">{order.createdAt}</p>
                               </div>
                             </div>
+
+                            {/* Payment Information */}
+                            {order.payment && (
+                              <div className="bg-gray-50 p-3 rounded-lg">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                                  <div>
+                                    <span className="text-gray-500">طريقة الدفع:</span>
+                                    <p className="font-semibold flex items-center">
+                                      {order.payment.type === 'cash' ? (
+                                        <>
+                                          <Banknote className="w-3 h-3 mr-1" />
+                                          نقدي
+                                        </>
+                                      ) : (
+                                        <>
+                                          <CreditCard className="w-3 h-3 mr-1" />
+                                          إلكتروني
+                                        </>
+                                      )}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <span className="text-gray-500">المبلغ المستلم:</span>
+                                    <p className="font-semibold text-green-600">{order.payment.receivedAmount?.toFixed(3)} د.ك</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-gray-500">المبلغ المتبقي:</span>
+                                    <p className="font-semibold text-red-600">{order.payment.remainingAmount?.toFixed(3)} د.ك</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                             
                             {/* QR Codes */}
                             <div className="flex flex-wrap gap-1">
