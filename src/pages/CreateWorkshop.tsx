@@ -7,8 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Building2, User, Lock, Settings } from 'lucide-react';
+import { ArrowLeft, Building2, User, Lock } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import SystemHeader from '@/components/SystemHeader';
 
@@ -18,19 +17,43 @@ const CreateWorkshop = () => {
   const [formData, setFormData] = useState({
     name: '',
     type: '',
-    address: '',
+    address: {
+      country: 'الكويت',
+      governorate: '',
+      block: '',
+      street: '',
+      building: ''
+    },
     description: '',
     username: '',
     password: '',
-    confirmPassword: '',
-    enableAdditionalServices: false
+    confirmPassword: ''
   });
+
+  const kuwaitGovernorates = [
+    'العاصمة',
+    'حولي',
+    'الفروانية',
+    'مبارك الكبير',
+    'الأحمدي',
+    'الجهراء'
+  ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const handleAddressChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      address: {
+        ...prev.address,
+        [field]: value
+      }
     }));
   };
 
@@ -105,16 +128,64 @@ const CreateWorkshop = () => {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="address">العنوان *</Label>
-                  <Input
-                    id="address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    placeholder="أدخل عنوان الورشة"
-                    required
-                  />
+                {/* Address Section */}
+                <div className="space-y-4">
+                  <h4 className="text-md font-medium text-gray-600">العنوان</h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>الدولة</Label>
+                      <Input
+                        value={formData.address.country}
+                        readOnly
+                        className="bg-gray-100"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>المحافظة *</Label>
+                      <Select value={formData.address.governorate} onValueChange={(value) => handleAddressChange('governorate', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر المحافظة" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {kuwaitGovernorates.map((gov) => (
+                            <SelectItem key={gov} value={gov}>{gov}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>القطعة *</Label>
+                      <Input
+                        value={formData.address.block}
+                        onChange={(e) => handleAddressChange('block', e.target.value)}
+                        placeholder="رقم القطعة"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>الشارع *</Label>
+                      <Input
+                        value={formData.address.street}
+                        onChange={(e) => handleAddressChange('street', e.target.value)}
+                        placeholder="رقم الشارع"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>المبنى *</Label>
+                      <Input
+                        value={formData.address.building}
+                        onChange={(e) => handleAddressChange('building', e.target.value)}
+                        placeholder="رقم المبنى"
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -186,35 +257,6 @@ const CreateWorkshop = () => {
                     />
                   </div>
                 </div>
-              </div>
-
-              {/* Additional Services */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center gap-2">
-                  <Settings className="w-5 h-5" />
-                  الخدمات الإضافية
-                </h3>
-                
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <Checkbox
-                    id="enableAdditionalServices"
-                    checked={formData.enableAdditionalServices}
-                    onCheckedChange={(checked) => 
-                      setFormData(prev => ({...prev, enableAdditionalServices: checked as boolean}))
-                    }
-                  />
-                  <Label htmlFor="enableAdditionalServices" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                    تفعيل الخدمات الأخرى لهذه الورشة
-                  </Label>
-                </div>
-                
-                {formData.enableAdditionalServices && (
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <p className="text-sm text-blue-700">
-                      سيتم ربط هذه الورشة بالخدمات الخارجية المتاحة في النظام مثل إدارة المخزون والتقارير المتقدمة.
-                    </p>
-                  </div>
-                )}
               </div>
 
               <div className="flex gap-4 pt-4">

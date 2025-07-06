@@ -26,8 +26,10 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/landing" element={<Landing />} />
+            <Route path="/system" element={<SystemOwnerLanding />} />
             <Route path="/system-owner" element={<SystemOwnerLanding />} />
             <Route path="/create-workshop" element={<CreateWorkshop />} />
+            <Route path="/workshop/new" element={<CreateWorkshop />} />
             <Route path="/workshop/:workshopId/dashboard" element={<WorkshopDashboard />} />
             <Route path="/new-order" element={<NewOrder />} />
             <Route path="/piece/:pieceId" element={<PieceDetails />} />
