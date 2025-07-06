@@ -311,7 +311,8 @@ ${customer.address.area} - ${customer.address.street}
       <SystemHeader
         title={workshop.name}
         subtitle={`لوحة تحكم الورشة - ${workshop.type}`}
-        showBackButton={true}
+        showSignOutButton={true}
+        hideSettingsButton={true}
         actions={
           <div className="flex gap-2">
             <Button 

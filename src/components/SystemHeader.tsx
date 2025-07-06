@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Building2, Settings, ArrowLeft } from "lucide-react";
+import { Building2, Settings, ArrowLeft, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageToggle from "./LanguageToggle";
@@ -10,12 +10,25 @@ interface SystemHeaderProps {
   title: string;
   subtitle?: string;
   showBackButton?: boolean;
+  showSignOutButton?: boolean;
   actions?: React.ReactNode;
+  hideSettingsButton?: boolean;
 }
 
-const SystemHeader = ({ title, subtitle, showBackButton = false, actions }: SystemHeaderProps) => {
+const SystemHeader = ({ 
+  title, 
+  subtitle, 
+  showBackButton = false, 
+  showSignOutButton = false,
+  actions,
+  hideSettingsButton = false
+}: SystemHeaderProps) => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+
+  const handleSignOut = () => {
+    navigate('/landing');
+  };
 
   return (
     <header className="bg-white shadow-sm border-b-2 border-primary sticky top-0 z-50">
@@ -32,6 +45,16 @@ const SystemHeader = ({ title, subtitle, showBackButton = false, actions }: Syst
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             )}
+            {showSignOutButton && (
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={handleSignOut}
+                className="shrink-0"
+              >
+                <LogOut className="w-5 h-5" />
+              </Button>
+            )}
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-600 to-amber-500 rounded-lg flex items-center justify-center shrink-0">
               <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
@@ -46,9 +69,11 @@ const SystemHeader = ({ title, subtitle, showBackButton = false, actions }: Syst
           <div className="flex items-center gap-2 sm:gap-3">
             <LanguageToggle />
             {actions}
-            <Button variant="outline" size="icon" className="shrink-0">
-              <Settings className="w-4 h-4" />
-            </Button>
+            {!hideSettingsButton && (
+              <Button variant="outline" size="icon" className="shrink-0">
+                <Settings className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </div>
       </div>
