@@ -201,9 +201,6 @@ const WorkshopDashboard = () => {
                          order.phone.includes(searchTerm);
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     return matchesSearch && matchesStatus;
-  }).sort((a, b) => {
-    // Sort by creation date (newest first)
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   const filteredCustomers = customers.filter(customer =>
