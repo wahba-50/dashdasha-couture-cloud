@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { User, Phone, Mail, Users, MapPin, Home, UserPlus, Search } from "lucide-react";
 import CustomerSearch from './CustomerSearch';
 import CustomerMeasurements from './CustomerMeasurements';
+import { useParams } from 'react-router-dom';
 
 interface CustomerData {
   name: string;
@@ -40,6 +40,7 @@ interface CustomerFormProps {
 }
 
 const CustomerForm = ({ onNext }: CustomerFormProps) => {
+  const { workshopId } = useParams();
   const [isNewCustomer, setIsNewCustomer] = useState(true);
   const [customerData, setCustomerData] = useState<CustomerData>({
     name: '',
@@ -111,9 +112,79 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const saveCustomerToStorage = (customer: CustomerData) => {
+    // Get workshop info for customer record
+    const workshopData = JSON.parse(localStorage.getItem('workshops') || '[]');
+    const currentWorkshop = workshopData.find((w: any) => w.id === workshopId);
+    
+    const customerRecord = {
+      id: Date.now(), // Simple ID generation
+      name: customer.name,
+      phone: customer.phone,
+      email: customer.email || '',
+      gender: customer.gender || '',
+      age: customer.age,
+      address: customer.address,
+      measurements: customer.measurements,
+      workshopId: workshopId,
+      workshopName: currentWorkshop?.name || 'ورشة غير محددة',
+      createdAt: new Date().toISOString().split('T')[0],
+      orders: 0,
+      totalSpent: 0,
+      lastOrder: new Date().toISOString().split('T')[0]
+    };
+
+    // Save to workshop customers
+    const workshopCustomers = JSON.parse(localStorage.getItem(`workshopCustomers_${workshopId}`) || '[]');
+    
+    // Check if customer already exists (by phone number)
+    const existingCustomerIndex = workshopCustomers.findIndex((c: any) => c.phone === customer.phone);
+    
+    if (existingCustomerIndex === -1) {
+      // New customer - add to workshop customers
+      workshopCustomers.push(customerRecord);
+      localStorage.setItem(`workshopCustomers_${workshopId}`, JSON.stringify(workshopCustomers));
+      
+      // Also save to system-wide customers for system owner dashboard
+      const systemCustomers = JSON.parse(localStorage.getItem('systemCustomers') || '[]');
+      const existingSystemCustomerIndex = systemCustomers.findIndex((c: any) => c.phone === customer.phone);
+      
+      if (existingSystemCustomerIndex === -1) {
+        // New customer in the entire system
+        systemCustomers.push(customerRecord);
+      } else {
+        // Customer exists in system but from different workshop
+        // Update the record to include multiple workshops if needed
+        const existingCustomer = systemCustomers[existingSystemCustomerIndex];
+        if (!existingCustomer.workshops) {
+          existingCustomer.workshops = [existingCustomer.workshopName];
+        }
+        if (!existingCustomer.workshops.includes(currentWorkshop?.name)) {
+          existingCustomer.workshops.push(currentWorkshop?.name || 'ورشة غير محددة');
+        }
+        systemCustomers[existingSystemCustomerIndex] = existingCustomer;
+      }
+      
+      localStorage.setItem('systemCustomers', JSON.stringify(systemCustomers));
+      
+      console.log('تم حفظ العميل الجديد:', customerRecord.name);
+    } else {
+      // Update existing customer
+      workshopCustomers[existingCustomerIndex] = { ...workshopCustomers[existingCustomerIndex], ...customerRecord };
+      localStorage.setItem(`workshopCustomers_${workshopId}`, JSON.stringify(workshopCustomers));
+      
+      console.log('تم تحديث بيانات العميل:', customerRecord.name);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
+      // Save customer to storage if it's a new customer
+      if (isNewCustomer) {
+        saveCustomerToStorage(customerData);
+      }
+      
       onNext(customerData);
     }
   };

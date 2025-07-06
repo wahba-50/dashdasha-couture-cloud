@@ -127,6 +127,9 @@ const WorkshopDashboard = () => {
     }
   ]);
 
+  // Load customers from new storage location
+  const [customers, setCustomers] = useState([]);
+
   // Load orders from localStorage on component mount
   useEffect(() => {
     const savedOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
@@ -145,55 +148,68 @@ const WorkshopDashboard = () => {
     }
   }, [workshopId]);
 
-  const customers = [
-    {
-      id: 1,
-      name: 'أحمد محمد الكندري',
-      phone: '+96597712345678',
-      email: 'ahmed.k@example.com',
-      gender: 'ذكر',
-      orders: 5,
-      lastOrder: '2024-07-04',
-      totalSpent: 234.750,
-      measurements: { chest: 95, waist: 85, shoulder: 45, neck: 38, length: 145 },
-      address: {
-        country: 'الكويت',
-        state: 'حولي',
-        area: 'السالمية',
-        street: 'شارع المطاعم',
-        house: '123'
-      }
-    },
-    {
-      id: 2,
-      name: 'فاطمة علي العتيبي',
-      phone: '+96597712345679',
-      email: 'fatma.ali@example.com',
-      gender: 'أنثى',
-      orders: 3,
-      lastOrder: '2024-07-02',
-      totalSpent: 156.250,
-      measurements: { chest: 88, waist: 78, shoulder: 40, neck: 35, length: 140 },
-      address: {
-        country: 'الكويت',
-        state: 'العاصمة',
-        area: 'قرطبة',
-        street: 'شارع الخليج',
-        house: '456'
-      }
+  // Load customers from localStorage on component mount
+  useEffect(() => {
+    const workshopCustomers = JSON.parse(localStorage.getItem(`workshopCustomers_${workshopId}`) || '[]');
+    
+    // Convert to the format expected by the existing UI
+    const formattedCustomers = workshopCustomers.map((customer: any) => ({
+      id: customer.id,
+      name: customer.name,
+      phone: customer.phone,
+      email: customer.email || '',
+      gender: customer.gender || '',
+      orders: customer.orders || 0,
+      lastOrder: customer.lastOrder || customer.createdAt,
+      totalSpent: customer.totalSpent || 0,
+      measurements: customer.measurements || {},
+      address: customer.address || {}
+    }));
+    
+    // Add default customers if no customers exist
+    if (formattedCustomers.length === 0) {
+      setCustomers([
+        {
+          id: 1,
+          name: 'أحمد محمد الكندري',
+          phone: '+96597712345678',
+          email: 'ahmed.k@example.com',
+          gender: 'ذكر',
+          orders: 5,
+          lastOrder: '2024-07-04',
+          totalSpent: 234.750,
+          measurements: { chest: 95, waist: 85, shoulder: 45, neck: 38, length: 145 },
+          address: {
+            country: 'الكويت',
+            state: 'حولي',
+            area: 'السالمية',
+            street: 'شارع المطاعم',
+            house: '123'
+          }
+        },
+        {
+          id: 2,
+          name: 'فاطمة علي العتيبي',
+          phone: '+96597712345679',
+          email: 'fatma.ali@example.com',
+          gender: 'أنثى',
+          orders: 3,
+          lastOrder: '2024-07-02',
+          totalSpent: 156.250,
+          measurements: { chest: 88, waist: 78, shoulder: 40, neck: 35, length: 140 },
+          address: {
+            country: 'الكويت',
+            state: 'العاصمة',
+            area: 'قرطبة',
+            street: 'شارع الخليج',
+            house: '456'
+          }
+        }
+      ]);
+    } else {
+      setCustomers(formattedCustomers);
     }
-  ];
-
-  const stats = {
-    totalOrders: orders.length,
-    newOrders: orders.filter(o => o.status === 'جديد').length,
-    inProgress: orders.filter(o => o.status === 'جاري الإنتاج').length,
-    completed: orders.filter(o => o.status === 'مكتمل').length,
-    totalCustomers: customers.length,
-    totalRevenue: orders.reduce((sum, order) => sum + order.total, 0),
-    avgOrderValue: orders.length > 0 ? orders.reduce((sum, order) => sum + order.total, 0) / orders.length : 0,
-    completionRate: orders.length > 0 ? (orders.filter(o => o.status === 'مكتمل').length / orders.length) * 100 : 0
-  };
+  }, [workshopId]);
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.id.includes(searchTerm) || 
@@ -306,6 +322,17 @@ ${customer.address.area} - ${customer.address.street}
     alert(`الطلبات السابقة للعميل: ${customer.name}\n\n${ordersText}`);
   };
 
+  const stats = {
+    totalOrders: orders.length,
+    newOrders: orders.filter(o => o.status === 'جديد').length,
+    inProgress: orders.filter(o => o.status === 'جاري الإنتاج').length,
+    completed: orders.filter(o => o.status === 'مكتمل').length,
+    totalCustomers: customers.length,
+    totalRevenue: orders.reduce((sum, order) => sum + order.total, 0),
+    avgOrderValue: orders.length > 0 ? orders.reduce((sum, order) => sum + order.total, 0) / orders.length : 0,
+    completionRate: orders.length > 0 ? (orders.filter(o => o.status === 'مكتمل').length / orders.length) * 100 : 0
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-amber-50">
       <SystemHeader
@@ -354,7 +381,7 @@ ${customer.address.area} - ${customer.address.street}
           />
           <StatsCard
             title="العملاء"
-            value={stats.totalCustomers}
+            value={customers.length}
             icon={Users}
             gradient="bg-gradient-to-r from-purple-500 to-purple-600"
           />
@@ -379,7 +406,7 @@ ${customer.address.area} - ${customer.address.street}
               الطلبات ({stats.totalOrders})
             </TabsTrigger>
             <TabsTrigger value="customers" className="text-xs sm:text-sm py-2">
-              العملاء ({stats.totalCustomers})
+              العملاء ({customers.length})
             </TabsTrigger>
             <TabsTrigger value="products" className="text-xs sm:text-sm py-2">
               المنتجات
@@ -609,7 +636,7 @@ ${customer.address.area} - ${customer.address.street}
                               </div>
                               <div>
                                 <span className="text-gray-500">العنوان:</span>
-                                <p className="font-medium">{customer.address.area}، {customer.address.state}</p>
+                                <p className="font-medium">{customer.address?.area || 'غير محدد'}، {customer.address?.state || 'غير محدد'}</p>
                               </div>
                               <div>
                                 <span className="text-gray-500">آخر طلب:</span>
@@ -628,7 +655,7 @@ ${customer.address.area} - ${customer.address.street}
                               </div>
                               <div className="text-center">
                                 <p className="text-gray-500">متوسط الطلب</p>
-                                <p className="font-bold">{(customer.totalSpent / customer.orders).toFixed(3)} د.ك</p>
+                                <p className="font-bold">{customer.orders > 0 ? (customer.totalSpent / customer.orders).toFixed(3) : '0.000'} د.ك</p>
                               </div>
                             </div>
                           </div>
