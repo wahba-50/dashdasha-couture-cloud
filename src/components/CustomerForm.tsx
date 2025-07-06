@@ -134,6 +134,8 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
       lastOrder: new Date().toISOString().split('T')[0]
     };
 
+    console.log('Saving customer to storage:', customerRecord);
+
     // Save to workshop customers
     const workshopCustomers = JSON.parse(localStorage.getItem(`workshopCustomers_${workshopId}`) || '[]');
     
@@ -144,6 +146,7 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
       // New customer - add to workshop customers
       workshopCustomers.push(customerRecord);
       localStorage.setItem(`workshopCustomers_${workshopId}`, JSON.stringify(workshopCustomers));
+      console.log('Customer saved to workshop customers:', workshopCustomers);
       
       // Also save to system-wide customers for system owner dashboard
       const systemCustomers = JSON.parse(localStorage.getItem('systemCustomers') || '[]');
@@ -152,6 +155,7 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
       if (existingSystemCustomerIndex === -1) {
         // New customer in the entire system
         systemCustomers.push(customerRecord);
+        console.log('Customer saved to system customers as new customer');
       } else {
         // Customer exists in system but from different workshop
         // Update the record to include multiple workshops if needed
@@ -163,9 +167,11 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
           existingCustomer.workshops.push(currentWorkshop?.name || 'ورشة غير محددة');
         }
         systemCustomers[existingSystemCustomerIndex] = existingCustomer;
+        console.log('Customer updated in system customers with multiple workshops');
       }
       
       localStorage.setItem('systemCustomers', JSON.stringify(systemCustomers));
+      console.log('System customers updated:', systemCustomers);
       
       console.log('تم حفظ العميل الجديد:', customerRecord.name);
     } else {
@@ -180,11 +186,11 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      // Save customer to storage if it's a new customer
-      if (isNewCustomer) {
-        saveCustomerToStorage(customerData);
-      }
+      // Always save customer data when creating new order (regardless of isNewCustomer flag)
+      // This ensures that any customer data entered during order creation is saved
+      saveCustomerToStorage(customerData);
       
+      // Pass customer data to next step
       onNext(customerData);
     }
   };
