@@ -312,7 +312,7 @@ ${customer.address.area} - ${customer.address.street}
 
       <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
         {/* Enhanced Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4 mb-6 sm:mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 mb-6 sm:mb-8">
           <StatsCard
             title="إجمالي الطلبات"
             value={stats.totalOrders}
@@ -350,12 +350,6 @@ ${customer.address.area} - ${customer.address.street}
             gradient="bg-gradient-to-r from-teal-500 to-teal-600"
           />
           <StatsCard
-            title="متوسط الطلب"
-            value={`${stats.avgOrderValue.toFixed(3)} د.ك`}
-            icon={BarChart3}
-            gradient="bg-gradient-to-r from-indigo-500 to-indigo-600"
-          />
-          <StatsCard
             title="معدل الإنجاز"
             value={`${stats.completionRate.toFixed(1)}%`}
             icon={CheckCircle}
@@ -365,7 +359,7 @@ ${customer.address.area} - ${customer.address.street}
 
         {/* Main Content Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
             <TabsTrigger value="orders" className="text-xs sm:text-sm py-2">
               الطلبات ({stats.totalOrders})
             </TabsTrigger>
@@ -377,9 +371,6 @@ ${customer.address.area} - ${customer.address.street}
             </TabsTrigger>
             <TabsTrigger value="reports" className="text-xs sm:text-sm py-2">
               التقارير
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="text-xs sm:text-sm py-2">
-              الإعدادات
             </TabsTrigger>
           </TabsList>
 
@@ -720,69 +711,6 @@ ${customer.address.area} - ${customer.address.street}
                       <span>معدل الاحتفاظ:</span>
                       <span className="font-bold text-primary">78%</span>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Settings Tab */}
-          <TabsContent value="settings">
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Building2 className="w-5 h-5" />
-                    معلومات الورشة
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div>
-                      <span className="text-gray-600">اسم الورشة:</span>
-                      <p className="font-semibold">{workshop.name}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">نوع الخدمة:</span>
-                      <p className="font-semibold">{workshop.type}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">العنوان:</span>
-                      <p className="font-semibold">{workshop.address}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">الهاتف:</span>
-                      <p className="font-semibold">{workshop.phone}</p>
-                    </div>
-                  </div>
-                  <Button variant="outline" className="w-full">
-                    <Settings2 className="w-4 h-4 mr-2" />
-                    تعديل المعلومات
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings2 className="w-5 h-5" />
-                    إعدادات النظام
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start">
-                      إدارة القياسات
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      إعدادات الطباعة
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      إعدادات الإشعارات
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      نسخ احتياطي للبيانات
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
