@@ -134,7 +134,7 @@ const WorkshopDashboard = () => {
   const reloadCustomers = () => {
     console.log('Reloading customers for workshop:', workshopId);
     const workshopCustomers = JSON.parse(localStorage.getItem(`workshopCustomers_${workshopId}`) || '[]');
-    console.log('Loaded workshop customers from storage:', workshopCustomers);
+    console.log('Raw workshop customers from storage:', workshopCustomers);
     
     // Convert to the format expected by the existing UI
     const formattedCustomers = workshopCustomers.map((customer: any) => ({
@@ -150,7 +150,7 @@ const WorkshopDashboard = () => {
       address: customer.address || {}
     }));
     
-    console.log('Formatted customers:', formattedCustomers);
+    console.log('Formatted customers for display:', formattedCustomers);
     setCustomers(formattedCustomers);
   };
 
@@ -178,30 +178,69 @@ const WorkshopDashboard = () => {
     reloadCustomers();
   }, [workshopId, selectedTab]);
 
-  // Add event listener for storage changes to refresh customers when new ones are added
+  // Enhanced event listeners for customer updates
   useEffect(() => {
+    console.log('Setting up customer refresh event listeners for workshop:', workshopId);
+    
     const handleStorageChange = (e: StorageEvent) => {
+      console.log('Storage event detected:', e.key);
       if (e.key === `workshopCustomers_${workshopId}`) {
-        console.log('Storage changed for workshop customers, reloading...');
-        reloadCustomers();
+        console.log('Workshop customers storage changed, reloading...');
+        setTimeout(reloadCustomers, 50);
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also listen for custom events when customers are added from the same window
-    const handleCustomerAdded = () => {
-      console.log('Customer added event received, reloading customers...');
-      reloadCustomers();
+    const handleCustomerAdded = (e: any) => {
+      console.log('Customer added event received:', e.detail);
+      if (e.detail?.workshopId === workshopId) {
+        console.log('Customer added for this workshop, reloading customers...');
+        setTimeout(reloadCustomers, 50);
+      }
     };
 
+    const handleCustomStorageEvent = (e: any) => {
+      console.log('Custom storage event received:', e.detail);
+      if (e.detail?.key === `workshopCustomers_${workshopId}`) {
+        console.log('Custom storage event for workshop customers, reloading...');
+        setTimeout(reloadCustomers, 50);
+      }
+    };
+
+    // Add multiple event listeners to ensure we catch customer updates
+    window.addEventListener('storage', handleStorageChange);
     window.addEventListener('customerAdded', handleCustomerAdded);
+    window.addEventListener('storage', handleCustomStorageEvent);
+    
+    // Also add a periodic check to ensure customers are loaded
+    const intervalId = setInterval(() => {
+      const currentCustomerCount = customers.length;
+      const storageCustomerCount = JSON.parse(localStorage.getItem(`workshopCustomers_${workshopId}`) || '[]').length;
+      if (currentCustomerCount !== storageCustomerCount) {
+        console.log('Customer count mismatch detected, reloading...', { current: currentCustomerCount, storage: storageCustomerCount });
+        reloadCustomers();
+      }
+    }, 2000);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('customerAdded', handleCustomerAdded);
+      window.removeEventListener('storage', handleCustomStorageEvent);
+      clearInterval(intervalId);
     };
-  }, [workshopId]);
+  }, [workshopId, customers.length]);
+
+  // Force reload customers when component becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && selectedTab === 'customers') {
+        console.log('Page became visible, reloading customers...');
+        reloadCustomers();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [selectedTab]);
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.id.includes(searchTerm) || 
