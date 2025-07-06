@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -131,96 +130,118 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
       phone: customer.phone,
       email: customer.email || '',
       gender: customer.gender || '',
-      age: customer.age,
+      age: customer.age || null,
       address: customer.address,
       measurements: customer.measurements,
       workshopId: workshopId,
       workshopName: currentWorkshop?.name || 'ورشة غير محددة',
       createdAt: new Date().toISOString().split('T')[0],
-      orders: 0,
+      orders: 1, // Start with 1 since we're creating an order
       totalSpent: 0,
       lastOrder: new Date().toISOString().split('T')[0]
     };
 
     console.log('💾 Customer record to save:', customerRecord);
 
-    // Save to workshop customers
-    const storageKey = `workshopCustomers_${workshopId}`;
-    const workshopCustomers = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    // Save to workshop-specific customers
+    const workshopStorageKey = `workshopCustomers_${workshopId}`;
+    const workshopCustomers = JSON.parse(localStorage.getItem(workshopStorageKey) || '[]');
     console.log('📋 Current workshop customers before save:', workshopCustomers.length);
     
     // Check if customer already exists (by phone number)
-    const existingCustomerIndex = workshopCustomers.findIndex((c: any) => c.phone === customer.phone);
+    const existingWorkshopCustomerIndex = workshopCustomers.findIndex((c: any) => c.phone === customer.phone);
     
-    if (existingCustomerIndex === -1) {
-      // New customer - add to workshop customers
+    if (existingWorkshopCustomerIndex === -1) {
+      // New customer for this workshop
       workshopCustomers.push(customerRecord);
-      localStorage.setItem(storageKey, JSON.stringify(workshopCustomers));
+      localStorage.setItem(workshopStorageKey, JSON.stringify(workshopCustomers));
       console.log('✅ Customer added to workshop customers. New count:', workshopCustomers.length);
-      
-      // Also save to system-wide customers
-      const systemCustomers = JSON.parse(localStorage.getItem('systemCustomers') || '[]');
-      const existingSystemCustomerIndex = systemCustomers.findIndex((c: any) => c.phone === customer.phone);
-      
-      if (existingSystemCustomerIndex === -1) {
-        systemCustomers.push(customerRecord);
-        console.log('✅ Customer added to system customers as new customer');
-      } else {
-        // Update existing system customer with workshop info
-        const existingCustomer = systemCustomers[existingSystemCustomerIndex];
-        if (!existingCustomer.workshops) {
-          existingCustomer.workshops = [existingCustomer.workshopName];
-        }
-        if (!existingCustomer.workshops.includes(currentWorkshop?.name)) {
-          existingCustomer.workshops.push(currentWorkshop?.name || 'ورشة غير محددة');
-        }
-        systemCustomers[existingSystemCustomerIndex] = existingCustomer;
-        console.log('✅ Customer updated in system customers with multiple workshops');
-      }
-      
-      localStorage.setItem('systemCustomers', JSON.stringify(systemCustomers));
-      
-      // Force immediate refresh with multiple events
-      const refreshEvents = () => {
-        // Dispatch multiple types of events to ensure refresh
-        window.dispatchEvent(new StorageEvent('storage', {
-          key: storageKey,
-          newValue: JSON.stringify(workshopCustomers),
-          oldValue: null
-        }));
-        
-        window.dispatchEvent(new CustomEvent('customerAdded', { 
-          detail: { customer: customerRecord, workshopId, action: 'new' } 
-        }));
-        
-        window.dispatchEvent(new CustomEvent('workshopCustomersUpdated', { 
-          detail: { workshopId, customers: workshopCustomers } 
-        }));
-        
-        console.log('🔔 All refresh events dispatched');
-      };
-      
-      // Immediate refresh
-      refreshEvents();
-      
-      // Delayed refresh to ensure all components receive the events
-      setTimeout(refreshEvents, 100);
-      setTimeout(refreshEvents, 500);
-      
-      console.log('✅ Customer saved successfully:', customerRecord.name);
     } else {
       // Update existing customer
-      workshopCustomers[existingCustomerIndex] = { ...workshopCustomers[existingCustomerIndex], ...customerRecord };
-      localStorage.setItem(storageKey, JSON.stringify(workshopCustomers));
-      console.log('✅ Customer updated:', customerRecord.name);
-      
-      // Dispatch update events
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('customerAdded', { 
-          detail: { customer: customerRecord, workshopId, action: 'update' } 
-        }));
-      }, 100);
+      workshopCustomers[existingWorkshopCustomerIndex] = { 
+        ...workshopCustomers[existingWorkshopCustomerIndex], 
+        ...customerRecord,
+        orders: (workshopCustomers[existingWorkshopCustomerIndex].orders || 0) + 1
+      };
+      localStorage.setItem(workshopStorageKey, JSON.stringify(workshopCustomers));
+      console.log('✅ Customer updated in workshop customers');
     }
+    
+    // Also save to system-wide customers
+    const systemCustomers = JSON.parse(localStorage.getItem('systemCustomers') || '[]');
+    const existingSystemCustomerIndex = systemCustomers.findIndex((c: any) => c.phone === customer.phone);
+    
+    if (existingSystemCustomerIndex === -1) {
+      // New customer in system
+      systemCustomers.push(customerRecord);
+      console.log('✅ Customer added to system customers as new customer');
+    } else {
+      // Update existing system customer
+      const existingCustomer = systemCustomers[existingSystemCustomerIndex];
+      
+      // Initialize workshops array if it doesn't exist
+      if (!existingCustomer.workshops) {
+        existingCustomer.workshops = [existingCustomer.workshopName];
+      }
+      
+      // Add current workshop if not already included
+      if (!existingCustomer.workshops.includes(currentWorkshop?.name)) {
+        existingCustomer.workshops.push(currentWorkshop?.name || 'ورشة غير محددة');
+      }
+      
+      // Update customer data
+      systemCustomers[existingSystemCustomerIndex] = {
+        ...existingCustomer,
+        ...customerRecord,
+        workshops: existingCustomer.workshops,
+        orders: (existingCustomer.orders || 0) + 1
+      };
+      console.log('✅ Customer updated in system customers with workshop info');
+    }
+    
+    localStorage.setItem('systemCustomers', JSON.stringify(systemCustomers));
+    
+    // Dispatch multiple events to ensure all components refresh
+    const dispatchRefreshEvents = () => {
+      // Workshop-specific events
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: workshopStorageKey,
+        newValue: JSON.stringify(workshopCustomers),
+        oldValue: null
+      }));
+      
+      // System-wide events
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'systemCustomers',
+        newValue: JSON.stringify(systemCustomers),
+        oldValue: null
+      }));
+      
+      // Custom events
+      window.dispatchEvent(new CustomEvent('customerAdded', { 
+        detail: { customer: customerRecord, workshopId, action: existingWorkshopCustomerIndex === -1 ? 'new' : 'update' } 
+      }));
+      
+      window.dispatchEvent(new CustomEvent('workshopCustomersUpdated', { 
+        detail: { workshopId, customers: workshopCustomers } 
+      }));
+      
+      window.dispatchEvent(new CustomEvent('systemCustomersUpdated', { 
+        detail: { customers: systemCustomers } 
+      }));
+      
+      console.log('🔔 All refresh events dispatched for customer:', customer.name);
+    };
+    
+    // Immediate dispatch
+    dispatchRefreshEvents();
+    
+    // Delayed dispatches to ensure all components receive the events
+    setTimeout(dispatchRefreshEvents, 100);
+    setTimeout(dispatchRefreshEvents, 300);
+    setTimeout(dispatchRefreshEvents, 500);
+    
+    console.log('✅ Customer saved successfully:', customerRecord.name);
   };
 
   const handleSubmit = (e: React.FormEvent) => {

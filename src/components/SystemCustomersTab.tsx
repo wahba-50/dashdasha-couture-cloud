@@ -14,6 +14,7 @@ const SystemCustomersTab = () => {
     console.log('🔄 Loading system-wide customers...');
     const systemCustomers = JSON.parse(localStorage.getItem('systemCustomers') || '[]');
     console.log('📋 System customers loaded:', systemCustomers.length);
+    console.log('🔍 System customers data:', systemCustomers);
     setCustomers(systemCustomers);
   };
 
@@ -24,21 +25,31 @@ const SystemCustomersTab = () => {
     const handleCustomerAdded = () => {
       console.log('🔔 Customer added event received in SystemCustomersTab, reloading...');
       setTimeout(loadSystemCustomers, 100);
+      setTimeout(loadSystemCustomers, 300);
     };
     
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'systemCustomers') {
+      if (e.key === 'systemCustomers' || e.key?.startsWith('workshopCustomers_')) {
         console.log('🔔 System customers storage changed, reloading...');
         setTimeout(loadSystemCustomers, 50);
+        setTimeout(loadSystemCustomers, 200);
       }
+    };
+
+    const handleSystemCustomersUpdated = () => {
+      console.log('🔔 System customers updated event received, reloading...');
+      setTimeout(loadSystemCustomers, 50);
+      setTimeout(loadSystemCustomers, 200);
     };
 
     window.addEventListener('customerAdded', handleCustomerAdded);
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('systemCustomersUpdated', handleSystemCustomersUpdated);
     
     return () => {
       window.removeEventListener('customerAdded', handleCustomerAdded);
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('systemCustomersUpdated', handleSystemCustomersUpdated);
     };
   }, []);
 

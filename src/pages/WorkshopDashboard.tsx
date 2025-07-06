@@ -142,6 +142,7 @@ const WorkshopDashboard = () => {
     const storageKey = `workshopCustomers_${workshopId}`;
     const workshopCustomers = JSON.parse(localStorage.getItem(storageKey) || '[]');
     console.log('📋 Raw workshop customers from storage:', workshopCustomers.length, 'customers');
+    console.log('🔍 Workshop customers data:', workshopCustomers);
     
     // Convert to the format expected by the existing UI
     const formattedCustomers = workshopCustomers.map((customer: any) => ({
@@ -150,6 +151,7 @@ const WorkshopDashboard = () => {
       phone: customer.phone,
       email: customer.email || '',
       gender: customer.gender || '',
+      age: customer.age || null,
       orders: customer.orders || 0,
       lastOrder: customer.lastOrder || customer.createdAt,
       totalSpent: customer.totalSpent || 0,
@@ -158,6 +160,7 @@ const WorkshopDashboard = () => {
     }));
     
     console.log('✅ Formatted customers for display:', formattedCustomers.length);
+    console.log('🔍 Formatted customers data:', formattedCustomers);
     setCustomers(formattedCustomers);
   };
 
@@ -193,23 +196,24 @@ const WorkshopDashboard = () => {
     
     const handleStorageChange = (e: StorageEvent) => {
       const storageKey = `workshopCustomers_${workshopId}`;
-      if (e.key === storageKey) {
-        console.log('🔔 Storage event detected for workshop customers, reloading...');
+      if (e.key === storageKey || e.key === 'systemCustomers') {
+        console.log('🔔 Storage event detected for customers, reloading...');
         setTimeout(reloadCustomers, 50);
+        setTimeout(reloadCustomers, 200);
       }
     };
 
     const handleCustomerAdded = (e: any) => {
-      if (e.detail?.workshopId === workshopId) {
-        console.log('🔔 Customer added/updated event received for this workshop, reloading...');
-        setTimeout(reloadCustomers, 50);
-      }
+      console.log('🔔 Customer added/updated event received, reloading...');
+      setTimeout(reloadCustomers, 50);
+      setTimeout(reloadCustomers, 200);
     };
 
     const handleWorkshopCustomersUpdated = (e: any) => {
       if (e.detail?.workshopId === workshopId) {
         console.log('🔔 Workshop customers updated event received, reloading...');
         setTimeout(reloadCustomers, 50);
+        setTimeout(reloadCustomers, 200);
       }
     };
 
@@ -217,25 +221,22 @@ const WorkshopDashboard = () => {
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('customerAdded', handleCustomerAdded);
     window.addEventListener('workshopCustomersUpdated', handleWorkshopCustomersUpdated);
-    
-    // Force refresh when customers tab is selected
-    if (selectedTab === 'customers') {
-      console.log('🔄 Customers tab selected, forcing refresh...');
-      setTimeout(reloadCustomers, 100);
-    }
+    window.addEventListener('systemCustomersUpdated', handleCustomerAdded);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('customerAdded', handleCustomerAdded);
       window.removeEventListener('workshopCustomersUpdated', handleWorkshopCustomersUpdated);
+      window.removeEventListener('systemCustomersUpdated', handleCustomerAdded);
     };
-  }, [workshopId, selectedTab]);
+  }, [workshopId]);
 
   // Force reload when tab changes to customers
   useEffect(() => {
     if (selectedTab === 'customers') {
-      console.log('🔄 Switched to customers tab, reloading...');
+      console.log('🔄 Switched to customers tab, forcing reload...');
       setTimeout(reloadCustomers, 100);
+      setTimeout(reloadCustomers, 300);
     }
   }, [selectedTab]);
 
