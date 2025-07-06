@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { User, Phone, MapPin, Calendar, Package, Scissors } from "lucide-react";
+import { User, Phone, MapPin, Calendar, Package, Scissors, CreditCard, Banknote } from "lucide-react";
 
 interface OrderDetailsModalProps {
   order: any;
@@ -96,6 +96,32 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
               </div>
             </CardContent>
           </Card>
+
+          {/* Payment Information */}
+          {order.payment && (
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  {order.payment.type === 'cash' ? <Banknote className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
+                  تفاصيل الدفع
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="font-medium text-blue-700 mb-1">نوع الدفع</div>
+                    <p className="font-semibold">{order.payment.type === 'cash' ? 'نقدي' : 'إلكتروني'}</p>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="font-medium text-green-700 mb-1">المبلغ المستلم</div>
+                    <p className="font-semibold">{order.payment.receivedAmount?.toFixed(3) || '0.000'} د.ك</p>
+                  </div>
+                  <div className="text-center p-4 bg-red-50 rounded-lg">
+                    <div className="font-medium text-red-700 mb-1">المبلغ المتبقي</div>
+                    <p className="font-semibold">{order.payment.remainingAmount?.toFixed(3) || '0.000'} د.ك</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Item Details */}
           <Card>

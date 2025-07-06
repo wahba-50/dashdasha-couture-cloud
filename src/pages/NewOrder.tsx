@@ -1,10 +1,12 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ArrowRight, ArrowLeft, Receipt, Download, Printer, CheckCircle } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ArrowRight, ArrowLeft, Receipt, Share, Printer, CheckCircle } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import SystemHeader from "@/components/SystemHeader";
@@ -22,7 +24,12 @@ const NewOrder = () => {
     items: [],
     discount: { type: 'amount', value: 0 },
     deliveryDate: '',
-    notes: ''
+    notes: '',
+    payment: {
+      type: 'cash',
+      receivedAmount: 0,
+      remainingAmount: 0
+    }
   });
 
   const handleCustomerNext = (customerData: any) => {
@@ -57,28 +64,70 @@ const NewOrder = () => {
     return calculateSubtotal() - calculateDiscount();
   };
 
+  const calculateRemainingAmount = () => {
+    const total = calculateTotal();
+    return Math.max(0, total - orderData.payment.receivedAmount);
+  };
+
   const generateOrderNumber = () => {
     return `ORD-${Date.now().toString().slice(-6)}`;
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handlePaymentAmountChange = (amount: number) => {
+    const total = calculateTotal();
+    const remaining = Math.max(0, total - amount);
+    setOrderData({
+      ...orderData,
+      payment: {
+        ...orderData.payment,
+        receivedAmount: amount,
+        remainingAmount: remaining
+      }
+    });
   };
 
-  const handleDownloadPDF = () => {
-    // Create a printable version and trigger print dialog
-    // This will allow users to save as PDF through browser's print dialog
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      const invoiceHTML = generateInvoiceHTML();
-      printWindow.document.write(invoiceHTML);
-      printWindow.document.close();
-      printWindow.focus();
-      setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-      }, 500);
+  const handleShare = async () => {
+    const orderNumber = generateOrderNumber();
+    const shareData = {
+      title: `فاتورة طلب رقم ${orderNumber}`,
+      text: `تفاصيل الطلب:\nالعميل: ${orderData.customer?.name}\nالمجموع: ${calculateTotal().toFixed(3)} د.ك`,
+      url: window.location.origin
+    };
+
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        console.log('Error sharing:', error);
+        fallbackShare();
+      }
+    } else {
+      fallbackShare();
     }
+  };
+
+  const fallbackShare = () => {
+    const orderNumber = generateOrderNumber();
+    const shareText = `فاتورة طلب رقم ${orderNumber}\nالعميل: ${orderData.customer?.name}\nالمجموع: ${calculateTotal().toFixed(3)} د.ك\nنوع الدفع: ${orderData.payment.type === 'cash' ? 'نقدي' : 'إلكتروني'}\nالمبلغ المستلم: ${orderData.payment.receivedAmount.toFixed(3)} د.ك\nالمبلغ المتبقي: ${calculateRemainingAmount().toFixed(3)} د.ك`;
+    
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(shareText).then(() => {
+        alert('تم نسخ تفاصيل الفاتورة إلى الحافظة');
+      });
+    } else {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = shareText;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert('تم نسخ تفاصيل الفاتورة إلى الحافظة');
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   const generateInvoiceHTML = () => {
@@ -93,13 +142,14 @@ const NewOrder = () => {
           body { font-family: Arial, sans-serif; margin: 20px; direction: rtl; }
           .invoice-header { text-align: center; margin-bottom: 30px; }
           .invoice-header h1 { color: #2563eb; margin-bottom: 5px; }
-          .customer-info, .items-section, .totals-section { margin: 20px 0; }
-          .customer-info { background: #f8f9fa; padding: 15px; border-radius: 8px; }
+          .customer-info, .items-section, .totals-section, .payment-section { margin: 20px 0; }
+          .customer-info, .payment-section { background: #f8f9fa; padding: 15px; border-radius: 8px; }
           table { width: 100%; border-collapse: collapse; margin: 15px 0; }
           th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
           th { background-color: #f8f9fa; }
           .totals { text-align: left; }
           .total-final { font-size: 18px; font-weight: bold; color: #2563eb; }
+          .payment-info { background: #e8f5e8; border: 1px solid #4caf50; }
           @media print { body { margin: 0; } }
         </style>
       </head>
@@ -160,13 +210,20 @@ const NewOrder = () => {
               <td><strong>${calculateTotal().toFixed(3)} د.ك</strong></td>
             </tr>
           </table>
-          
-          ${orderData.deliveryDate ? `
-          <div style="text-align: center; margin-top: 20px; padding: 10px; background: #fff3cd; border-radius: 5px;">
-            <strong>موعد التسليم المتوقع: ${new Date(orderData.deliveryDate).toLocaleDateString('ar-KW')}</strong>
-          </div>
-          ` : ''}
         </div>
+
+        <div class="payment-section payment-info">
+          <h3>تفاصيل الدفع</h3>
+          <p><strong>نوع الدفع:</strong> ${orderData.payment.type === 'cash' ? 'نقدي' : 'إلكتروني'}</p>
+          <p><strong>المبلغ المستلم:</strong> ${orderData.payment.receivedAmount.toFixed(3)} د.ك</p>
+          <p><strong>المبلغ المتبقي:</strong> ${calculateRemainingAmount().toFixed(3)} د.ك</p>
+        </div>
+        
+        ${orderData.deliveryDate ? `
+        <div style="text-align: center; margin-top: 20px; padding: 10px; background: #fff3cd; border-radius: 5px;">
+          <strong>موعد التسليم المتوقع: ${new Date(orderData.deliveryDate).toLocaleDateString('ar-KW')}</strong>
+        </div>
+        ` : ''}
         
         <div style="text-align: center; margin-top: 40px; font-size: 14px; color: #666;">
           شكراً لثقتكم بنا - نظام إدارة ورش الدشاديش
@@ -198,6 +255,7 @@ const NewOrder = () => {
       workshopId: workshopId,
       discount: orderData.discount,
       notes: orderData.notes,
+      payment: orderData.payment,
       fullOrderData: orderData
     };
     
@@ -404,6 +462,64 @@ const NewOrder = () => {
                     </div>
                   </div>
 
+                  {/* Payment Section */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-3">تفاصيل الدفع</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>نوع الدفع</Label>
+                        <RadioGroup
+                          value={orderData.payment.type}
+                          onValueChange={(value) => setOrderData({
+                            ...orderData,
+                            payment: { ...orderData.payment, type: value }
+                          })}
+                          className="flex gap-6 mt-2"
+                        >
+                          <div className="flex items-center space-x-2 space-x-reverse">
+                            <RadioGroupItem value="cash" id="cash" />
+                            <Label htmlFor="cash">نقدي</Label>
+                          </div>
+                          <div className="flex items-center space-x-2 space-x-reverse">
+                            <RadioGroupItem value="online" id="online" />
+                            <Label htmlFor="online">إلكتروني</Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <Label htmlFor="receivedAmount">المبلغ المستلم</Label>
+                          <Input
+                            id="receivedAmount"
+                            type="number"
+                            min="0"
+                            step="0.001"
+                            max={calculateTotal()}
+                            value={orderData.payment.receivedAmount}
+                            onChange={(e) => handlePaymentAmountChange(parseFloat(e.target.value) || 0)}
+                            placeholder="0.000"
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label>المبلغ الإجمالي</Label>
+                          <div className="mt-1 p-2 bg-gray-100 rounded-md text-center font-semibold">
+                            {calculateTotal().toFixed(3)} د.ك
+                          </div>
+                        </div>
+                        <div>
+                          <Label>المبلغ المتبقي</Label>
+                          <div className={`mt-1 p-2 rounded-md text-center font-semibold ${
+                            calculateRemainingAmount() > 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                          }`}>
+                            {calculateRemainingAmount().toFixed(3)} د.ك
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Final Invoice */}
                   <div className="bg-white border-2 border-primary rounded-lg p-6">
                     <div className="text-center mb-6">
@@ -435,6 +551,29 @@ const NewOrder = () => {
                         <span>المجموع النهائي:</span>
                         <span>{calculateTotal().toFixed(3)} د.ك</span>
                       </div>
+
+                      {/* Payment Details in Invoice */}
+                      <div className="bg-green-50 p-4 rounded-lg mt-4 border border-green-200">
+                        <h4 className="font-semibold text-green-800 mb-2">تفاصيل الدفع</h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>نوع الدفع:</span>
+                            <span className="font-medium">{orderData.payment.type === 'cash' ? 'نقدي' : 'إلكتروني'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>المبلغ المستلم:</span>
+                            <span className="font-medium">{orderData.payment.receivedAmount.toFixed(3)} د.ك</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>المبلغ المتبقي:</span>
+                            <span className={`font-medium ${
+                              calculateRemainingAmount() > 0 ? 'text-red-600' : 'text-green-600'
+                            }`}>
+                              {calculateRemainingAmount().toFixed(3)} د.ك
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                       
                       {orderData.deliveryDate && (
                         <div className="text-center mt-4 p-3 bg-amber-50 rounded-lg">
@@ -456,9 +595,9 @@ const NewOrder = () => {
                       <Printer className="w-4 h-4 mr-2" />
                       طباعة الفاتورة
                     </Button>
-                    <Button variant="outline" size="lg" className="sm:w-auto" onClick={handleDownloadPDF}>
-                      <Download className="w-4 h-4 mr-2" />
-                      تحميل PDF
+                    <Button variant="outline" size="lg" className="sm:w-auto" onClick={handleShare}>
+                      <Share className="w-4 h-4 mr-2" />
+                      مشاركة الفاتورة
                     </Button>
                   </div>
                 </CardContent>
