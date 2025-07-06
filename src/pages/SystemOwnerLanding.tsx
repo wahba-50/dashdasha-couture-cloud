@@ -31,7 +31,7 @@ const SystemOwnerLanding = () => {
     
     // Simulate login process
     setTimeout(() => {
-      navigate('/system-owner');
+      navigate('/system');
       setIsLoading(false);
     }, 1000);
   };
