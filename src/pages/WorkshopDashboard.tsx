@@ -127,43 +127,6 @@ const WorkshopDashboard = () => {
     }
   ]);
 
-  // Load customers from new storage location
-  const [customers, setCustomers] = useState([]);
-
-  // Function to reload customers from localStorage
-  const reloadCustomers = () => {
-    console.log('🔄 Reloading customers for workshop:', workshopId);
-    
-    if (!workshopId) {
-      console.error('❌ No workshopId available for loading customers');
-      return;
-    }
-    
-    const storageKey = `workshopCustomers_${workshopId}`;
-    const workshopCustomers = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    console.log('📋 Raw workshop customers from storage:', workshopCustomers.length, 'customers');
-    console.log('🔍 Workshop customers data:', workshopCustomers);
-    
-    // Convert to the format expected by the existing UI
-    const formattedCustomers = workshopCustomers.map((customer: any) => ({
-      id: customer.id,
-      name: customer.name,
-      phone: customer.phone,
-      email: customer.email || '',
-      gender: customer.gender || '',
-      age: customer.age || null,
-      orders: customer.orders || 0,
-      lastOrder: customer.lastOrder || customer.createdAt,
-      totalSpent: customer.totalSpent || 0,
-      measurements: customer.measurements || {},
-      address: customer.address || {}
-    }));
-    
-    console.log('✅ Formatted customers for display:', formattedCustomers.length);
-    console.log('🔍 Formatted customers data:', formattedCustomers);
-    setCustomers(formattedCustomers);
-  };
-
   // Load orders from localStorage on component mount
   useEffect(() => {
     const savedOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
@@ -182,63 +145,55 @@ const WorkshopDashboard = () => {
     }
   }, [workshopId]);
 
-  // Enhanced customer loading and refresh system
-  useEffect(() => {
-    console.log('🔄 Setting up customer loading for workshop:', workshopId);
-    reloadCustomers();
-  }, [workshopId]);
-
-  // Enhanced event listeners for customer updates
-  useEffect(() => {
-    if (!workshopId) return;
-    
-    console.log('🔄 Setting up customer refresh event listeners for workshop:', workshopId);
-    
-    const handleStorageChange = (e: StorageEvent) => {
-      const storageKey = `workshopCustomers_${workshopId}`;
-      if (e.key === storageKey || e.key === 'systemCustomers') {
-        console.log('🔔 Storage event detected for customers, reloading...');
-        setTimeout(reloadCustomers, 50);
-        setTimeout(reloadCustomers, 200);
+  const customers = [
+    {
+      id: 1,
+      name: 'أحمد محمد الكندري',
+      phone: '+96597712345678',
+      email: 'ahmed.k@example.com',
+      gender: 'ذكر',
+      orders: 5,
+      lastOrder: '2024-07-04',
+      totalSpent: 234.750,
+      measurements: { chest: 95, waist: 85, shoulder: 45, neck: 38, length: 145 },
+      address: {
+        country: 'الكويت',
+        state: 'حولي',
+        area: 'السالمية',
+        street: 'شارع المطاعم',
+        house: '123'
       }
-    };
-
-    const handleCustomerAdded = (e: any) => {
-      console.log('🔔 Customer added/updated event received, reloading...');
-      setTimeout(reloadCustomers, 50);
-      setTimeout(reloadCustomers, 200);
-    };
-
-    const handleWorkshopCustomersUpdated = (e: any) => {
-      if (e.detail?.workshopId === workshopId) {
-        console.log('🔔 Workshop customers updated event received, reloading...');
-        setTimeout(reloadCustomers, 50);
-        setTimeout(reloadCustomers, 200);
+    },
+    {
+      id: 2,
+      name: 'فاطمة علي العتيبي',
+      phone: '+96597712345679',
+      email: 'fatma.ali@example.com',
+      gender: 'أنثى',
+      orders: 3,
+      lastOrder: '2024-07-02',
+      totalSpent: 156.250,
+      measurements: { chest: 88, waist: 78, shoulder: 40, neck: 35, length: 140 },
+      address: {
+        country: 'الكويت',
+        state: 'العاصمة',
+        area: 'قرطبة',
+        street: 'شارع الخليج',
+        house: '456'
       }
-    };
-
-    // Add multiple event listeners
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('customerAdded', handleCustomerAdded);
-    window.addEventListener('workshopCustomersUpdated', handleWorkshopCustomersUpdated);
-    window.addEventListener('systemCustomersUpdated', handleCustomerAdded);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('customerAdded', handleCustomerAdded);
-      window.removeEventListener('workshopCustomersUpdated', handleWorkshopCustomersUpdated);
-      window.removeEventListener('systemCustomersUpdated', handleCustomerAdded);
-    };
-  }, [workshopId]);
-
-  // Force reload when tab changes to customers
-  useEffect(() => {
-    if (selectedTab === 'customers') {
-      console.log('🔄 Switched to customers tab, forcing reload...');
-      setTimeout(reloadCustomers, 100);
-      setTimeout(reloadCustomers, 300);
     }
-  }, [selectedTab]);
+  ];
+
+  const stats = {
+    totalOrders: orders.length,
+    newOrders: orders.filter(o => o.status === 'جديد').length,
+    inProgress: orders.filter(o => o.status === 'جاري الإنتاج').length,
+    completed: orders.filter(o => o.status === 'مكتمل').length,
+    totalCustomers: customers.length,
+    totalRevenue: orders.reduce((sum, order) => sum + order.total, 0),
+    avgOrderValue: orders.length > 0 ? orders.reduce((sum, order) => sum + order.total, 0) / orders.length : 0,
+    completionRate: orders.length > 0 ? (orders.filter(o => o.status === 'مكتمل').length / orders.length) * 100 : 0
+  };
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.id.includes(searchTerm) || 
@@ -321,16 +276,16 @@ const WorkshopDashboard = () => {
     const measurementsText = `
 قياسات العميل: ${customer.name}
 
-الصدر: ${customer.measurements.chest || 'غير محدد'} سم
-الخصر: ${customer.measurements.waist || 'غير محدد'} سم
-الكتف: ${customer.measurements.shoulder || 'غير محدد'} سم
-الرقبة: ${customer.measurements.neckCircumference || 'غير محدد'} سم
-الطول: ${customer.measurements.length || 'غير محدد'} سم
+الصدر: ${customer.measurements.chest} سم
+الخصر: ${customer.measurements.waist} سم
+الكتف: ${customer.measurements.shoulder} سم
+الرقبة: ${customer.measurements.neck} سم
+الطول: ${customer.measurements.length} سم
 
 العنوان الكامل:
-${customer.address?.country || 'غير محدد'} - ${customer.address?.governorate || 'غير محدد'}
-${customer.address?.block || 'غير محدد'} - ${customer.address?.street || 'غير محدد'}
-منزل رقم: ${customer.address?.houseNumber || 'غير محدد'}
+${customer.address.country} - ${customer.address.state}
+${customer.address.area} - ${customer.address.street}
+منزل رقم: ${customer.address.house}
     `;
     
     alert(measurementsText);
@@ -349,17 +304,6 @@ ${customer.address?.block || 'غير محدد'} - ${customer.address?.street || 
       : 'لا توجد طلبات سابقة لهذا العميل';
     
     alert(`الطلبات السابقة للعميل: ${customer.name}\n\n${ordersText}`);
-  };
-
-  const stats = {
-    totalOrders: orders.length,
-    newOrders: orders.filter(o => o.status === 'جديد').length,
-    inProgress: orders.filter(o => o.status === 'جاري الإنتاج').length,
-    completed: orders.filter(o => o.status === 'مكتمل').length,
-    totalCustomers: customers.length,
-    totalRevenue: orders.reduce((sum, order) => sum + order.total, 0),
-    avgOrderValue: orders.length > 0 ? orders.reduce((sum, order) => sum + order.total, 0) / orders.length : 0,
-    completionRate: orders.length > 0 ? (orders.filter(o => o.status === 'مكتمل').length / orders.length) * 100 : 0
   };
 
   return (
@@ -410,7 +354,7 @@ ${customer.address?.block || 'غير محدد'} - ${customer.address?.street || 
           />
           <StatsCard
             title="العملاء"
-            value={customers.length}
+            value={stats.totalCustomers}
             icon={Users}
             gradient="bg-gradient-to-r from-purple-500 to-purple-600"
           />
@@ -435,7 +379,7 @@ ${customer.address?.block || 'غير محدد'} - ${customer.address?.street || 
               الطلبات ({stats.totalOrders})
             </TabsTrigger>
             <TabsTrigger value="customers" className="text-xs sm:text-sm py-2">
-              العملاء ({customers.length})
+              العملاء ({stats.totalCustomers})
             </TabsTrigger>
             <TabsTrigger value="products" className="text-xs sm:text-sm py-2">
               المنتجات
@@ -650,7 +594,7 @@ ${customer.address?.block || 'غير محدد'} - ${customer.address?.street || 
                             <div className="flex items-center gap-2">
                               <h3 className="font-bold text-lg">{customer.name}</h3>
                               <Badge variant="outline" className="text-xs">
-                                {customer.gender || 'غير محدد'}
+                                {customer.gender}
                               </Badge>
                             </div>
                             
@@ -661,11 +605,11 @@ ${customer.address?.block || 'غير محدد'} - ${customer.address?.street || 
                               </div>
                               <div>
                                 <span className="text-gray-500">البريد:</span>
-                                <p className="font-medium">{customer.email || 'غير محدد'}</p>
+                                <p className="font-medium">{customer.email}</p>
                               </div>
                               <div>
-                                <span className="text-gray-500">المحافظة:</span>
-                                <p className="font-medium">{customer.address?.governorate || 'غير محدد'}</p>
+                                <span className="text-gray-500">العنوان:</span>
+                                <p className="font-medium">{customer.address.area}، {customer.address.state}</p>
                               </div>
                               <div>
                                 <span className="text-gray-500">آخر طلب:</span>
@@ -684,7 +628,7 @@ ${customer.address?.block || 'غير محدد'} - ${customer.address?.street || 
                               </div>
                               <div className="text-center">
                                 <p className="text-gray-500">متوسط الطلب</p>
-                                <p className="font-bold">{customer.orders > 0 ? (customer.totalSpent / customer.orders).toFixed(3) : '0.000'} د.ك</p>
+                                <p className="font-bold">{(customer.totalSpent / customer.orders).toFixed(3)} د.ك</p>
                               </div>
                             </div>
                           </div>
@@ -716,7 +660,6 @@ ${customer.address?.block || 'غير محدد'} - ${customer.address?.street || 
                     <div className="text-center py-12 text-gray-500">
                       <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
                       <p>لا توجد عملاء</p>
-                      <p className="text-sm mt-2">سيظهر العملاء هنا بعد إنشاء طلبات جديدة</p>
                     </div>
                   )}
                 </div>
