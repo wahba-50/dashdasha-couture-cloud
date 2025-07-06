@@ -202,16 +202,7 @@ const WorkshopDashboard = () => {
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   }).sort((a, b) => {
-    // Sort by status priority: جديد first, then جاري الإنتاج, then مكتمل
-    const statusOrder = { 'جديد': 0, 'جاري الإنتاج': 1, 'مكتمل': 2 };
-    const aStatusPriority = statusOrder[a.status] ?? 3;
-    const bStatusPriority = statusOrder[b.status] ?? 3;
-    
-    if (aStatusPriority !== bStatusPriority) {
-      return aStatusPriority - bStatusPriority;
-    }
-    
-    // If same status, sort by creation date (newest first)
+    // Sort by creation date (newest first)
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
