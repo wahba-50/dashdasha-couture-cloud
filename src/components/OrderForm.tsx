@@ -1,347 +1,671 @@
-import React, { useState, useCallback } from 'react';
+
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowRight, ArrowLeft, Plus, Minus, Package, QrCode } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Plus, Package, Scissors, Shirt, Copy, QrCode, Trash2, Eye, Calculator } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+interface OrderItem {
+  id: string;
+  qrCode: string;
+  fabricType: 'workshop' | 'customer';
+  fabric?: {
+    id: string;
+    name: string;
+    price: number;
+    meters?: number;
+    specifications?: string;
+  };
+  cut: {
+    id: string;
+    name: string;
+    price: number;
+    image?: string;
+  };
+  accessories: Array<{
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+  }>;
+  labors: Array<{
+    id: string;
+    name: string;
+    price: number;
+  }>;
+  totalPrice: number;
+}
 
 interface OrderFormProps {
   customerData: any;
-  onNext: (items: any[]) => void;
+  onNext: (items: OrderItem[]) => void;
   onPrevious: () => void;
 }
 
 const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
-  const { t } = useLanguage();
-  const [items, setItems] = useState<any[]>([]);
-  const [currentItem, setCurrentItem] = useState<any>({
-    id: Date.now(),
-    fabricType: 'workshop',
-    fabric: null,
-    cut: null,
-    accessories: [],
-    labors: [],
-    totalPrice: 0,
-    qrCode: '',
-    customerFabricSpecs: ''
+  const { t, language } = useLanguage();
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [isAddingItem, setIsAddingItem] = useState(false);
+  const [currentItem, setCurrentItem] = useState<Partial<OrderItem>>({
+    fabricType: 'workshop'
   });
 
-  const handleCustomerFabricSpecsChange = useCallback((value: string) => {
-    setCurrentItem(prev => ({ ...prev, customerFabricSpecs: value }));
-  }, []);
+  // Mock data - in real app this would come from ProductManagement
+  const workshopFabrics = [
+    { id: '1', name: 'قماش قطني فاخر', price: 12.500, image: '/api/placeholder/100/100', inStock: 50 },
+    { id: '2', name: 'قماش حريري', price: 25.750, image: '/api/placeholder/100/100', inStock: 30 },
+    { id: '3', name: 'قماش كتان', price: 18.250, image: '/api/placeholder/100/100', inStock: 40 }
+  ];
 
-  const mockFabrics = [
-    {
-      id: 'fabric-1',
-      name: 'قماش قطني فاخر',
-      price: 12.500,
-      unit: 'متر',
-      stock: 50,
-      category: 'قطني',
-      color: 'أبيض',
-      material: 'قطن 100%'
-    },
-    {
-      id: 'fabric-2',
-      name: 'قماش حرير طبيعي',
-      price: 45.000,
-      unit: 'متر',
-      stock: 30,
-      category: 'حرير',
-      color: 'أسود',
-      material: 'حرير 100%'
-    },
-    {
-      id: 'fabric-3',
-      name: 'قماش كتان صيفي',
-      price: 18.750,
-      unit: 'متر',
-      stock: 40,
-      category: 'كتان',
-      color: 'بيج',
-      material: 'كتان 100%'
+  const cuts = [
+    { id: '1', name: 'قصة كلاسيكية', price: 15.750, image: '/api/placeholder/150/150' },
+    { id: '2', name: 'قصة عصرية', price: 18.500, image: '/api/placeholder/150/150' },
+    { id: '3', name: 'قصة فاخرة', price: 22.000, image: '/api/placeholder/150/150' }
+  ];
+
+  const accessories = [
+    { id: '1', name: 'أزرار ذهبية', price: 2.250, image: '/api/placeholder/80/80' },
+    { id: '2', name: 'أزرار فضية', price: 1.750, image: '/api/placeholder/80/80' },
+    { id: '3', name: 'تطريز يدوي', price: 15.000, image: '/api/placeholder/80/80' },
+    { id: '4', name: 'جيوب مخفية', price: 5.500, image: '/api/placeholder/80/80' }
+  ];
+
+  const labors = [
+    { id: '1', name: 'مصنعية القص', price: 8.000 },
+    { id: '2', name: 'مصنعية التفصيل', price: 15.000 },
+    { id: '3', name: 'تركيب الإكسسوارات', price: 5.000 },
+    { id: '4', name: 'مصنعية الكي', price: 3.000 }
+  ];
+
+  const generateQRCode = () => {
+    return `QR${Date.now()}${Math.random().toString(36).substr(2, 9)}`.toUpperCase();
+  };
+
+  const calculateItemTotal = (item: Partial<OrderItem>) => {
+    let total = 0;
+    
+    if (item.fabric) {
+      total += item.fabricType === 'workshop' && item.fabric.meters 
+        ? item.fabric.price * item.fabric.meters 
+        : item.fabric.price;
     }
-  ];
-
-  const mockCuts = [
-    { id: 'cut-1', name: 'قصة كلاسيكية' },
-    { id: 'cut-2', name: 'قصة عصرية' },
-    { id: 'cut-3', name: 'قصة واسعة' }
-  ];
-
-  const mockAccessories = [
-    { id: 'acc-1', name: 'أزرار ذهبية', price: 2.500 },
-    { id: 'acc-2', name: 'سحاب مخفي', price: 1.250 },
-    { id: 'acc-3', name: 'خيوط تطريز', price: 3.750 }
-  ];
-
-  const mockLabors = [
-    { id: 'labor-1', name: 'خياطة أساسية', price: 15.000 },
-    { id: 'labor-2', name: 'تطريز يدوي', price: 25.000 },
-    { id: 'labor-3', name: 'تركيب أزرار', price: 5.000 }
-  ];
-
-  const calculateItemPrice = (item: any) => {
-    let fabricPrice = 0;
-    if (item.fabricType === 'workshop' && item.fabric) {
-      fabricPrice = item.fabric.price;
+    
+    if (item.cut) {
+      total += item.cut.price;
     }
-    const accessoriesPrice = item.accessories.reduce((sum: number, acc: any) => sum + acc.price, 0);
-    const laborsPrice = item.labors.reduce((sum: number, labor: any) => sum + labor.price, 0);
-    return fabricPrice + accessoriesPrice + laborsPrice;
+    
+    if (item.accessories) {
+      total += item.accessories.reduce((sum, acc) => sum + (acc.price * acc.quantity), 0);
+    }
+    
+    if (item.labors) {
+      total += item.labors.reduce((sum, labor) => sum + labor.price, 0);
+    }
+    
+    return total;
   };
 
   const handleAddItem = () => {
-    const qrCode = `QR-${Date.now().toString().slice(-4)}`;
-    const newItem = {
-      ...currentItem,
-      id: Date.now(),
-      totalPrice: calculateItemPrice(currentItem),
-      qrCode: qrCode
+    if (currentItem.fabric && currentItem.cut) {
+      const newItem: OrderItem = {
+        id: Date.now().toString(),
+        qrCode: generateQRCode(),
+        fabricType: currentItem.fabricType!,
+        fabric: currentItem.fabric,
+        cut: currentItem.cut,
+        accessories: currentItem.accessories || [],
+        labors: currentItem.labors || [],
+        totalPrice: calculateItemTotal(currentItem)
+      };
+      
+      setOrderItems([...orderItems, newItem]);
+      setCurrentItem({ fabricType: 'workshop' });
+      setIsAddingItem(false);
+    }
+  };
+
+  const handleCopyItem = (item: OrderItem) => {
+    const copiedItem: OrderItem = {
+      ...item,
+      id: Date.now().toString(),
+      qrCode: generateQRCode()
     };
-    setItems([...items, newItem]);
-    setCurrentItem({
-      id: Date.now(),
-      fabricType: 'workshop',
-      fabric: null,
-      cut: null,
-      accessories: [],
-      labors: [],
-      totalPrice: 0,
-      qrCode: '',
-      customerFabricSpecs: ''
-    });
+    setOrderItems([...orderItems, copiedItem]);
   };
 
-  const handleRemoveItem = (id: number) => {
-    setItems(items.filter(item => item.id !== id));
+  const handleDeleteItem = (id: string) => {
+    setOrderItems(orderItems.filter(item => item.id !== id));
   };
 
-  const handleNext = () => {
-    onNext(items);
-  };
+  const totalOrderAmount = orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>تفاصيل الطلب - العميل: {customerData?.name}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Fabric Selection */}
-        <div>
-          <Label className="text-base font-semibold">اختيار القماش *</Label>
-          <RadioGroup
-            value={currentItem.fabricType}
-            onValueChange={(value) => setCurrentItem({...currentItem, fabricType: value, fabric: null})}
-            className="flex gap-6 mt-2"
-          >
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <RadioGroupItem value="workshop" id="workshop" />
-              <Label htmlFor="workshop">قماش الورشة</Label>
-            </div>
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <RadioGroupItem value="customer" id="customer" />
-              <Label htmlFor="customer">قماش العميل</Label>
-            </div>
-          </RadioGroup>
-        </div>
-
-        {currentItem.fabricType === 'customer' && (
-          <div>
-            <Label htmlFor="customerFabricSpecs">مواصفات قماش العميل</Label>
-            <Textarea
-              id="customerFabricSpecs"
-              value={currentItem.customerFabricSpecs}
-              onChange={(e) => handleCustomerFabricSpecsChange(e.target.value)}
-              placeholder="وصف نوع ولون ونمط القماش..."
-              rows={3}
-              className="mt-1"
-            />
-          </div>
-        )}
-
-        {currentItem.fabricType === 'workshop' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {mockFabrics.map(fabric => (
-              <div 
-                key={fabric.id}
-                className={`cursor-pointer p-3 border rounded-lg transition-all ${
-                  currentItem.fabric?.id === fabric.id 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-                onClick={() => setCurrentItem({...currentItem, fabric, totalPrice: calculateItemPrice({...currentItem, fabric})})}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-medium text-sm">{fabric.name}</h4>
-                  <Badge variant="secondary">{fabric.category}</Badge>
-                </div>
-                <div className="text-xs text-gray-600 space-y-1">
-                  <div>السعر: {fabric.price.toFixed(3)} د.ك/{fabric.unit}</div>
-                  <div>اللون: {fabric.color}</div>
-                  <div>النوع: {fabric.material}</div>
-                  <div>المخزون: {fabric.stock} {fabric.unit}</div>
-                </div>
+  const ItemBuilder = () => (
+    <div className="space-y-6">
+      {/* Fabric Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="w-5 h-5" />
+            اختيار القماش
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Tabs value={currentItem.fabricType} onValueChange={(value) => setCurrentItem({...currentItem, fabricType: value as 'workshop' | 'customer'})}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="workshop">قماش الورشة</TabsTrigger>
+              <TabsTrigger value="customer">قماش العميل</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="workshop" className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {workshopFabrics.map(fabric => (
+                  <Card 
+                    key={fabric.id} 
+                    className={`cursor-pointer transition-all hover:shadow-md ${
+                      currentItem.fabric?.id === fabric.id ? 'ring-2 ring-primary' : ''
+                    }`}
+                    onClick={() => setCurrentItem({
+                      ...currentItem, 
+                      fabric: { ...fabric, meters: 1 }
+                    })}
+                  >
+                    <CardContent className="p-3">
+                      <div className="aspect-square bg-gray-100 rounded-lg mb-2"></div>
+                      <h4 className="font-medium text-sm">{fabric.name}</h4>
+                      <p className="text-xs text-gray-600">{fabric.price.toFixed(3)} د.ك/متر</p>
+                      <p className="text-xs text-green-600">متوفر: {fabric.inStock} متر</p>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
+              
+              {currentItem.fabric && currentItem.fabricType === 'workshop' && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <Label htmlFor="meters">عدد الأمتار</Label>
+                  <Input
+                    id="meters"
+                    type="number"
+                    min="0.5"
+                    step="0.5"
+                    value={currentItem.fabric.meters || 1}
+                    onChange={(e) => setCurrentItem({
+                      ...currentItem,
+                      fabric: {
+                        ...currentItem.fabric!,
+                        meters: parseFloat(e.target.value) || 1
+                      }
+                    })}
+                    className="mt-1"
+                  />
+                  <p className="text-sm text-gray-600 mt-2">
+                    الإجمالي: {((currentItem.fabric.meters || 1) * currentItem.fabric.price).toFixed(3)} د.ك
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="customer" className="space-y-4">
+              <div className="bg-amber-50 p-4 rounded-lg">
+                <Label htmlFor="fabricSpecs">مواصفات قماش العميل</Label>
+                <Textarea
+                  id="fabricSpecs"
+                  placeholder="وصف نوع ولون وخامة القماش..."
+                  value={currentItem.fabric?.specifications || ''}
+                  onChange={(e) => setCurrentItem({
+                    ...currentItem,
+                    fabric: {
+                      id: 'customer-fabric',
+                      name: 'قماش العميل',
+                      price: 0,
+                      specifications: e.target.value
+                    }
+                  })}
+                  className="mt-1"
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      {/* Cut Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Scissors className="w-5 h-5" />
+            اختiار القصة
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {cuts.map(cut => (
+              <Card 
+                key={cut.id} 
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  currentItem.cut?.id === cut.id ? 'ring-2 ring-primary' : ''
+                }`}
+                onClick={() => setCurrentItem({...currentItem, cut})}
+              >
+                <CardContent className="p-3 text-center">
+                  <div className="aspect-square bg-gray-100 rounded-lg mb-2"></div>
+                  <h4 className="font-medium text-sm">{cut.name}</h4>
+                  <p className="text-sm text-primary font-semibold">{cut.price.toFixed(3)} د.ك</p>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        )}
+        </CardContent>
+      </Card>
 
-        {/* Cut Selection */}
-        <div>
-          <Label htmlFor="cut" className="text-base font-semibold">اختيار القصة *</Label>
-          <Select onValueChange={(value) => setCurrentItem({...currentItem, cut: mockCuts.find(cut => cut.id === value), totalPrice: calculateItemPrice({...currentItem, cut: mockCuts.find(cut => cut.id === value)})})}>
-            <SelectTrigger>
-              <SelectValue placeholder="اختر قصة" />
-            </SelectTrigger>
-            <SelectContent>
-              {mockCuts.map(cut => (
-                <SelectItem key={cut.id} value={cut.id}>{cut.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Accessories Selection */}
-        <div>
-          <Label className="text-base font-semibold">الإكسسوارات</Label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {mockAccessories.map(accessory => (
-              <div 
-                key={accessory.id}
-                className={`cursor-pointer p-3 border rounded-lg transition-all ${
-                  currentItem.accessories.find((acc: any) => acc.id === accessory.id)
-                    ? 'border-primary bg-primary/5'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-                onClick={() => {
-                  const isSelected = currentItem.accessories.find((acc: any) => acc.id === accessory.id);
-                  if (isSelected) {
-                    setCurrentItem({
-                      ...currentItem,
-                      accessories: currentItem.accessories.filter((acc: any) => acc.id !== accessory.id),
-                      totalPrice: calculateItemPrice({...currentItem, accessories: currentItem.accessories.filter((acc: any) => acc.id !== accessory.id)})
-                    });
-                  } else {
-                    setCurrentItem({
-                      ...currentItem,
-                      accessories: [...currentItem.accessories, accessory],
-                      totalPrice: calculateItemPrice({...currentItem, accessories: [...currentItem.accessories, accessory]})
-                    });
-                  }
-                }}
-              >
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium text-sm">{accessory.name}</h4>
-                  <Badge variant="outline">{accessory.price.toFixed(3)} د.ك</Badge>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Labors Selection */}
-        <div>
-          <Label className="text-base font-semibold">المصنعيات</Label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {mockLabors.map(labor => (
-              <div
-                key={labor.id}
-                className={`cursor-pointer p-3 border rounded-lg transition-all ${
-                  currentItem.labors.find((l: any) => l.id === labor.id)
-                    ? 'border-primary bg-primary/5'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-                onClick={() => {
-                  const isSelected = currentItem.labors.find((l: any) => l.id === labor.id);
-                  if (isSelected) {
-                    setCurrentItem({
-                      ...currentItem,
-                      labors: currentItem.labors.filter((l: any) => l.id !== labor.id),
-                      totalPrice: calculateItemPrice({...currentItem, labors: currentItem.labors.filter((l: any) => l.id !== labor.id)})
-                    });
-                  } else {
-                    setCurrentItem({
-                      ...currentItem,
-                      labors: [...currentItem.labors, labor],
-                      totalPrice: calculateItemPrice({...currentItem, labors: [...currentItem.labors, labor]})
-                    });
-                  }
-                }}
-              >
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium text-sm">{labor.name}</h4>
-                  <Badge variant="outline">{labor.price.toFixed(3)} د.ك</Badge>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Add Item */}
-        <Button onClick={handleAddItem} className="w-full">
-          <Plus className="w-4 h-4 mr-2" />
-          إضافة قطعة
-        </Button>
-
-        {/* Items List */}
-        {items.length > 0 && (
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold">القطع المضافة</h3>
-            {items.map(item => (
-              <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <h4 className="font-medium">قطعة #{items.indexOf(item) + 1}</h4>
-                  <div className="text-sm text-gray-600">
-                    {item.fabricType === 'workshop' && item.fabric && (
-                      <div>القماش: {item.fabric.name}</div>
+      {/* Accessories Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shirt className="w-5 h-5" />
+            الإكسسوارات
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {accessories.map(accessory => {
+              const selectedAcc = currentItem.accessories?.find(a => a.id === accessory.id);
+              return (
+                <Card 
+                  key={accessory.id} 
+                  className={`cursor-pointer transition-all hover:shadow-md ${
+                    selectedAcc ? 'ring-2 ring-primary' : ''
+                  }`}
+                >
+                  <CardContent className="p-3 text-center">
+                    <div className="aspect-square bg-gray-100 rounded-lg mb-2 w-16 h-16 mx-auto"></div>
+                    <h4 className="font-medium text-xs">{accessory.name}</h4>
+                    <p className="text-xs text-primary font-semibold">{accessory.price.toFixed(3)} د.ك</p>
+                    
+                    {selectedAcc ? (
+                      <div className="flex items-center gap-1 mt-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-6 h-6 p-0"
+                          onClick={() => {
+                            const newQuantity = Math.max(0, selectedAcc.quantity - 1);
+                            if (newQuantity === 0) {
+                              setCurrentItem({
+                                ...currentItem,
+                                accessories: currentItem.accessories?.filter(a => a.id !== accessory.id)
+                              });
+                            } else {
+                              setCurrentItem({
+                                ...currentItem,
+                                accessories: currentItem.accessories?.map(a => 
+                                  a.id === accessory.id ? {...a, quantity: newQuantity} : a
+                                )
+                              });
+                            }
+                          }}
+                        >
+                          -
+                        </Button>
+                        <span className="text-xs font-bold w-8 text-center">{selectedAcc.quantity}</span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-6 h-6 p-0"
+                          onClick={() => {
+                            setCurrentItem({
+                              ...currentItem,
+                              accessories: currentItem.accessories?.map(a => 
+                                a.id === accessory.id ? {...a, quantity: a.quantity + 1} : a
+                              )
+                            });
+                          }}
+                        >
+                          +
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full mt-2 text-xs"
+                        onClick={() => {
+                          const newAccessories = [...(currentItem.accessories || []), {
+                            ...accessory,
+                            quantity: 1
+                          }];
+                          setCurrentItem({...currentItem, accessories: newAccessories});
+                        }}
+                      >
+                        إضافة
+                      </Button>
                     )}
-                    {item.cut && <div>القصة: {item.cut.name}</div>}
-                    <div>السعر: {item.totalPrice.toFixed(3)} د.ك</div>
-                    <div className="font-mono text-xs bg-gray-100 px-2 py-1 rounded inline-block">
-                      QR: {item.qrCode}
-                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Labor Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calculator className="w-5 h-5" />
+            المصنعيات
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {labors.map(labor => {
+              const isSelected = currentItem.labors?.some(l => l.id === labor.id);
+              return (
+                <div 
+                  key={labor.id}
+                  className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${
+                    isSelected ? 'bg-primary/10 border-primary' : 'hover:bg-gray-50'
+                  }`}
+                  onClick={() => {
+                    if (isSelected) {
+                      setCurrentItem({
+                        ...currentItem,
+                        labors: currentItem.labors?.filter(l => l.id !== labor.id)
+                      });
+                    } else {
+                      setCurrentItem({
+                        ...currentItem,
+                        labors: [...(currentItem.labors || []), labor]
+                      });
+                    }
+                  }}
+                >
+                  <div>
+                    <h4 className="font-medium text-sm">{labor.name}</h4>
+                    <p className="text-sm text-primary font-semibold">{labor.price.toFixed(3)} د.ك</p>
+                  </div>
+                  <div className={`w-4 h-4 rounded border ${
+                    isSelected ? 'bg-primary border-primary' : 'border-gray-300'
+                  }`}>
+                    {isSelected && <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>}
                   </div>
                 </div>
-                <Button variant="destructive" size="icon" onClick={() => handleRemoveItem(item.id)}>
-                  <Minus className="w-4 h-4" />
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
-        )}
+        </CardContent>
+      </Card>
 
-        {/* Navigation Buttons */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8 pt-4 border-t">
-          <Button
-            variant="outline"
-            onClick={onPrevious}
-            className="w-full sm:w-auto order-2 sm:order-1"
-          >
-            <ArrowRight className="w-4 h-4 mr-2" />
-            تعديل بيانات العميل
-          </Button>
-          
-          <div className="text-center text-sm text-gray-600 order-1 sm:order-2">
-            {items.length > 0 ? `تم إضافة ${items.length} قطعة` : 'لم يتم إضافة أي قطع بعد'}
+      {/* Item Summary */}
+      {(currentItem.fabric || currentItem.cut) && (
+        <Card className="bg-green-50 border-green-200">
+          <CardHeader>
+            <CardTitle className="text-lg">ملخص القطعة</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {currentItem.fabric && (
+              <div className="flex justify-between text-sm">
+                <span>القماش:</span>
+                <span className="font-semibold">
+                  {currentItem.fabricType === 'workshop' && currentItem.fabric.meters
+                    ? `${(currentItem.fabric.price * currentItem.fabric.meters).toFixed(3)} د.ك`
+                    : currentItem.fabricType === 'customer' 
+                    ? 'قماش العميل' 
+                    : `${currentItem.fabric.price.toFixed(3)} د.ك`
+                  }
+                </span>
+              </div>
+            )}
+            
+            {currentItem.cut && (
+              <div className="flex justify-between text-sm">
+                <span>القصة:</span>
+                <span className="font-semibold">{currentItem.cut.price.toFixed(3)} د.ك</span>
+              </div>
+            )}
+            
+            {currentItem.accessories && currentItem.accessories.length > 0 && (
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>الإكسسوارات:</span>
+                  <span className="font-semibold">
+                    {currentItem.accessories.reduce((sum, acc) => sum + (acc.price * acc.quantity), 0).toFixed(3)} د.ك
+                  </span>
+                </div>
+                <div className="text-xs text-gray-600 space-y-1">
+                  {currentItem.accessories.map(acc => (
+                    <div key={acc.id} className="flex justify-between">
+                      <span>{acc.name} × {acc.quantity}</span>
+                      <span>{(acc.price * acc.quantity).toFixed(3)} د.ك</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {currentItem.labors && currentItem.labors.length > 0 && (
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>المصنعيات:</span>
+                  <span className="font-semibold">
+                    {currentItem.labors.reduce((sum, labor) => sum + labor.price, 0).toFixed(3)} د.ك
+                  </span>
+                </div>
+                <div className="text-xs text-gray-600 space-y-1">
+                  {currentItem.labors.map(labor => (
+                    <div key={labor.id} className="flex justify-between">
+                      <span>{labor.name}</span>
+                      <span>{labor.price.toFixed(3)} د.ك</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <Separator />
+            <div className="flex justify-between font-bold">
+              <span>إجمالي القطعة:</span>
+              <span className="text-primary">{calculateItemTotal(currentItem).toFixed(3)} د.ك</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      <div className="flex gap-2">
+        <Button onClick={handleAddItem} disabled={!currentItem.fabric || !currentItem.cut} className="flex-1">
+          إضافة القطعة
+        </Button>
+        <Button variant="outline" onClick={() => setIsAddingItem(false)} className="flex-1">
+          إلغاء
+        </Button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* Current Items */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <CardTitle>قطع الطلب ({orderItems.length})</CardTitle>
+              <p className="text-sm text-gray-600 mt-1">
+                إجمالي المبلغ: <span className="font-bold text-primary">{totalOrderAmount.toFixed(3)} د.ك</span>
+              </p>
+            </div>
+            <Dialog open={isAddingItem} onOpenChange={setIsAddingItem}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  إضافة قطعة
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>إنشاء قطعة جديدة</DialogTitle>
+                </DialogHeader>
+                <ItemBuilder />
+              </DialogContent>
+            </Dialog>
           </div>
-          
-          <Button
-            onClick={handleNext}
-            disabled={items.length === 0}
-            className="w-full sm:w-auto order-3"
-          >
-            متابعة للفاتورة
-            <ArrowLeft className="w-4 h-4 ml-2" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent>
+          {orderItems.length > 0 ? (
+            <div className="space-y-4">
+              {orderItems.map((item, index) => (
+                <Card key={item.id} className="border-l-4 border-l-primary">
+                  <CardContent className="p-4">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline">قطعة #{index + 1}</Badge>
+                          <Badge className="bg-blue-100 text-blue-800">
+                            <QrCode className="w-3 h-3 mr-1" />
+                            {item.qrCode}
+                          </Badge>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                          <div>
+                            <span className="text-gray-500">القماش:</span>
+                            <p className="font-medium">
+                              {item.fabricType === 'customer' ? 'قماش العميل' : item.fabric?.name}
+                            </p>
+                            {item.fabric?.meters && (
+                              <p className="text-xs text-gray-600">{item.fabric.meters} متر</p>
+                            )}
+                          </div>
+                          
+                          <div>
+                            <span className="text-gray-500">القصة:</span>
+                            <p className="font-medium">{item.cut.name}</p>
+                          </div>
+                          
+                          <div>
+                            <span className="text-gray-500">الإكسسوارات:</span>
+                            <p className="font-medium">{item.accessories.length} عنصر</p>
+                          </div>
+                          
+                          <div>
+                            <span className="text-gray-500">الإجمالي:</span>
+                            <p className="font-bold text-primary">{item.totalPrice.toFixed(3)} د.ك</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={() => handleCopyItem(item)}>
+                          <Copy className="w-3 h-3 mr-1" />
+                          نسخ
+                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button size="sm" variant="outline">
+                              <Eye className="w-3 h-3 mr-1" />
+                              عرض
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>تفاصيل القطعة #{index + 1}</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <strong>رمز QR:</strong> {item.qrCode}
+                                </div>
+                                <div>
+                                  <strong>نوع القماش:</strong> {item.fabricType === 'workshop' ? 'قماش الورشة' : 'قماش العميل'}
+                                </div>
+                              </div>
+                              
+                              {/* Detailed breakdown */}
+                              <div className="space-y-3">
+                                <h4 className="font-semibold">تفاصيل التكلفة:</h4>
+                                
+                                {item.fabric && (
+                                  <div className="flex justify-between">
+                                    <span>القماش:</span>
+                                    <span>{item.fabricType === 'customer' ? 'مجاني' : `${item.fabric.price.toFixed(3)} د.ك`}</span>
+                                  </div>
+                                )}
+                                
+                                <div className="flex justify-between">
+                                  <span>القصة:</span>
+                                  <span>{item.cut.price.toFixed(3)} د.ك</span>
+                                </div>
+                                
+                                {item.accessories.map(acc => (
+                                  <div key={acc.id} className="flex justify-between text-sm">
+                                    <span>{acc.name} × {acc.quantity}:</span>
+                                    <span>{(acc.price * acc.quantity).toFixed(3)} د.ك</span>
+                                  </div>
+                                ))}
+                                
+                                {item.labors.map(labor => (
+                                  <div key={labor.id} className="flex justify-between text-sm">
+                                    <span>{labor.name}:</span>
+                                    <span>{labor.price.toFixed(3)} د.ك</span>
+                                  </div>
+                                ))}
+                                
+                                <Separator />
+                                <div className="flex justify-between font-bold">
+                                  <span>الإجمالي:</span>
+                                  <span className="text-primary">{item.totalPrice.toFixed(3)} د.ك</span>
+                                </div>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                        <Button 
+                          size="sm" 
+                          variant="destructive" 
+                          onClick={() => handleDeleteItem(item.id)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>لم يتم إضافة أي قطع بعد</p>
+              <Button className="mt-4" onClick={() => setIsAddingItem(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                إضافة القطعة الأولى
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Navigation */}
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <Button variant="outline" onClick={onPrevious} className="flex-1 sm:flex-none">
+          السابق
+        </Button>
+        <Button 
+          onClick={() => onNext(orderItems)} 
+          disabled={orderItems.length === 0}
+          className="flex-1 sm:flex-none"
+        >
+          التالي - الملخص والفاتورة
+        </Button>
+      </div>
+    </div>
   );
 };
 
