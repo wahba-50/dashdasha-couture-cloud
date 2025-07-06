@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -86,22 +85,355 @@ const NewOrder = () => {
     });
   };
 
-  const handleShare = async () => {
+  const generateInvoiceHTML = () => {
     const orderNumber = generateOrderNumber();
-    const shareData = {
-      title: `فاتورة طلب رقم ${orderNumber}`,
-      text: `تفاصيل الطلب:\nالعميل: ${orderData.customer?.name}\nالمجموع: ${calculateTotal().toFixed(3)} د.ك`,
-      url: window.location.origin
-    };
+    return `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>فاتورة - ${orderNumber}</title>
+        <style>
+          body { 
+            font-family: 'Arial', sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            direction: rtl; 
+            background: white;
+            font-size: 14px;
+            line-height: 1.6;
+          }
+          .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #2563eb;
+            border-radius: 10px;
+            overflow: hidden;
+          }
+          .invoice-header { 
+            text-align: center; 
+            background: #2563eb;
+            color: white;
+            padding: 20px;
+            margin-bottom: 0;
+          }
+          .invoice-header h1 { 
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            font-weight: bold;
+          }
+          .invoice-header p { 
+            margin: 5px 0;
+            opacity: 0.9;
+          }
+          .invoice-body {
+            padding: 30px;
+          }
+          .section {
+            margin-bottom: 25px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+          }
+          .section-header {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: bold;
+            color: #374151;
+          }
+          .section-content {
+            padding: 15px;
+          }
+          .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+          }
+          .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dotted #d1d5db;
+          }
+          .info-item:last-child {
+            border-bottom: none;
+          }
+          .info-label {
+            font-weight: 600;
+            color: #6b7280;
+          }
+          .info-value {
+            font-weight: bold;
+            color: #111827;
+          }
+          table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 0;
+          }
+          th, td { 
+            padding: 12px; 
+            text-align: right; 
+            border-bottom: 1px solid #e5e7eb;
+          }
+          th { 
+            background-color: #f8f9fa; 
+            font-weight: bold;
+            color: #374151;
+          }
+          .totals-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+          }
+          .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dotted #d1d5db;
+          }
+          .total-row:last-child {
+            border-bottom: none;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2563eb;
+            border-top: 2px solid #2563eb;
+            padding-top: 15px;
+            margin-top: 10px;
+          }
+          .payment-section {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+          }
+          .payment-header {
+            font-size: 16px;
+            font-weight: bold;
+            color: #065f46;
+            margin-bottom: 15px;
+            text-align: center;
+          }
+          .delivery-notice {
+            text-align: center;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #92400e;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+            color: #6b7280;
+            font-style: italic;
+          }
+          .qr-codes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+          }
+          .qr-code {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-family: monospace;
+            font-size: 12px;
+          }
+          @media print { 
+            body { margin: 0; padding: 10px; }
+            .invoice-container { border: none; box-shadow: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-container">
+          <div class="invoice-header">
+            <h1>نظام إدارة ورش الدشاديش</h1>
+            <p>ورشة النموذج - الكويت</p>
+            <p>التاريخ: ${new Date().toLocaleDateString('ar-KW')}</p>
+            <p>رقم الطلب: ${orderNumber}</p>
+          </div>
+          
+          <div class="invoice-body">
+            <div class="section">
+              <div class="section-header">بيانات العميل</div>
+              <div class="section-content">
+                <div class="info-grid">
+                  <div class="info-item">
+                    <span class="info-label">الاسم:</span>
+                    <span class="info-value">${orderData.customer?.name || ''}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">الهاتف:</span>
+                    <span class="info-value">${orderData.customer?.phone || ''}</span>
+                  </div>
+                  ${orderData.customer?.email ? `
+                  <div class="info-item">
+                    <span class="info-label">البريد الإلكتروني:</span>
+                    <span class="info-value">${orderData.customer.email}</span>
+                  </div>
+                  ` : ''}
+                  ${orderData.customer?.gender ? `
+                  <div class="info-item">
+                    <span class="info-label">الجنس:</span>
+                    <span class="info-value">${orderData.customer.gender}</span>
+                  </div>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+            
+            <div class="section">
+              <div class="section-header">تفاصيل القطع (${orderData.items.length})</div>
+              <div class="section-content">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>القطعة</th>
+                      <th>نوع القماش</th>
+                      <th>نوع القصة</th>
+                      <th>الإكسسوارات</th>
+                      <th>السعر</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${orderData.items.map((item: any, index: number) => `
+                      <tr>
+                        <td>قطعة #${index + 1}</td>
+                        <td>${item.fabricType === 'customer' ? 'قماش العميل' : item.fabric?.name || ''}</td>
+                        <td>${item.cut?.name || ''}</td>
+                        <td>${item.accessories?.map((acc: any) => `${acc.name} (${acc.quantity})`).join(', ') || 'لا يوجد'}</td>
+                        <td>${item.totalPrice?.toFixed(3) || '0.000'} د.ك</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+                
+                <div style="margin-top: 15px;">
+                  <strong>أكواد QR للقطع:</strong>
+                  <div class="qr-codes">
+                    ${orderData.items.map((item: any) => `<span class="qr-code">${item.qrCode}</span>`).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="totals-section">
+              <div class="total-row">
+                <span>المجموع الفرعي:</span>
+                <span>${calculateSubtotal().toFixed(3)} د.ك</span>
+              </div>
+              ${orderData.discount.value > 0 ? `
+              <div class="total-row" style="color: #dc2626;">
+                <span>الخصم (${orderData.discount.type === 'percentage' ? `${orderData.discount.value}%` : 'مبلغ ثابت'}):</span>
+                <span>-${calculateDiscount().toFixed(3)} د.ك</span>
+              </div>
+              ` : ''}
+              <div class="total-row">
+                <span>المجموع النهائي:</span>
+                <span>${calculateTotal().toFixed(3)} د.ك</span>
+              </div>
+            </div>
 
-    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-      try {
-        await navigator.share(shareData);
-      } catch (error) {
-        console.log('Error sharing:', error);
-        fallbackShare();
+            <div class="payment-section">
+              <div class="payment-header">تفاصيل الدفع</div>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">نوع الدفع:</span>
+                  <span class="info-value">${orderData.payment.type === 'cash' ? 'نقدي' : 'إلكتروني'}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">المبلغ الإجمالي:</span>
+                  <span class="info-value">${calculateTotal().toFixed(3)} د.ك</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">المبلغ المستلم:</span>
+                  <span class="info-value">${orderData.payment.receivedAmount.toFixed(3)} د.ك</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">المبلغ المتبقي:</span>
+                  <span class="info-value" style="color: ${calculateRemainingAmount() > 0 ? '#dc2626' : '#16a34a'};">
+                    ${calculateRemainingAmount().toFixed(3)} د.ك
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            ${orderData.deliveryDate ? `
+            <div class="delivery-notice">
+              موعد التسليم المتوقع: ${new Date(orderData.deliveryDate).toLocaleDateString('ar-KW')}
+            </div>
+            ` : ''}
+            
+            ${orderData.notes ? `
+            <div class="section">
+              <div class="section-header">ملاحظات إضافية</div>
+              <div class="section-content">
+                <p>${orderData.notes}</p>
+              </div>
+            </div>
+            ` : ''}
+            
+            <div class="footer">
+              شكراً لثقتكم بنا - نظام إدارة ورش الدشاديش
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  };
+
+  const handleShare = async () => {
+    try {
+      const invoiceHTML = generateInvoiceHTML();
+      const blob = new Blob([invoiceHTML], { type: 'text/html;charset=utf-8' });
+      const orderNumber = generateOrderNumber();
+      
+      // Create a temporary link for the HTML file
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${orderNumber}.html`;
+      
+      // For mobile sharing
+      if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) {
+        try {
+          // Create a File object for sharing
+          const file = new File([invoiceHTML], `invoice-${orderNumber}.html`, { type: 'text/html' });
+          
+          await navigator.share({
+            title: `فاتورة طلب رقم ${orderNumber}`,
+            text: `فاتورة طلب - العميل: ${orderData.customer?.name} - المجموع: ${calculateTotal().toFixed(3)} د.ك`,
+            files: [file]
+          });
+        } catch (shareError) {
+          console.log('Native share failed, using fallback:', shareError);
+          fallbackShare();
+        }
+      } else {
+        // For desktop - download the HTML file
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        alert('تم تحميل ملف الفاتورة بصيغة HTML. يمكنك فتحه في المتصفح وطباعته كـ PDF.');
       }
-    } else {
+    } catch (error) {
+      console.error('Error sharing invoice:', error);
       fallbackShare();
     }
   };
@@ -115,7 +447,6 @@ const NewOrder = () => {
         alert('تم نسخ تفاصيل الفاتورة إلى الحافظة');
       });
     } else {
-      // Fallback for older browsers
       const textArea = document.createElement('textarea');
       textArea.value = shareText;
       document.body.appendChild(textArea);
@@ -127,110 +458,21 @@ const NewOrder = () => {
   };
 
   const handlePrint = () => {
-    window.print();
-  };
-
-  const generateInvoiceHTML = () => {
-    return `
-      <!DOCTYPE html>
-      <html dir="rtl" lang="ar">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>فاتورة - ${generateOrderNumber()}</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; direction: rtl; }
-          .invoice-header { text-align: center; margin-bottom: 30px; }
-          .invoice-header h1 { color: #2563eb; margin-bottom: 5px; }
-          .customer-info, .items-section, .totals-section, .payment-section { margin: 20px 0; }
-          .customer-info, .payment-section { background: #f8f9fa; padding: 15px; border-radius: 8px; }
-          table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
-          th { background-color: #f8f9fa; }
-          .totals { text-align: left; }
-          .total-final { font-size: 18px; font-weight: bold; color: #2563eb; }
-          .payment-info { background: #e8f5e8; border: 1px solid #4caf50; }
-          @media print { body { margin: 0; } }
-        </style>
-      </head>
-      <body>
-        <div class="invoice-header">
-          <h1>نظام إدارة ورش الدشاديش</h1>
-          <p>ورشة النموذج - الكويت</p>
-          <p>التاريخ: ${new Date().toLocaleDateString('ar-KW')}</p>
-          <p>رقم الطلب: ${generateOrderNumber()}</p>
-        </div>
-        
-        <div class="customer-info">
-          <h3>بيانات العميل</h3>
-          <p><strong>الاسم:</strong> ${orderData.customer?.name || ''}</p>
-          <p><strong>الهاتف:</strong> ${orderData.customer?.phone || ''}</p>
-          ${orderData.customer?.email ? `<p><strong>البريد:</strong> ${orderData.customer.email}</p>` : ''}
-          ${orderData.customer?.gender ? `<p><strong>الجنس:</strong> ${orderData.customer.gender}</p>` : ''}
-        </div>
-        
-        <div class="items-section">
-          <h3>تفاصيل القطع (${orderData.items.length})</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>القطعة</th>
-                <th>القماش</th>
-                <th>القصة</th>
-                <th>السعر</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${orderData.items.map((item: any, index: number) => `
-                <tr>
-                  <td>قطعة #${index + 1}</td>
-                  <td>${item.fabricType === 'customer' ? 'قماش العميل' : item.fabric?.name || ''}</td>
-                  <td>${item.cut?.name || ''}</td>
-                  <td>${item.totalPrice?.toFixed(3) || '0.000'} د.ك</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-        
-        <div class="totals-section">
-          <table class="totals">
-            <tr>
-              <td><strong>المجموع الفرعي:</strong></td>
-              <td><strong>${calculateSubtotal().toFixed(3)} د.ك</strong></td>
-            </tr>
-            ${orderData.discount.value > 0 ? `
-            <tr>
-              <td>الخصم (${orderData.discount.type === 'percentage' ? `${orderData.discount.value}%` : 'مبلغ ثابت'}):</td>
-              <td style="color: red;">-${calculateDiscount().toFixed(3)} د.ك</td>
-            </tr>
-            ` : ''}
-            <tr class="total-final">
-              <td><strong>المجموع النهائي:</strong></td>
-              <td><strong>${calculateTotal().toFixed(3)} د.ك</strong></td>
-            </tr>
-          </table>
-        </div>
-
-        <div class="payment-section payment-info">
-          <h3>تفاصيل الدفع</h3>
-          <p><strong>نوع الدفع:</strong> ${orderData.payment.type === 'cash' ? 'نقدي' : 'إلكتروني'}</p>
-          <p><strong>المبلغ المستلم:</strong> ${orderData.payment.receivedAmount.toFixed(3)} د.ك</p>
-          <p><strong>المبلغ المتبقي:</strong> ${calculateRemainingAmount().toFixed(3)} د.ك</p>
-        </div>
-        
-        ${orderData.deliveryDate ? `
-        <div style="text-align: center; margin-top: 20px; padding: 10px; background: #fff3cd; border-radius: 5px;">
-          <strong>موعد التسليم المتوقع: ${new Date(orderData.deliveryDate).toLocaleDateString('ar-KW')}</strong>
-        </div>
-        ` : ''}
-        
-        <div style="text-align: center; margin-top: 40px; font-size: 14px; color: #666;">
-          شكراً لثقتكم بنا - نظام إدارة ورش الدشاديش
-        </div>
-      </body>
-      </html>
-    `;
+    const invoiceHTML = generateInvoiceHTML();
+    const printWindow = window.open('', '_blank');
+    
+    if (printWindow) {
+      printWindow.document.write(invoiceHTML);
+      printWindow.document.close();
+      
+      // Wait for content to load then print
+      printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+      };
+    } else {
+      alert('يرجى السماح للنوافذ المنبثقة لعرض الفاتورة');
+    }
   };
 
   const handleCreateOrder = () => {
@@ -255,18 +497,20 @@ const NewOrder = () => {
       workshopId: workshopId,
       discount: orderData.discount,
       notes: orderData.notes,
-      payment: orderData.payment,
+      payment: {
+        type: orderData.payment.type,
+        receivedAmount: orderData.payment.receivedAmount,
+        remainingAmount: calculateRemainingAmount()
+      },
       fullOrderData: orderData
     };
     
-    // Save to localStorage for now (in real app, this would be saved to database)
     const existingOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
     existingOrders.push(order);
     localStorage.setItem('workshopOrders', JSON.stringify(existingOrders));
     
     console.log('Order created and saved:', order);
     
-    // Show success and navigate back to workshop dashboard
     alert(`تم إنشاء الطلب بنجاح!\nرقم الطلب: ${orderNumber}`);
     
     if (workshopId) {
