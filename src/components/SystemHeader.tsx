@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Building2, Settings, ArrowLeft, LogOut } from "lucide-react";
+import { Building2, ArrowLeft, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageToggle from "./LanguageToggle";
@@ -27,7 +27,7 @@ const SystemHeader = ({
   const { t } = useLanguage();
 
   const handleSignOut = () => {
-    navigate('/landing');
+    navigate('/system');
   };
 
   return (
@@ -70,8 +70,13 @@ const SystemHeader = ({
             <LanguageToggle />
             {actions}
             {!hideSettingsButton && (
-              <Button variant="outline" size="icon" className="shrink-0">
-                <Settings className="w-4 h-4" />
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="shrink-0"
+                onClick={handleSignOut}
+              >
+                <LogOut className="w-4 h-4" />
               </Button>
             )}
           </div>
