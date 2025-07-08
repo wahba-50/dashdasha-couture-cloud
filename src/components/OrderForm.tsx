@@ -147,33 +147,33 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
 
   const totalOrderAmount = orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
-  // Completely isolated textarea using ref to prevent any re-rendering
+  // Fixed textarea with proper event handling
   const CustomerFabricTextarea = React.memo(() => {
-    const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+    const [internalValue, setInternalValue] = React.useState('');
 
-    const handleChange = () => {
-      if (textareaRef.current) {
-        const value = textareaRef.current.value;
-        // Async update to prevent re-render during typing
-        requestAnimationFrame(() => {
-          setCurrentItem(prev => ({
-            ...prev,
-            fabric: {
-              id: 'customer-fabric',
-              name: 'قماش العميل',
-              price: 0,
-              specifications: value
-            }
-          }));
-        });
-      }
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const value = e.target.value;
+      setInternalValue(value);
+      
+      // Update parent state asynchronously
+      setTimeout(() => {
+        setCurrentItem(prev => ({
+          ...prev,
+          fabric: {
+            id: 'customer-fabric',
+            name: 'قماش العميل',
+            price: 0,
+            specifications: value
+          }
+        }));
+      }, 0);
     };
 
     return (
       <textarea
-        ref={textareaRef}
         id="fabricSpecs"
         placeholder="وصف نوع ولون وخامة القماش..."
+        value={internalValue}
         onChange={handleChange}
         className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mt-1"
       />
