@@ -127,25 +127,102 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
           <Card>
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4">تفاصيل القطع</h3>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {order.itemDetails?.map((item: any, index: number) => (
-                  <div key={index} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <Badge variant="outline" className="font-mono">
+                  <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                    <div className="flex items-center justify-between mb-4">
+                      <Badge variant="outline" className="font-mono text-sm">
                         {item.qrCode}
                       </Badge>
-                      <span className="text-sm text-gray-500">قطعة {index + 1}</span>
+                      <span className="text-sm font-medium text-primary">قطعة {index + 1}</span>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-600">نوع القماش:</span>
-                        <p className="font-medium">{item.fabricType === 'customer' ? `قماش العميل${item.fabric?.specifications ? ` - ${item.fabric.specifications}` : ''}` : item.fabric}</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 text-sm">
+                      {/* Fabric Details */}
+                      <div className="space-y-2">
+                        <div>
+                          <span className="text-gray-600 font-medium">نوع القماش:</span>
+                          <p className="font-medium">{item.fabricType === 'customer' ? 'قماش العميل' : item.fabric}</p>
+                        </div>
+                        {item.fabric?.specifications && (
+                          <div>
+                            <span className="text-gray-600 font-medium">مواصفات القماش:</span>
+                            <p className="font-medium">{item.fabric.specifications}</p>
+                          </div>
+                        )}
+                        {item.fabric?.color && (
+                          <div>
+                            <span className="text-gray-600 font-medium">لون القماش:</span>
+                            <p className="font-medium">{item.fabric.color}</p>
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <span className="text-gray-600">نوع القصة:</span>
-                        <p className="font-medium">{item.cut}</p>
+
+                      {/* Cut and Style Details */}
+                      <div className="space-y-2">
+                        <div>
+                          <span className="text-gray-600 font-medium">نوع القصة:</span>
+                          <p className="font-medium">{item.cut}</p>
+                        </div>
+                        {item.style && (
+                          <div>
+                            <span className="text-gray-600 font-medium">الستايل:</span>
+                            <p className="font-medium">{item.style}</p>
+                          </div>
+                        )}
+                        {item.size && (
+                          <div>
+                            <span className="text-gray-600 font-medium">المقاس:</span>
+                            <p className="font-medium">{item.size}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Additional Details */}
+                      <div className="space-y-2">
+                        {item.measurements && (
+                          <div>
+                            <span className="text-gray-600 font-medium">القياسات:</span>
+                            <div className="text-xs space-y-1 mt-1">
+                              {Object.entries(item.measurements).map(([key, value]) => (
+                                <p key={key} className="flex justify-between">
+                                  <span>{key}:</span>
+                                  <span className="font-medium">{value as string}</span>
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {item.price && (
+                          <div>
+                            <span className="text-gray-600 font-medium">السعر:</span>
+                            <p className="font-medium">{item.price} د.ك</p>
+                          </div>
+                        )}
+                        {item.deliveryDate && (
+                          <div>
+                            <span className="text-gray-600 font-medium">تاريخ التسليم:</span>
+                            <p className="font-medium">{item.deliveryDate}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
+
+                    {/* Notes Section */}
+                    {item.notes && (
+                      <div className="mt-4 pt-3 border-t border-gray-200">
+                        <span className="text-gray-600 font-medium">ملاحظات:</span>
+                        <p className="font-medium mt-1 text-sm bg-yellow-50 p-2 rounded border">{item.notes}</p>
+                      </div>
+                    )}
+
+                    {/* Special Instructions */}
+                    {item.specialInstructions && (
+                      <div className="mt-3">
+                        <span className="text-gray-600 font-medium">تعليمات خاصة:</span>
+                        <p className="font-medium mt-1 text-sm bg-blue-50 p-2 rounded border">{item.specialInstructions}</p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
