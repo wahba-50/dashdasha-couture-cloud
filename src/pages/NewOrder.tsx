@@ -539,7 +539,7 @@ const NewOrder = () => {
         <div className="flex items-center justify-center mb-6 sm:mb-8 overflow-x-auto">
           <div className="flex items-center gap-4 min-w-max px-4">
             {steps.map((step, index) => (
-              <div key={step.number} className="flex items-center">
+              <React.Fragment key={step.number}>
                 <div className="flex flex-col items-center">
                   <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-semibold text-sm ${
                     step.number <= currentStep 
@@ -559,7 +559,7 @@ const NewOrder = () => {
                     step.completed ? 'bg-primary' : 'bg-gray-200'
                   }`} />
                 )}
-              </div>
+              </React.Fragment>
             ))}
           </div>
         </div>

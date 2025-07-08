@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Package, Scissors, Shirt, Copy, QrCode, Trash2, Eye, Calculator } from "lucide-react";
@@ -58,7 +58,7 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
     fabricType: 'workshop'
   });
 
-  // Real products data from ProductManagement with proper images
+  // Real products data from ProductManagement
   const allProducts = [
     {
       id: '1',
@@ -105,53 +105,6 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
       unit: 'قطعة',
       stock: 999,
       description: 'أجرة القص والتفصيل والخياطة'
-    },
-    {
-      id: '5',
-      name: 'قماش حرير ناعم',
-      nameEn: 'Smooth Silk Fabric',
-      type: 'fabric',
-      price: 18.750,
-      unit: 'متر',
-      stock: 30,
-      description: 'قماش حرير فاخر للمناسبات الخاصة',
-      category: 'حرير',
-      color: 'كريمي',
-      material: 'حرير طبيعي',
-      image: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
-    },
-    {
-      id: '6',
-      name: 'قصة عصرية مميزة',
-      nameEn: 'Modern Special Cut',
-      type: 'cut',
-      price: 22.500,
-      unit: 'قطعة',
-      stock: 75,
-      description: 'قصة عصرية مناسبة للشباب',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
-    },
-    {
-      id: '7',
-      name: 'خيوط ذهبية',
-      nameEn: 'Golden Threads',
-      type: 'accessory',
-      price: 5.500,
-      unit: 'متر',
-      stock: 150,
-      description: 'خيوط ذهبية للتطريز والزخرفة',
-      image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
-    },
-    {
-      id: '8',
-      name: 'أزرار فضية أنيقة',
-      nameEn: 'Elegant Silver Buttons',
-      type: 'accessory',
-      price: 3.250,
-      unit: 'عدد',
-      stock: 180,
-      description: 'أزرار فضية عالية الجودة',
-      image: 'https://images.unsplash.com/photo-1544966503-7cc72cd7ad34?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
     }
   ];
 
@@ -160,7 +113,7 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
     id: p.id,
     name: p.name,
     price: p.price,
-    image: p.image || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+    image: p.image || '/api/placeholder/100/100',
     inStock: p.stock
   }));
 
@@ -168,14 +121,14 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
     id: p.id,
     name: p.name,
     price: p.price,
-    image: p.image || 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+    image: p.image || '/api/placeholder/150/150'
   }));
 
   const accessories = allProducts.filter(p => p.type === 'accessory').map(p => ({
     id: p.id,
     name: p.name,
     price: p.price,
-    image: p.image || 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+    image: p.image || '/api/placeholder/80/80'
   }));
 
   const labors = allProducts.filter(p => p.type === 'labor').map(p => ({
@@ -302,17 +255,7 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
                     })}
                   >
                     <CardContent className="p-3">
-                      <div className="aspect-square bg-gray-100 rounded-lg mb-2 overflow-hidden">
-                        <img 
-                          src={fabric.image} 
-                          alt={fabric.name}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-                          }}
-                        />
-                      </div>
+                      <div className="aspect-square bg-gray-100 rounded-lg mb-2"></div>
                       <h4 className="font-medium text-sm">{fabric.name}</h4>
                       <p className="text-xs text-gray-600">{fabric.price.toFixed(3)} د.ك/متر</p>
                       <p className="text-xs text-green-600">متوفر: {fabric.inStock} متر</p>
@@ -361,7 +304,7 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Scissors className="w-5 h-5" />
-            اختيار القصة
+            اختiار القصة
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -375,17 +318,7 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
                 onClick={() => setCurrentItem({...currentItem, cut})}
               >
                 <CardContent className="p-3 text-center">
-                  <div className="aspect-square bg-gray-100 rounded-lg mb-2 overflow-hidden">
-                    <img 
-                      src={cut.image} 
-                      alt={cut.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-                      }}
-                    />
-                  </div>
+                  <div className="aspect-square bg-gray-100 rounded-lg mb-2"></div>
                   <h4 className="font-medium text-sm">{cut.name}</h4>
                   <p className="text-sm text-primary font-semibold">{cut.price.toFixed(3)} د.ك</p>
                 </CardContent>
@@ -415,17 +348,7 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
                   }`}
                 >
                   <CardContent className="p-3 text-center">
-                    <div className="aspect-square bg-gray-100 rounded-lg mb-2 w-16 h-16 mx-auto overflow-hidden">
-                      <img 
-                        src={accessory.image} 
-                        alt={accessory.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-                        }}
-                      />
-                    </div>
+                    <div className="aspect-square bg-gray-100 rounded-lg mb-2 w-16 h-16 mx-auto"></div>
                     <h4 className="font-medium text-xs">{accessory.name}</h4>
                     <p className="text-xs text-primary font-semibold">{accessory.price.toFixed(3)} د.ك</p>
                     
@@ -651,9 +574,6 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
               <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>إنشاء قطعة جديدة</DialogTitle>
-                  <DialogDescription>
-                    اختر المواد والمصنعيات لإنشاء قطعة جديدة
-                  </DialogDescription>
                 </DialogHeader>
                 <ItemBuilder />
               </DialogContent>
@@ -719,9 +639,6 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
                           <DialogContent className="max-w-2xl">
                             <DialogHeader>
                               <DialogTitle>تفاصيل القطعة #{index + 1}</DialogTitle>
-                              <DialogDescription>
-                                عرض تفاصيل القطعة وتكلفتها
-                              </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div className="grid grid-cols-2 gap-4 text-sm">
