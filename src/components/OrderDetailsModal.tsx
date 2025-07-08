@@ -97,6 +97,26 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
             </CardContent>
           </Card>
 
+          {/* Client Measurements */}
+          {order.clientMeasurements && Object.keys(order.clientMeasurements).length > 0 && (
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  قياسات العميل
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm">
+                  {Object.entries(order.clientMeasurements).map(([key, value]) => (
+                    <div key={key} className="flex flex-col">
+                      <span className="text-gray-600 font-medium">{key}:</span>
+                      <span className="font-semibold">{value as string}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Payment Information */}
           {order.payment && (
             <Card>
@@ -144,6 +164,28 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
                           <span className="text-gray-600 font-medium">نوع القماش:</span>
                           <p className="font-medium">{item.fabricType === 'customer' ? 'قماش العميل' : item.fabric}</p>
                         </div>
+                        {item.fabricType === 'customer' && item.clientFabric && (
+                          <>
+                            {item.clientFabric.type && (
+                              <div>
+                                <span className="text-gray-600 font-medium">نوع قماش العميل:</span>
+                                <p className="font-medium">{item.clientFabric.type}</p>
+                              </div>
+                            )}
+                            {item.clientFabric.color && (
+                              <div>
+                                <span className="text-gray-600 font-medium">لون قماش العميل:</span>
+                                <p className="font-medium">{item.clientFabric.color}</p>
+                              </div>
+                            )}
+                            {item.clientFabric.description && (
+                              <div>
+                                <span className="text-gray-600 font-medium">وصف قماش العميل:</span>
+                                <p className="font-medium">{item.clientFabric.description}</p>
+                              </div>
+                            )}
+                          </>
+                        )}
                         {item.fabric?.specifications && (
                           <div>
                             <span className="text-gray-600 font-medium">مواصفات القماش:</span>
@@ -221,6 +263,20 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
                       <div className="mt-3">
                         <span className="text-gray-600 font-medium">تعليمات خاصة:</span>
                         <p className="font-medium mt-1 text-sm bg-blue-50 p-2 rounded border">{item.specialInstructions}</p>
+                      </div>
+                    )}
+
+                    {/* Accessories Section */}
+                    {item.accessories && item.accessories.length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-gray-200">
+                        <span className="text-gray-600 font-medium mb-2 block">الإكسسوارات:</span>
+                        <div className="flex flex-wrap gap-1">
+                          {item.accessories.map((accessory: string, accIndex: number) => (
+                            <Badge key={accIndex} variant="secondary" className="text-xs">
+                              {accessory}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
