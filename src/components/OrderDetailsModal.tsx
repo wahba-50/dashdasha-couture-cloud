@@ -15,6 +15,9 @@ interface OrderDetailsModalProps {
 const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) => {
   if (!order) return null;
 
+  // Debug: Log order structure
+  console.log('Order data:', order);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'جديد': return 'bg-blue-100 text-blue-800 border-blue-200';
