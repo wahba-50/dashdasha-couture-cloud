@@ -505,9 +505,17 @@ const NewOrder = () => {
       fullOrderData: orderData
     };
     
+    console.log('About to save order to localStorage...');
     const existingOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
+    console.log('Existing orders before save:', existingOrders);
     existingOrders.push(order);
+    console.log('Orders after adding new order:', existingOrders);
     localStorage.setItem('workshopOrders', JSON.stringify(existingOrders));
+    console.log('Successfully saved to localStorage');
+    
+    // Verify the save worked
+    const savedOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
+    console.log('Verification - orders in localStorage after save:', savedOrders);
     
     console.log('Order created and saved:', order);
     
