@@ -219,15 +219,18 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
                   id="fabricSpecs"
                   placeholder="وصف نوع ولون وخامة القماش..."
                   value={currentItem.fabric?.specifications || ''}
-                  onChange={(e) => setCurrentItem({
-                    ...currentItem,
-                    fabric: {
-                      id: 'customer-fabric',
-                      name: 'قماش العميل',
-                      price: 0,
-                      specifications: e.target.value
-                    }
-                  })}
+                  onChange={(e) => {
+                    const specifications = e.target.value;
+                    setCurrentItem(prev => ({
+                      ...prev,
+                      fabric: {
+                        id: 'customer-fabric',
+                        name: 'قماش العميل',
+                        price: 0,
+                        specifications
+                      }
+                    }));
+                  }}
                   className="mt-1"
                 />
               </div>
