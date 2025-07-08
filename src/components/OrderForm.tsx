@@ -147,26 +147,28 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
 
   const totalOrderAmount = orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
-  // Isolated customer fabric component to prevent re-rendering
-  const CustomerFabricInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
-    const [localValue, setLocalValue] = useState(value);
+  // Isolated textarea component with ref-based approach to prevent re-rendering
+  const CustomerFabricTextarea = ({ initialValue, onValueChange }: { initialValue: string; onValueChange: (value: string) => void }) => {
+    const textareaRef = React.useRef<HTMLTextAreaElement>(null);
     
-    useEffect(() => {
-      setLocalValue(value);
-    }, [value]);
-    
-    const handleChange = (newValue: string) => {
-      setLocalValue(newValue);
-      onChange(newValue);
+    React.useEffect(() => {
+      if (textareaRef.current && textareaRef.current.value !== initialValue) {
+        textareaRef.current.value = initialValue;
+      }
+    }, [initialValue]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      onValueChange(e.target.value);
     };
 
     return (
-      <Textarea
+      <textarea
+        ref={textareaRef}
         id="fabricSpecs"
         placeholder="وصف نوع ولون وخامة القماش..."
-        value={localValue}
-        onChange={(e) => handleChange(e.target.value)}
-        className="mt-1"
+        defaultValue={initialValue}
+        onChange={handleChange}
+        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mt-1"
       />
     );
   };
@@ -239,9 +241,9 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
             <TabsContent value="customer" className="space-y-4">
               <div className="bg-amber-50 p-4 rounded-lg">
                 <Label htmlFor="fabricSpecs">مواصفات قماش العميل</Label>
-                <CustomerFabricInput
-                  value={currentItem.fabric?.specifications || ''}
-                  onChange={(specifications) => {
+                <CustomerFabricTextarea
+                  initialValue={currentItem.fabric?.specifications || ''}
+                  onValueChange={(specifications) => {
                     setCurrentItem(prev => ({
                       ...prev,
                       fabric: {
