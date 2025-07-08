@@ -139,7 +139,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-gray-600">نوع القماش:</span>
-                        <p className="font-medium">{item.fabric}</p>
+                        <p className="font-medium">{item.fabricType === 'customer' ? `قماش العميل${item.fabric?.specifications ? ` - ${item.fabric.specifications}` : ''}` : item.fabric}</p>
                       </div>
                       <div>
                         <span className="text-gray-600">نوع القصة:</span>

@@ -119,7 +119,7 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
                       <div className="grid grid-cols-1 gap-2">
                         <div>
                           <span className="font-semibold">نوع القماش:</span>
-                          <p className="mt-1">{item.fabric}</p>
+                          <p className="mt-1">{item.fabricType === 'customer' ? `قماش العميل${item.fabric?.specifications ? ` - ${item.fabric.specifications}` : ''}` : item.fabric}</p>
                         </div>
                         <div>
                           <span className="font-semibold">نوع القصة:</span>
