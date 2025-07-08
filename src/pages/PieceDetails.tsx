@@ -15,15 +15,37 @@ const PieceDetails = () => {
   useEffect(() => {
     const fetchPieceData = () => {
       console.log('Looking for pieceId:', pieceId);
+      console.log('All localStorage keys:', Object.keys(localStorage));
       
-      // Get the stored order data from localStorage
-      const storedOrders = localStorage.getItem('orders');
-      console.log('Stored orders from localStorage:', storedOrders);
+      // Try different possible keys for orders
+      const possibleKeys = ['orders', 'workshopOrders', 'orderData'];
+      let orders = [];
       
-      if (storedOrders) {
-        const orders = JSON.parse(storedOrders);
-        console.log('Parsed orders:', orders);
-        
+      for (const key of possibleKeys) {
+        const storedData = localStorage.getItem(key);
+        console.log(`Checking localStorage key "${key}":`, storedData);
+        if (storedData) {
+          try {
+            const parsedData = JSON.parse(storedData);
+            if (Array.isArray(parsedData)) {
+              orders = parsedData;
+              console.log(`Found orders array in "${key}":`, orders);
+              break;
+            } else if (parsedData && typeof parsedData === 'object') {
+              // Handle single order object
+              orders = [parsedData];
+              console.log(`Found single order in "${key}":`, orders);
+              break;
+            }
+          } catch (e) {
+            console.log(`Error parsing localStorage key "${key}":`, e);
+          }
+        }
+      }
+      
+      console.log('Found orders:', orders);
+      
+      if (orders.length > 0) {
         // Find the order that contains this piece
         for (const order of orders) {
           console.log('Checking order:', order.id, 'QR codes:', order.qrCodes);
