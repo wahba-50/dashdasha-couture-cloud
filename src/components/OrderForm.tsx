@@ -58,32 +58,84 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
     fabricType: 'workshop'
   });
 
-  // Mock data - in real app this would come from ProductManagement
-  const workshopFabrics = [
-    { id: '1', name: 'قماش قطني فاخر', price: 12.500, image: '/api/placeholder/100/100', inStock: 50 },
-    { id: '2', name: 'قماش حريري', price: 25.750, image: '/api/placeholder/100/100', inStock: 30 },
-    { id: '3', name: 'قماش كتان', price: 18.250, image: '/api/placeholder/100/100', inStock: 40 }
+  // Real products data from ProductManagement
+  const allProducts = [
+    {
+      id: '1',
+      name: 'قماش قطني فاخر',
+      nameEn: 'Premium Cotton Fabric',
+      type: 'fabric',
+      price: 12.500,
+      unit: 'متر',
+      stock: 50,
+      description: 'قماش قطني عالي الجودة مناسب للدشاديش الصيفية',
+      category: 'قطني',
+      color: 'أبيض',
+      material: 'قطن 100%',
+      image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+    },
+    {
+      id: '2',
+      name: 'قصة دشداشة كلاسيكية',
+      nameEn: 'Classic Dshdasha Cut',
+      type: 'cut',
+      price: 15.750,
+      unit: 'قطعة',
+      stock: 100,
+      description: 'قصة تقليدية كويتية أنيقة',
+      image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+    },
+    {
+      id: '3',
+      name: 'أزرار ذهبية',
+      nameEn: 'Golden Buttons',
+      type: 'accessory',
+      price: 2.250,
+      unit: 'عدد',
+      stock: 200,
+      description: 'أزرار معدنية ذهبية فاخرة',
+      image: 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
+    },
+    {
+      id: '4',
+      name: 'مصنعية قص وتفصيل',
+      nameEn: 'Cutting & Tailoring Labor',
+      type: 'labor',
+      price: 25.000,
+      unit: 'قطعة',
+      stock: 999,
+      description: 'أجرة القص والتفصيل والخياطة'
+    }
   ];
 
-  const cuts = [
-    { id: '1', name: 'قصة كلاسيكية', price: 15.750, image: '/api/placeholder/150/150' },
-    { id: '2', name: 'قصة عصرية', price: 18.500, image: '/api/placeholder/150/150' },
-    { id: '3', name: 'قصة فاخرة', price: 22.000, image: '/api/placeholder/150/150' }
-  ];
+  // Filter products by type
+  const workshopFabrics = allProducts.filter(p => p.type === 'fabric').map(p => ({
+    id: p.id,
+    name: p.name,
+    price: p.price,
+    image: p.image || '/api/placeholder/100/100',
+    inStock: p.stock
+  }));
 
-  const accessories = [
-    { id: '1', name: 'أزرار ذهبية', price: 2.250, image: '/api/placeholder/80/80' },
-    { id: '2', name: 'أزرار فضية', price: 1.750, image: '/api/placeholder/80/80' },
-    { id: '3', name: 'تطريز يدوي', price: 15.000, image: '/api/placeholder/80/80' },
-    { id: '4', name: 'جيوب مخفية', price: 5.500, image: '/api/placeholder/80/80' }
-  ];
+  const cuts = allProducts.filter(p => p.type === 'cut').map(p => ({
+    id: p.id,
+    name: p.name,
+    price: p.price,
+    image: p.image || '/api/placeholder/150/150'
+  }));
 
-  const labors = [
-    { id: '1', name: 'مصنعية القص', price: 8.000 },
-    { id: '2', name: 'مصنعية التفصيل', price: 15.000 },
-    { id: '3', name: 'تركيب الإكسسوارات', price: 5.000 },
-    { id: '4', name: 'مصنعية الكي', price: 3.000 }
-  ];
+  const accessories = allProducts.filter(p => p.type === 'accessory').map(p => ({
+    id: p.id,
+    name: p.name,
+    price: p.price,
+    image: p.image || '/api/placeholder/80/80'
+  }));
+
+  const labors = allProducts.filter(p => p.type === 'labor').map(p => ({
+    id: p.id,
+    name: p.name,
+    price: p.price
+  }));
 
   const generateQRCode = () => {
     return `QR${Date.now()}${Math.random().toString(36).substr(2, 9)}`.toUpperCase();
