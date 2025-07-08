@@ -27,7 +27,7 @@ const SystemHeader = ({
   const { t } = useLanguage();
 
   const handleSignOut = () => {
-    navigate('/system');
+    navigate('/landing');
   };
 
   return (
