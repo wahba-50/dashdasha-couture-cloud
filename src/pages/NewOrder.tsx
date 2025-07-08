@@ -476,7 +476,10 @@ const NewOrder = () => {
   };
 
   const handleCreateOrder = () => {
+    console.log('=== ORDER CREATION STARTED ===');
+    console.log('orderData:', orderData);
     const orderNumber = generateOrderNumber();
+    console.log('Generated order number:', orderNumber);
     const order = {
       id: orderNumber,
       customerName: orderData.customer.name,
