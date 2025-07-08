@@ -567,7 +567,7 @@ const NewOrder = () => {
         {/* Step Content */}
         <div className="space-y-6">
           {currentStep === 1 && (
-            <CustomerForm onNext={handleCustomerNext} />
+            <CustomerForm onNext={handleCustomerNext} workshopId={workshopId} />
           )}
 
           {currentStep === 2 && (

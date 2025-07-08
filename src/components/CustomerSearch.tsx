@@ -8,133 +8,103 @@ import { Label } from "@/components/ui/label";
 import { Search, User, Phone, MapPin, History, Ruler, RotateCcw } from "lucide-react";
 import CustomerMeasurements from './CustomerMeasurements';
 
-// Mock customer data - in real app this would come from Supabase
-const mockCustomers = [
-  {
-    id: '1',
-    name: 'أحمد محمد العلي',
-    phone: '12345678',
-    email: 'ahmed@example.com',
-    gender: 'ذكر',
-    age: 35,
-    address: {
-      country: 'الكويت',
-      governorate: 'الأحمدي',
-      block: '1',
-      street: '10',
-      houseNumber: '15'
-    },
-    measurements: {
-      chest: '110',
-      waist: '95',
-      shoulder: '45',
-      length: '150',
-      armLength: '60',
-      neckCircumference: '42',
-      armOpening: '25',
-      bottomWidth: '65',
-      notes: 'العميل يفضل القصة الواسعة قليلاً'
-    },
-    orderHistory: [
-      { id: 'ORD-001', date: '2024-01-15', total: 45.750, status: 'مكتمل' },
-      { id: 'ORD-002', date: '2024-02-20', total: 32.500, status: 'جاري التنفيذ' }
-    ]
-  },
-  {
-    id: '2', 
-    name: 'محمد سالم الرشيد',
-    phone: '87654321',
-    email: 'mohammed@example.com',
-    gender: 'ذكر',
-    age: 28,
-    address: {
-      country: 'الكويت',
-      governorate: 'حولي',
-      block: '3',
-      street: '25',
-      houseNumber: '8'
-    },
-    measurements: {
-      chest: '105',
-      waist: '90',
-      shoulder: '44',
-      length: '148',
-      armLength: '58',
-      neckCircumference: '40',
-      armOpening: '24',
-      bottomWidth: '62',
-      notes: ''
-    },
-    orderHistory: [
-      { id: 'ORD-003', date: '2024-03-10', total: 28.750, status: 'مكتمل' }
-    ]
-  },
-  {
-    id: '3',
-    name: 'وهبه',
-    phone: '99887766',
-    email: 'wahba@example.com',
-    gender: 'ذكر',
-    age: 30,
-    address: {
-      country: 'الكويت',
-      governorate: 'العاصمة',
-      block: '5',
-      street: '12',
-      houseNumber: '7'
-    },
-    measurements: {
-      chest: '108',
-      waist: '92',
-      shoulder: '44',
-      length: '149',
-      armLength: '59',
-      neckCircumference: '41',
-      armOpening: '25',
-      bottomWidth: '64',
-      notes: 'العميل يفضل القطع الكلاسيكية'
-    },
-    orderHistory: [
-      { id: 'ORD-006', date: '2024-02-10', total: 38.750, status: 'مكتمل' }
-    ]
-  },
-  {
-    id: '4',
-    name: 'خالد عبدالله المطيري',
-    phone: '55667788',
-    email: '',
-    gender: 'ذكر',
-    age: 42,
-    address: {
-      country: 'الكويت',
-      governorate: 'الجهراء',
-      block: '2',
-      street: '15',
-      houseNumber: '22'
-    },
-    measurements: {
-      chest: '115',
-      waist: '100',
-      shoulder: '46',
-      length: '152',
-      armLength: '62',
-      neckCircumference: '44',
-      armOpening: '26',
-      bottomWidth: '68',
-      notes: 'العميل طويل القامة'
-    },
-    orderHistory: [
-      { id: 'ORD-004', date: '2024-01-25', total: 55.250, status: 'مكتمل' },
-      { id: 'ORD-005', date: '2024-03-15', total: 41.500, status: 'مكتمل' }
-    ]
-  }
-];
+// Get customers from actual workshop data
+const getWorkshopCustomers = (workshopId?: string) => {
+  // Get saved orders from localStorage
+  const savedOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
+  
+  // Filter orders for this specific workshop
+  const workshopOrders = savedOrders.filter((order: any) => 
+    order.workshopId === workshopId || !order.workshopId
+  );
+
+  // Default orders if no saved orders exist
+  const defaultOrders = [
+    {
+      id: 'ORD-001',
+      customerName: 'أحمد محمد الكندري',
+      phone: '+96597712345678',
+      total: 45.500,
+      status: 'جديد',
+      deliveryDate: '2024-07-15',
+      createdAt: '2024-07-04',
+      customerMeasurements: {
+        chest: '95',
+        waist: '85',
+        shoulder: '45',
+        neck: '38',
+        length: '145',
+        sleeve: '60',
+        armhole: '42'
+      },
+      fullOrderData: {
+        customer: {
+          name: 'أحمد محمد الكندري',
+          phone: '+96597712345678',
+          email: 'ahmed@example.com',
+          gender: 'ذكر',
+          age: 35,
+          address: {
+            country: 'الكويت',
+            governorate: 'الأحمدي',
+            block: '1',
+            street: '10',
+            houseNumber: '15'
+          }
+        }
+      }
+    }
+  ];
+
+  const allOrders = workshopOrders.length > 0 ? [...defaultOrders, ...workshopOrders] : defaultOrders;
+  
+  // Generate customers from orders
+  const customerMap = new Map();
+  
+  allOrders.forEach(order => {
+    const customerKey = `${order.customerName}-${order.phone}`;
+    
+    if (!customerMap.has(customerKey)) {
+      const orderWithFullData = order as any;
+      const customerData = orderWithFullData.fullOrderData?.customer || {};
+      
+      customerMap.set(customerKey, {
+        id: customerKey,
+        name: order.customerName,
+        phone: order.phone,
+        email: customerData.email || '',
+        gender: customerData.gender || 'ذكر',
+        age: customerData.age || 30,
+        address: customerData.address || {
+          country: 'الكويت',
+          governorate: '',
+          block: '',
+          street: '',
+          houseNumber: ''
+        },
+        measurements: order.customerMeasurements || {},
+        orderHistory: []
+      });
+    }
+    
+    const customer = customerMap.get(customerKey);
+    customer.orderHistory.push({
+      id: order.id,
+      date: order.createdAt,
+      total: order.total,
+      status: order.status
+    });
+  });
+  
+  return Array.from(customerMap.values());
+};
 
 interface CustomerSearchProps {
   onCustomerSelect: (customer: any) => void;
+  workshopId?: string;
 }
 
-const CustomerSearch = ({ onCustomerSelect }: CustomerSearchProps) => {
+const CustomerSearch = ({ onCustomerSelect, workshopId }: CustomerSearchProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
@@ -143,11 +113,14 @@ const CustomerSearch = ({ onCustomerSelect }: CustomerSearchProps) => {
   const [selectedOrderForReorder, setSelectedOrderForReorder] = useState<any>(null);
   const [reorderQuantity, setReorderQuantity] = useState('');
   const [reorderDeliveryDate, setReorderDeliveryDate] = useState('');
+  
+  // Get actual customers from workshop data
+  const customers = React.useMemo(() => getWorkshopCustomers(workshopId), [workshopId]);
 
-  // Simulate elastic search
+  // Simulate elastic search with actual customer data
   useEffect(() => {
-    if (searchTerm.length >= 2) {
-      const results = mockCustomers.filter(customer =>
+    if (searchTerm.length >= 1) {
+      const results = customers.filter(customer =>
         customer.name.includes(searchTerm) ||
         customer.phone.includes(searchTerm) ||
         customer.email?.includes(searchTerm)
@@ -156,7 +129,7 @@ const CustomerSearch = ({ onCustomerSelect }: CustomerSearchProps) => {
     } else {
       setSearchResults([]);
     }
-  }, [searchTerm]);
+  }, [searchTerm, customers]);
 
   const handleCustomerSelect = (customer: any) => {
     setSelectedCustomer(customer);
@@ -268,7 +241,7 @@ const CustomerSearch = ({ onCustomerSelect }: CustomerSearchProps) => {
               </div>
             )}
 
-            {searchTerm.length >= 2 && searchResults.length === 0 && (
+            {searchTerm.length >= 1 && searchResults.length === 0 && (
               <div className="text-center py-4 text-gray-500">
                 لم يتم العثور على عملاء مطابقين للبحث
               </div>

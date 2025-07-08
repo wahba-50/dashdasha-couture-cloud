@@ -37,9 +37,10 @@ interface CustomerData {
 
 interface CustomerFormProps {
   onNext: (customerData: CustomerData) => void;
+  workshopId?: string;
 }
 
-const CustomerForm = ({ onNext }: CustomerFormProps) => {
+const CustomerForm = ({ onNext, workshopId }: CustomerFormProps) => {
   const [isNewCustomer, setIsNewCustomer] = useState(true);
   const [customerData, setCustomerData] = useState<CustomerData>({
     name: '',
@@ -188,7 +189,10 @@ const CustomerForm = ({ onNext }: CustomerFormProps) => {
 
         {/* Existing Customer Search */}
         {!isNewCustomer && (
-          <CustomerSearch onCustomerSelect={handleCustomerSelect} />
+          <CustomerSearch 
+            onCustomerSelect={handleCustomerSelect} 
+            workshopId={workshopId}
+          />
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
