@@ -30,6 +30,179 @@ interface ProductManagementProps {
   onClose?: () => void;
 }
 
+interface ProductFormProps {
+  product: Partial<Product>;
+  onChange: (field: keyof Product, value: any) => void;
+  isEditing?: boolean;
+  onImageUpload: (event: React.ChangeEvent<HTMLInputElement>, isEditing: boolean) => void;
+}
+
+const ProductForm = React.memo(({ product, onChange, isEditing = false, onImageUpload }: ProductFormProps) => {
+  const productTypes = [
+    { value: 'fabric', label: 'الأقمشة', labelEn: 'Fabrics', icon: Package, color: 'bg-blue-500' },
+    { value: 'cut', label: 'القصات', labelEn: 'Cuts', icon: Scissors, color: 'bg-green-500' },
+    { value: 'accessory', label: 'الإكسسوارات', labelEn: 'Accessories', icon: Shirt, color: 'bg-purple-500' },
+    { value: 'labor', label: 'المصنعيات', labelEn: 'Labor', icon: Wrench, color: 'bg-orange-500' }
+  ];
+
+  return (
+    <div className="space-y-4 p-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="name">الاسم بالعربية *</Label>
+          <Input
+            id="name"
+            value={product.name || ''}
+            onChange={(e) => onChange('name', e.target.value)}
+            placeholder="اسم المنتج"
+          />
+        </div>
+        <div>
+          <Label htmlFor="nameEn">الاسم بالإنجليزية</Label>
+          <Input
+            id="nameEn"
+            value={product.nameEn || ''}
+            onChange={(e) => onChange('nameEn', e.target.value)}
+            placeholder="Product Name"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <Label htmlFor="type">النوع *</Label>
+          <Select value={product.type} onValueChange={(value) => onChange('type', value)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {productTypes.map(type => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="price">السعر (د.ك) *</Label>
+          <Input
+            id="price"
+            type="number"
+            step="0.001"
+            value={product.price || ''}
+            onChange={(e) => onChange('price', parseFloat(e.target.value) || 0)}
+            placeholder="0.000"
+          />
+        </div>
+        <div>
+          <Label htmlFor="unit">الوحدة *</Label>
+          <Select value={product.unit} onValueChange={(value) => onChange('unit', value)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="متر">متر</SelectItem>
+              <SelectItem value="قطعة">قطعة</SelectItem>
+              <SelectItem value="عدد">عدد</SelectItem>
+              <SelectItem value="كيلو">كيلو</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Image Upload Section */}
+      <div>
+        <Label htmlFor="image">صورة المنتج</Label>
+        <div className="mt-2 space-y-3">
+          {product.image && (
+            <div className="relative w-32 h-32 mx-auto">
+              <img 
+                src={product.image} 
+                alt={product.name} 
+                className="w-full h-full object-cover rounded-lg border"
+              />
+            </div>
+          )}
+          <div className="flex items-center justify-center">
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <Upload className="w-8 h-8 mb-2 text-gray-500" />
+                <p className="text-sm text-gray-500">انقر لرفع صورة</p>
+                <p className="text-xs text-gray-500">PNG, JPG حتى 10MB</p>
+              </div>
+              <input 
+                type="file" 
+                className="hidden" 
+                accept="image/*"
+                onChange={(e) => onImageUpload(e, isEditing)}
+              />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="stock">المخزون</Label>
+          <Input
+            id="stock"
+            type="number"
+            value={product.stock || ''}
+            onChange={(e) => onChange('stock', parseInt(e.target.value) || 0)}
+            placeholder="0"
+          />
+        </div>
+        {product.type === 'fabric' && (
+          <div>
+            <Label htmlFor="color">اللون</Label>
+            <Input
+              id="color"
+              value={product.color || ''}
+              onChange={(e) => onChange('color', e.target.value)}
+              placeholder="اللون"
+            />
+          </div>
+        )}
+      </div>
+
+      {product.type === 'fabric' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="material">نوع القماش</Label>
+            <Input
+              id="material"
+              value={product.material || ''}
+              onChange={(e) => onChange('material', e.target.value)}
+              placeholder="مثل: قطن، حرير، كتان"
+            />
+          </div>
+          <div>
+            <Label htmlFor="category">الفئة</Label>
+            <Input
+              id="category"
+              value={product.category || ''}
+              onChange={(e) => onChange('category', e.target.value)}
+              placeholder="مثل: صيفي، شتوي، فاخر"
+            />
+          </div>
+        </div>
+      )}
+
+      <div>
+        <Label htmlFor="description">الوصف</Label>
+        <Textarea
+          id="description"
+          value={product.description || ''}
+          onChange={(e) => onChange('description', e.target.value)}
+          placeholder="وصف المنتج..."
+          rows={3}
+        />
+      </div>
+    </div>
+  );
+});
+
 const ProductManagement = ({ onClose }: ProductManagementProps) => {
   const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState('fabric');
@@ -185,166 +358,6 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
     }
   };
 
-  const ProductForm = ({ product, onChange, isEditing = false }: { 
-    product: Partial<Product>, 
-    onChange: (field: keyof Product, value: any) => void,
-    isEditing?: boolean
-  }) => (
-    <div className="space-y-4 p-1">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name">الاسم بالعربية *</Label>
-          <Input
-            id="name"
-            value={product.name || ''}
-            onChange={(e) => onChange('name', e.target.value)}
-            placeholder="اسم المنتج"
-          />
-        </div>
-        <div>
-          <Label htmlFor="nameEn">الاسم بالإنجليزية</Label>
-          <Input
-            id="nameEn"
-            value={product.nameEn || ''}
-            onChange={(e) => onChange('nameEn', e.target.value)}
-            placeholder="Product Name"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <Label htmlFor="type">النوع *</Label>
-          <Select value={product.type} onValueChange={(value) => onChange('type', value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {productTypes.map(type => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="price">السعر (د.ك) *</Label>
-          <Input
-            id="price"
-            type="number"
-            step="0.001"
-            value={product.price || ''}
-            onChange={(e) => onChange('price', parseFloat(e.target.value) || 0)}
-            placeholder="0.000"
-          />
-        </div>
-        <div>
-          <Label htmlFor="unit">الوحدة *</Label>
-          <Select value={product.unit} onValueChange={(value) => onChange('unit', value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="متر">متر</SelectItem>
-              <SelectItem value="قطعة">قطعة</SelectItem>
-              <SelectItem value="عدد">عدد</SelectItem>
-              <SelectItem value="كيلو">كيلو</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Image Upload Section */}
-      <div>
-        <Label htmlFor="image">صورة المنتج</Label>
-        <div className="mt-2 space-y-3">
-          {product.image && (
-            <div className="relative w-32 h-32 mx-auto">
-              <img 
-                src={product.image} 
-                alt={product.name} 
-                className="w-full h-full object-cover rounded-lg border"
-              />
-            </div>
-          )}
-          <div className="flex items-center justify-center">
-            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <Upload className="w-8 h-8 mb-2 text-gray-500" />
-                <p className="text-sm text-gray-500">انقر لرفع صورة</p>
-                <p className="text-xs text-gray-500">PNG, JPG حتى 10MB</p>
-              </div>
-              <input 
-                type="file" 
-                className="hidden" 
-                accept="image/*"
-                onChange={(e) => handleImageUpload(e, isEditing)}
-              />
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="stock">المخزون</Label>
-          <Input
-            id="stock"
-            type="number"
-            value={product.stock || ''}
-            onChange={(e) => onChange('stock', parseInt(e.target.value) || 0)}
-            placeholder="0"
-          />
-        </div>
-        {product.type === 'fabric' && (
-          <div>
-            <Label htmlFor="color">اللون</Label>
-            <Input
-              id="color"
-              value={product.color || ''}
-              onChange={(e) => onChange('color', e.target.value)}
-              placeholder="اللون"
-            />
-          </div>
-        )}
-      </div>
-
-      {product.type === 'fabric' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="material">نوع القماش</Label>
-            <Input
-              id="material"
-              value={product.material || ''}
-              onChange={(e) => onChange('material', e.target.value)}
-              placeholder="مثل: قطن، حرير، كتان"
-            />
-          </div>
-          <div>
-            <Label htmlFor="category">الفئة</Label>
-            <Input
-              id="category"
-              value={product.category || ''}
-              onChange={(e) => onChange('category', e.target.value)}
-              placeholder="مثل: صيفي، شتوي، فاخر"
-            />
-          </div>
-        </div>
-      )}
-
-      <div>
-        <Label htmlFor="description">الوصف</Label>
-        <Textarea
-          id="description"
-          value={product.description || ''}
-          onChange={(e) => onChange('description', e.target.value)}
-          placeholder="وصف المنتج..."
-          rows={3}
-        />
-      </div>
-    </div>
-  );
 
   return (
     <div className="space-y-6">
@@ -368,6 +381,7 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
             <ProductForm
               product={newProduct}
               onChange={handleNewProductChange}
+              onImageUpload={handleImageUpload}
             />
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button onClick={handleAddProduct}>إضافة المنتج</Button>
@@ -475,6 +489,7 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
                             product={editingProduct || product}
                             onChange={handleEditProductChange}
                             isEditing={true}
+                            onImageUpload={handleImageUpload}
                           />
                           <div className="flex justify-end gap-2 pt-4 border-t">
                             <Button onClick={() => editingProduct && handleEditProduct(editingProduct)}>
