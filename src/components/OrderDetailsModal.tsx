@@ -15,9 +15,6 @@ interface OrderDetailsModalProps {
 const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) => {
   if (!order) return null;
 
-  // Debug: Log order structure
-  console.log('Order data:', order);
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'جديد': return 'bg-blue-100 text-blue-800 border-blue-200';
@@ -101,7 +98,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
           </Card>
 
           {/* Client Measurements */}
-          {order.clientMeasurements && Object.keys(order.clientMeasurements).length > 0 && (
+          {order.customerMeasurements && Object.keys(order.customerMeasurements).length > 0 && (
             <Card>
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -109,7 +106,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
                   قياسات العميل
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm">
-                  {Object.entries(order.clientMeasurements).map(([key, value]) => (
+                  {Object.entries(order.customerMeasurements).map(([key, value]) => (
                     <div key={key} className="flex flex-col">
                       <span className="text-gray-600 font-medium">{key}:</span>
                       <span className="font-semibold">{value as string}</span>
