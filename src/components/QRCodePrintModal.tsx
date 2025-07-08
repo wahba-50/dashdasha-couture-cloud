@@ -125,18 +125,18 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
                             <span className="font-semibold">نوع القماش:</span>
                             <p className="mt-1">
                               {(() => {
-                                console.log('Checking fabric type:', item.fabricType);
-                                console.log('Full item fabric:', fullItem?.fabric);
-                                console.log('Item fabric:', item.fabric);
+                                // Check if it's customer fabric by looking at fabric name or specifications
+                                const isCustomerFabric = item.fabricType === 'customer' || 
+                                                        fullItem?.fabricType === 'customer' ||
+                                                        fullItem?.fabric?.specifications ||
+                                                        (typeof item.fabric === 'string' && item.fabric.includes('قماش العميل'));
                                 
-                                if (item.fabricType === 'customer') {
-                                  // Get fabric specifications from fullItem first, then fallback to item
+                                if (isCustomerFabric) {
                                   const specifications = fullItem?.fabric?.specifications || 
                                                        item.fabric?.specifications || 
                                                        fullItem?.customerFabricDetails || 
                                                        item.customerFabricDetails ||
                                                        '';
-                                  console.log('Found specifications:', specifications);
                                   return `قماش العميل${specifications ? ` - ${specifications}` : ''}`;
                                 } else {
                                   return `${item.fabric}${item.fabricCode ? ` - كود: ${item.fabricCode}` : ''}${item.fabricColor ? ` - لون: ${item.fabricColor}` : ''}`;
