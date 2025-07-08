@@ -28,8 +28,8 @@ const SystemHeader = ({
   const { t } = useLanguage();
 
   const handleSignOut = () => {
-    // If on index page, redirect to system page
-    if (location.pathname === '/') {
+    // If on index page or workshop creation page, redirect to system page
+    if (location.pathname === '/' || location.pathname === '/workshop/new') {
       navigate('/system');
     } else {
       // For workshop dashboard and other pages, redirect to landing
