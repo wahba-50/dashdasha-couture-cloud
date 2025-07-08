@@ -119,12 +119,29 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
                       <div className="grid grid-cols-1 gap-2">
                         <div>
                           <span className="font-semibold">نوع القماش:</span>
-                          <p className="mt-1">{item.fabricType === 'customer' ? `قماش العميل${item.fabric?.specifications ? ` - ${item.fabric.specifications}` : ''}` : item.fabric}</p>
+                          <p className="mt-1">
+                            {item.fabricType === 'customer' 
+                              ? `قماش العميل${item.fabric?.specifications ? ` - ${item.fabric.specifications}` : ''}`
+                              : `${item.fabric}${item.fabricCode ? ` - كود: ${item.fabricCode}` : ''}${item.fabricColor ? ` - لون: ${item.fabricColor}` : ''}`
+                            }
+                          </p>
                         </div>
                         <div>
                           <span className="font-semibold">نوع القصة:</span>
                           <p className="mt-1">{item.cut}</p>
                         </div>
+                        {item.accessories && item.accessories.length > 0 && (
+                          <div>
+                            <span className="font-semibold">الإكسسوارات:</span>
+                            <div className="mt-1 space-y-1">
+                              {item.accessories.map((accessory: any, accIndex: number) => (
+                                <p key={accIndex} className="text-xs">
+                                  {accessory.name} - عدد: {accessory.quantity || 1}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                         <div>
                           <span className="font-semibold">رقم الطلب:</span>
                           <p className="mt-1">#{order.id}</p>
