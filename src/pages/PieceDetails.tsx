@@ -13,77 +13,43 @@ const PieceDetails = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // In a real app, this would fetch from an API
+    // For now, we'll simulate the data that would be stored with the QR code
     const fetchPieceData = () => {
-      try {
-        // Get all orders from localStorage
-        const existingOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
-        console.log('All orders:', existingOrders);
-        console.log('Looking for pieceId:', pieceId);
-        
-        // Find the order and item that contains this piece ID
-        let foundPiece = null;
-        let foundOrder = null;
-        
-        for (const order of existingOrders) {
-          console.log('Checking order:', order.id, 'itemDetails:', order.itemDetails);
-          // Check if this pieceId exists in this order's itemDetails
-          const item = order.itemDetails?.find((item: any) => item.qrCode === pieceId);
-          if (item) {
-            foundPiece = item;
-            foundOrder = order;
-            console.log('Found piece:', foundPiece, 'in order:', foundOrder.id);
-            break;
-          }
-        }
-        
-        if (foundPiece && foundOrder) {
-          // Get the full item details from fullOrderData
-          const fullItem = foundOrder.fullOrderData?.items?.find((fullItem: any) => fullItem.qrCode === pieceId);
-          
-          const pieceData = {
-            orderId: foundOrder.id,
-            itemCode: pieceId,
-            customerName: foundOrder.customerName,
-            customerPhone: foundOrder.phone,
-            fabric: foundPiece.fabric || 'غير محدد',
-            cut: foundPiece.cut || 'غير محدد',
-            deliveryDate: foundOrder.deliveryDate,
-            createdAt: foundOrder.createdAt,
-            workshopName: "ورشة الأناقة الكويتية",
-            workshopPhone: "+965 2262 8945",
-            workshopAddress: "حولي، شارع تونس، مجمع الأناقة التجاري",
-            measurements: foundOrder.customerMeasurements || {
-              chest: 0,
-              waist: 0,
-              shoulder: 0,
-              neck: 0,
-              length: 0,
-              sleeve: 0,
-              armhole: 0
-            },
-            status: foundOrder.status || 'جديد',
-            cutter: foundOrder.cutter,
-            totalAmount: foundOrder.total,
-            timestamp: new Date().toISOString(),
-            fullItem: fullItem // Include full item details for additional info like accessories
-          };
-          
-          console.log('Final pieceData:', pieceData);
-          setPieceData(pieceData);
-        } else {
-          console.log('Piece not found. foundPiece:', foundPiece, 'foundOrder:', foundOrder);
-          setPieceData(null);
-        }
-      } catch (error) {
-        console.error('Error fetching piece data:', error);
-        setPieceData(null);
-      }
+      // This simulates getting data from a database or API
+      const mockData = {
+        orderId: 'ORD-001',
+        itemCode: pieceId,
+        customerName: 'أحمد محمد الكندري',
+        customerPhone: '+96597712345678',
+        fabric: 'قماش قطني فاخر',
+        cut: 'قصة كلاسيكية',
+        deliveryDate: '2024-07-15',
+        createdAt: '2024-07-04',
+        workshopName: "ورشة الأناقة الكويتية",
+        workshopPhone: "+965 2262 8945",
+        workshopAddress: "حولي، شارع تونس، مجمع الأناقة التجاري",
+        measurements: {
+          chest: 95,
+          waist: 85,
+          shoulder: 45,
+          neck: 38,
+          length: 145,
+          sleeve: 60,
+          armhole: 42
+        },
+        status: 'جديد',
+        cutter: null,
+        totalAmount: 45.500,
+        timestamp: new Date().toISOString()
+      };
       
+      setPieceData(mockData);
       setLoading(false);
     };
 
     if (pieceId) {
-      setTimeout(fetchPieceData, 500); // Keep the loading simulation for better UX
+      setTimeout(fetchPieceData, 500); // Simulate loading time
     }
   }, [pieceId]);
 
