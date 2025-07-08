@@ -147,16 +147,21 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
 
   const totalOrderAmount = orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
-  // Fixed textarea with proper event handling
+  // Isolated textarea that maintains focus during typing
   const CustomerFabricTextarea = React.memo(() => {
-    const [internalValue, setInternalValue] = React.useState('');
+    const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+    const updateTimeoutRef = React.useRef<NodeJS.Timeout>();
 
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const value = e.target.value;
-      setInternalValue(value);
+    const handleInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+      const value = (e.target as HTMLTextAreaElement).value;
       
-      // Update parent state asynchronously
-      setTimeout(() => {
+      // Clear previous timeout
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
+      
+      // Debounce the parent state update to prevent re-renders
+      updateTimeoutRef.current = setTimeout(() => {
         setCurrentItem(prev => ({
           ...prev,
           fabric: {
@@ -166,15 +171,15 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
             specifications: value
           }
         }));
-      }, 0);
+      }, 300);
     };
 
     return (
       <textarea
+        ref={textareaRef}
         id="fabricSpecs"
         placeholder="وصف نوع ولون وخامة القماش..."
-        value={internalValue}
-        onChange={handleChange}
+        onInput={handleInput}
         className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mt-1"
       />
     );
