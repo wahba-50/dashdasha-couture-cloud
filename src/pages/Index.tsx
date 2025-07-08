@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Building2, Users, ShoppingCart, Plus, Eye, Search, Filter, Phone, Mail, MapPin, Ruler, Calendar, User, Power, PowerOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -20,11 +21,21 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState('workshops');
   const [showServiceDialog, setShowServiceDialog] = useState(false);
+  const [showFilterDialog, setShowFilterDialog] = useState(false);
   const [selectedCustomerForDetails, setSelectedCustomerForDetails] = useState<any>(null);
   const [selectedWorkshopForDetails, setSelectedWorkshopForDetails] = useState<any>(null);
   const [selectedCustomerOrders, setSelectedCustomerOrders] = useState<any[]>([]);
   const [showCustomerOrdersDialog, setShowCustomerOrdersDialog] = useState(false);
   const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<any>(null);
+
+  // Filter states
+  const [filters, setFilters] = useState({
+    status: '',
+    type: '',
+    dateFrom: '',
+    dateTo: '',
+    workshop: ''
+  });
 
   const [workshops, setWorkshops] = useState([
     {
@@ -162,22 +173,47 @@ const Index = () => {
     totalRevenue: allOrders.reduce((sum, order) => sum + order.total, 0)
   };
 
-  const filteredWorkshops = workshops.filter(workshop =>
-    workshop.name.includes(searchTerm) || workshop.address.includes(searchTerm)
-  );
+  // Apply filters function
+  const applyFilters = (items: any[], type: string) => {
+    return items.filter(item => {
+      // Search term filter
+      const searchMatch = searchTerm === '' || 
+        (type === 'workshops' && (item.name.includes(searchTerm) || item.address.includes(searchTerm))) ||
+        (type === 'customers' && (item.name.includes(searchTerm) || item.phone.includes(searchTerm) || item.email.includes(searchTerm) || item.workshop.includes(searchTerm))) ||
+        (type === 'orders' && (item.id.includes(searchTerm) || (item.customerName || item.customer || '').includes(searchTerm) || (item.workshopName || item.workshop || '').includes(searchTerm)));
 
-  const filteredCustomers = allCustomers.filter(customer =>
-    customer.name.includes(searchTerm) || 
-    customer.phone.includes(searchTerm) || 
-    customer.email.includes(searchTerm) ||
-    customer.workshop.includes(searchTerm)
-  );
+      // Status filter
+      const statusMatch = filters.status === '' || item.status === filters.status;
 
-  const filteredOrders = allOrders.filter(order =>
-    order.id.includes(searchTerm) || 
-    (order.customerName || order.customer || '').includes(searchTerm) || 
-    (order.workshopName || order.workshop || '').includes(searchTerm)
-  );
+      // Type filter
+      const typeMatch = filters.type === '' || 
+        (type === 'workshops' && item.type === filters.type) ||
+        (type === 'customers' && item.gender === filters.type);
+
+      // Workshop filter for customers and orders
+      const workshopMatch = filters.workshop === '' || 
+        (type === 'customers' && item.workshop === filters.workshop) ||
+        (type === 'orders' && (item.workshopName || item.workshop) === filters.workshop);
+
+      // Date filter for orders and customers
+      let dateMatch = true;
+      if (filters.dateFrom || filters.dateTo) {
+        const itemDate = new Date(item.createdAt || item.lastOrder);
+        if (filters.dateFrom) {
+          dateMatch = dateMatch && itemDate >= new Date(filters.dateFrom);
+        }
+        if (filters.dateTo) {
+          dateMatch = dateMatch && itemDate <= new Date(filters.dateTo);
+        }
+      }
+
+      return searchMatch && statusMatch && typeMatch && workshopMatch && dateMatch;
+    });
+  };
+
+  const filteredWorkshops = applyFilters(workshops, 'workshops');
+  const filteredCustomers = applyFilters(allCustomers, 'customers');
+  const filteredOrders = applyFilters(allOrders, 'orders');
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -270,6 +306,20 @@ const Index = () => {
     setSelectedOrderForDetails(order);
   };
 
+  const handleApplyFilters = () => {
+    setShowFilterDialog(false);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      status: '',
+      type: '',
+      dateFrom: '',
+      dateTo: '',
+      workshop: ''
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-amber-50">
       <SystemHeader
@@ -349,7 +399,12 @@ const Index = () => {
                 className="pr-10"
               />
             </div>
-            <Button variant="outline" size="sm" className="w-full sm:w-auto">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full sm:w-auto"
+              onClick={() => setShowFilterDialog(true)}
+            >
               <Filter className="w-4 h-4 mr-2" />
               تصفية
             </Button>
@@ -722,6 +777,120 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Filter Dialog */}
+      <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5" />
+              خيارات التصفية
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Status Filter */}
+              <div>
+                <Label htmlFor="status-filter">الحالة</Label>
+                <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر الحالة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">جميع الحالات</SelectItem>
+                    <SelectItem value="نشط">نشط</SelectItem>
+                    <SelectItem value="غير نشط">غير نشط</SelectItem>
+                    <SelectItem value="جديد">جديد</SelectItem>
+                    <SelectItem value="جاري الإنتاج">جاري الإنتاج</SelectItem>
+                    <SelectItem value="مكتمل">مكتمل</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Type Filter */}
+              <div>
+                <Label htmlFor="type-filter">النوع</Label>
+                <Select value={filters.type} onValueChange={(value) => setFilters(prev => ({ ...prev, type: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر النوع" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">جميع الأنواع</SelectItem>
+                    {selectedTab === 'workshops' && (
+                      <>
+                        <SelectItem value="رجالي">رجالي</SelectItem>
+                        <SelectItem value="حريمي">حريمي</SelectItem>
+                        <SelectItem value="حريمي ورجالي">حريمي ورجالي</SelectItem>
+                      </>
+                    )}
+                    {selectedTab === 'customers' && (
+                      <>
+                        <SelectItem value="ذكر">ذكر</SelectItem>
+                        <SelectItem value="أنثى">أنثى</SelectItem>
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Workshop Filter (for customers and orders) */}
+            {(selectedTab === 'customers' || selectedTab === 'orders') && (
+              <div>
+                <Label htmlFor="workshop-filter">الورشة</Label>
+                <Select value={filters.workshop} onValueChange={(value) => setFilters(prev => ({ ...prev, workshop: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر الورشة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">جميع الورش</SelectItem>
+                    {workshops.map((workshop) => (
+                      <SelectItem key={workshop.id} value={workshop.name}>
+                        {workshop.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Date Range Filter */}
+            {(selectedTab === 'customers' || selectedTab === 'orders') && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="date-from">من تاريخ</Label>
+                  <Input
+                    id="date-from"
+                    type="date"
+                    value={filters.dateFrom}
+                    onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="date-to">إلى تاريخ</Label>
+                  <Input
+                    id="date-to"
+                    type="date"
+                    value={filters.dateTo}
+                    onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value }))}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <Button onClick={handleApplyFilters} className="flex-1">
+                تطبيق التصفية
+              </Button>
+              <Button variant="outline" onClick={handleClearFilters} className="flex-1">
+                مسح التصفية
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Workshop Details Modal */}
       <WorkshopDetailsModal
