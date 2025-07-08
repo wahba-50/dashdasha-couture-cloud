@@ -147,6 +147,17 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
 
   const totalOrderAmount = orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
+  // Memoized customer fabric textarea to prevent re-renders
+  const CustomerFabricTextarea = React.memo(({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
+    <Textarea
+      id="fabricSpecs"
+      placeholder="وصف نوع ولون وخامة القماش..."
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="mt-1"
+    />
+  ));
+
   const ItemBuilder = () => (
     <div className="space-y-6">
       {/* Fabric Selection */}
@@ -215,12 +226,9 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
             <TabsContent value="customer" className="space-y-4">
               <div className="bg-amber-50 p-4 rounded-lg">
                 <Label htmlFor="fabricSpecs">مواصفات قماش العميل</Label>
-                <Textarea
-                  id="fabricSpecs"
-                  placeholder="وصف نوع ولون وخامة القماش..."
+                <CustomerFabricTextarea
                   value={currentItem.fabric?.specifications || ''}
-                  onChange={(e) => {
-                    const specifications = e.target.value;
+                  onChange={(specifications) => {
                     setCurrentItem(prev => ({
                       ...prev,
                       fabric: {
@@ -231,7 +239,6 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
                       }
                     }));
                   }}
-                  className="mt-1"
                 />
               </div>
             </TabsContent>
