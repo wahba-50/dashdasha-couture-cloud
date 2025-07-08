@@ -145,44 +145,52 @@ const WorkshopDashboard = () => {
     }
   }, [workshopId]);
 
-  const customers = [
-    {
-      id: 1,
-      name: 'أحمد محمد الكندري',
-      phone: '+96597712345678',
-      email: 'ahmed.k@example.com',
-      gender: 'ذكر',
-      orders: 5,
-      lastOrder: '2024-07-04',
-      totalSpent: 234.750,
-      measurements: { chest: 95, waist: 85, shoulder: 45, neck: 38, length: 145 },
-      address: {
-        country: 'الكويت',
-        state: 'حولي',
-        area: 'السالمية',
-        street: 'شارع المطاعم',
-        house: '123'
+  // Generate customers from orders
+  const customers = React.useMemo(() => {
+    const customerMap = new Map();
+    
+    // Process all orders to extract unique customers
+    orders.forEach(order => {
+      const customerKey = `${order.customerName}-${order.phone}`;
+      
+      if (!customerMap.has(customerKey)) {
+        customerMap.set(customerKey, {
+          id: customerMap.size + 1,
+          name: order.customerName,
+          phone: order.phone,
+          email: '', // Not available from orders
+          gender: '', // Not available from orders
+          orders: 0,
+          lastOrder: order.createdAt,
+          totalSpent: 0,
+          measurements: order.customerMeasurements || {},
+          address: {
+            country: 'الكويت',
+            state: '',
+            area: '',
+            street: '',
+            house: ''
+          }
+        });
       }
-    },
-    {
-      id: 2,
-      name: 'فاطمة علي العتيبي',
-      phone: '+96597712345679',
-      email: 'fatma.ali@example.com',
-      gender: 'أنثى',
-      orders: 3,
-      lastOrder: '2024-07-02',
-      totalSpent: 156.250,
-      measurements: { chest: 88, waist: 78, shoulder: 40, neck: 35, length: 140 },
-      address: {
-        country: 'الكويت',
-        state: 'العاصمة',
-        area: 'قرطبة',
-        street: 'شارع الخليج',
-        house: '456'
+      
+      const customer = customerMap.get(customerKey);
+      customer.orders += 1;
+      customer.totalSpent += order.total;
+      
+      // Update last order date if this order is more recent
+      if (new Date(order.createdAt) > new Date(customer.lastOrder)) {
+        customer.lastOrder = order.createdAt;
       }
-    }
-  ];
+      
+      // Update measurements if available
+      if (order.customerMeasurements) {
+        customer.measurements = { ...customer.measurements, ...order.customerMeasurements };
+      }
+    });
+    
+    return Array.from(customerMap.values());
+  }, [orders]);
 
   const stats = {
     totalOrders: orders.length,
