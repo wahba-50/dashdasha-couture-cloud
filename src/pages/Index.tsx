@@ -12,6 +12,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import SystemHeader from "@/components/SystemHeader";
 import StatsCard from "@/components/StatsCard";
 import WorkshopDetailsModal from "@/components/WorkshopDetailsModal";
+import OrderDetailsModal from "@/components/OrderDetailsModal";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -21,6 +22,9 @@ const Index = () => {
   const [showServiceDialog, setShowServiceDialog] = useState(false);
   const [selectedCustomerForDetails, setSelectedCustomerForDetails] = useState<any>(null);
   const [selectedWorkshopForDetails, setSelectedWorkshopForDetails] = useState<any>(null);
+  const [selectedCustomerOrders, setSelectedCustomerOrders] = useState<any[]>([]);
+  const [showCustomerOrdersDialog, setShowCustomerOrdersDialog] = useState(false);
+  const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<any>(null);
 
   const [workshops, setWorkshops] = useState([
     {
@@ -228,6 +232,19 @@ const Index = () => {
 
   const handleViewCustomerDetails = (customer: any) => {
     setSelectedCustomerForDetails(customer);
+  };
+
+  const handleViewCustomerOrders = (customer: any) => {
+    // Find all orders for this customer
+    const customerOrders = allOrders.filter(order => 
+      order.customerName === customer.name && order.phone === customer.phone
+    );
+    setSelectedCustomerOrders(customerOrders);
+    setShowCustomerOrdersDialog(true);
+  };
+
+  const handleViewOrderDetails = (order: any) => {
+    setSelectedOrderForDetails(order);
   };
 
   return (
@@ -442,7 +459,12 @@ const Index = () => {
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm bg-blue-50 p-3 rounded-lg">
                               <div className="text-center">
                                 <p className="text-gray-600">الطلبات</p>
-                                <p className="font-bold text-blue-600">{customer.orders}</p>
+                                <button 
+                                  onClick={() => handleViewCustomerOrders(customer)}
+                                  className="font-bold text-blue-600 hover:text-blue-800 underline cursor-pointer"
+                                >
+                                  {customer.orders}
+                                </button>
                               </div>
                               <div className="text-center">
                                 <p className="text-gray-600">آخر طلب</p>
@@ -496,6 +518,7 @@ const Index = () => {
                             <Button 
                               size="sm" 
                               variant="outline"
+                              onClick={() => handleViewCustomerDetails(customer)}
                               className="w-full flex items-center gap-2"
                             >
                               <Eye className="w-4 h-4" />
@@ -837,6 +860,64 @@ const Index = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Customer Orders Dialog */}
+      <Dialog open={showCustomerOrdersDialog} onOpenChange={setShowCustomerOrdersDialog}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShoppingCart className="w-5 h-5" />
+              طلبات العميل ({selectedCustomerOrders.length})
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {selectedCustomerOrders.map((order) => (
+              <Card key={order.id} className="border">
+                <CardContent className="p-4">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <h4 className="font-bold text-lg text-primary">#{order.id}</h4>
+                        <Badge className={getStatusBadge(order.status)}>
+                          {order.status}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+                        <p><span className="text-gray-600">التاريخ:</span> <span className="font-medium">{order.createdAt}</span></p>
+                        <p><span className="text-gray-600">عدد القطع:</span> <span className="font-medium">{order.items}</span></p>
+                        <p><span className="text-gray-600">المبلغ:</span> <span className="font-medium text-green-600">{order.total.toFixed(3)} د.ك</span></p>
+                      </div>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleViewOrderDetails(order)}
+                    >
+                      <Eye className="w-4 h-4 mr-1" />
+                      عرض التفاصيل
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            
+            {selectedCustomerOrders.length === 0 && (
+              <div className="text-center py-12 text-gray-500">
+                <ShoppingCart className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>لا توجد طلبات لهذا العميل</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Order Details Modal */}
+      <OrderDetailsModal
+        order={selectedOrderForDetails}
+        isOpen={!!selectedOrderForDetails}
+        onClose={() => setSelectedOrderForDetails(null)}
+      />
 
       {/* Add Service Dialog */}
       <Dialog open={showServiceDialog} onOpenChange={setShowServiceDialog}>
