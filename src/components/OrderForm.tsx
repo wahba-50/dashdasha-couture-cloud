@@ -147,44 +147,38 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
 
   const totalOrderAmount = orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
-  // Memoized component to prevent re-renders on parent state changes
-  const CustomerFabricTextarea = React.memo(({ 
-    initialValue, 
-    onValueChange 
-  }: { 
-    initialValue: string; 
-    onValueChange: (value: string) => void 
-  }) => {
-    const [localValue, setLocalValue] = useState(initialValue);
+  // Completely isolated textarea component
+  const CustomerFabricTextarea = React.memo(() => {
+    const [value, setValue] = useState(currentItem.fabric?.specifications || '');
 
-    const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newValue = e.target.value;
-      setLocalValue(newValue);
-      onValueChange(newValue);
-    }, [onValueChange]);
+      setValue(newValue);
+      
+      // Update parent state without causing re-render
+      setTimeout(() => {
+        setCurrentItem(prev => ({
+          ...prev,
+          fabric: {
+            id: 'customer-fabric',
+            name: 'قماش العميل',
+            price: 0,
+            specifications: newValue
+          }
+        }));
+      }, 0);
+    };
 
     return (
       <textarea
         id="fabricSpecs"
         placeholder="وصف نوع ولون وخامة القماش..."
-        value={localValue}
+        value={value}
         onChange={handleChange}
         className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mt-1"
       />
     );
   });
-
-  const handleFabricSpecsChange = useCallback((specifications: string) => {
-    setCurrentItem(prev => ({
-      ...prev,
-      fabric: {
-        id: 'customer-fabric',
-        name: 'قماش العميل',
-        price: 0,
-        specifications
-      }
-    }));
-  }, []);
 
   const ItemBuilder = () => (
     <div className="space-y-6">
@@ -254,10 +248,7 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
             <TabsContent value="customer" className="space-y-4">
               <div className="bg-amber-50 p-4 rounded-lg">
                 <Label htmlFor="fabricSpecs">مواصفات قماش العميل</Label>
-                <CustomerFabricTextarea
-                  initialValue={currentItem.fabric?.specifications || ''}
-                  onValueChange={handleFabricSpecsChange}
-                />
+                <CustomerFabricTextarea />
               </div>
             </TabsContent>
           </Tabs>
