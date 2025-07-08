@@ -72,13 +72,67 @@ const Index = () => {
 
   // Load data from localStorage on component mount
   useEffect(() => {
-    // Load all customers from localStorage
-    const savedCustomers = JSON.parse(localStorage.getItem('allCustomers') || '[]');
-    setAllCustomers(savedCustomers);
-
     // Load all orders from localStorage  
     const savedOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
     setAllOrders(savedOrders);
+
+    // Generate customers from orders with complete information
+    const customerMap = new Map();
+    
+    savedOrders.forEach((order: any) => {
+      const customerKey = `${order.customerName}-${order.phone}`;
+      
+      if (!customerMap.has(customerKey)) {
+        // Extract customer data from fullOrderData if available, otherwise use basic order data
+        const customerData = order.fullOrderData?.customer || {};
+        
+        customerMap.set(customerKey, {
+          id: customerMap.size + 1,
+          name: order.customerName,
+          phone: order.phone,
+          email: customerData.email || '',
+          gender: customerData.gender || '',
+          age: customerData.age || '',
+          workshop: order.workshopName || 'غير معروف',
+          orders: 0,
+          lastOrder: order.createdAt,
+          totalSpent: 0,
+          measurements: order.customerMeasurements || customerData.measurements || {},
+          address: customerData.address || {
+            country: 'الكويت',
+            governorate: '',
+            area: '',
+            block: '',
+            street: '',
+            houseNumber: ''
+          }
+        });
+      }
+      
+      const customer = customerMap.get(customerKey);
+      customer.orders += 1;
+      customer.totalSpent += order.total;
+      
+      if (new Date(order.createdAt) > new Date(customer.lastOrder)) {
+        customer.lastOrder = order.createdAt;
+      }
+      
+      if (order.customerMeasurements) {
+        customer.measurements = { ...customer.measurements, ...order.customerMeasurements };
+      }
+      
+      // Update customer data from fullOrderData if available
+      if (order.fullOrderData?.customer) {
+        const orderCustomer = order.fullOrderData.customer;
+        if (orderCustomer.email) customer.email = orderCustomer.email;
+        if (orderCustomer.gender) customer.gender = orderCustomer.gender;
+        if (orderCustomer.age) customer.age = orderCustomer.age;
+        if (orderCustomer.address) customer.address = { ...customer.address, ...orderCustomer.address };
+      }
+    });
+    
+    const generatedCustomers = Array.from(customerMap.values());
+    setAllCustomers(generatedCustomers);
   }, []);
 
   const stats = {
@@ -424,7 +478,7 @@ const Index = () => {
                               </div>
                               <div>
                                 <span className="text-gray-500">المنزل:</span>
-                                <p className="font-medium">{customer.address.house}</p>
+                                <p className="font-medium">{customer.address.houseNumber}</p>
                               </div>
                             </div>
                           </div>
@@ -703,7 +757,7 @@ const Index = () => {
                     </div>
                     <div>
                       <span className="text-gray-600">رقم المنزل:</span>
-                      <p className="font-medium">{selectedCustomerForDetails.address.house}</p>
+                      <p className="font-medium">{selectedCustomerForDetails.address.houseNumber}</p>
                     </div>
                   </div>
                 </CardContent>

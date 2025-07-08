@@ -154,24 +154,29 @@ const WorkshopDashboard = () => {
       const customerKey = `${order.customerName}-${order.phone}`;
       
       if (!customerMap.has(customerKey)) {
+        // Extract customer data from fullOrderData if available, otherwise use basic order data
+        const orderWithFullData = order as any;
+        const customerData = orderWithFullData.fullOrderData?.customer || {};
+        
         customerMap.set(customerKey, {
           id: customerMap.size + 1,
           name: order.customerName,
           phone: order.phone,
-          email: '', // Not available from orders
-          gender: '', // Not available from orders
+          email: customerData.email || '',
+          gender: customerData.gender || '',
+          age: customerData.age || '',
           workshop: workshop.name,
           orders: 0,
           lastOrder: order.createdAt,
           totalSpent: 0,
-          measurements: order.customerMeasurements || {},
-          address: {
+          measurements: order.customerMeasurements || customerData.measurements || {},
+          address: customerData.address || {
             country: 'الكويت',
             governorate: '',
             area: '',
             block: '',
             street: '',
-            house: ''
+            houseNumber: ''
           }
         });
       }
@@ -188,6 +193,16 @@ const WorkshopDashboard = () => {
       // Update measurements if available
       if (order.customerMeasurements) {
         customer.measurements = { ...customer.measurements, ...order.customerMeasurements };
+      }
+      
+      // Update customer data from fullOrderData if available
+      const orderWithFullData = order as any;
+      if (orderWithFullData.fullOrderData?.customer) {
+        const orderCustomer = orderWithFullData.fullOrderData.customer;
+        if (orderCustomer.email) customer.email = orderCustomer.email;
+        if (orderCustomer.gender) customer.gender = orderCustomer.gender;
+        if (orderCustomer.age) customer.age = orderCustomer.age;
+        if (orderCustomer.address) customer.address = { ...customer.address, ...orderCustomer.address };
       }
     });
     
@@ -630,24 +645,50 @@ ${customer.address.area} - ${customer.address.street}
                               </Badge>
                             </div>
                             
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
                               <div>
                                 <span className="text-gray-500">الهاتف:</span>
                                 <p className="font-medium">{customer.phone}</p>
                               </div>
                               <div>
                                 <span className="text-gray-500">البريد:</span>
-                                <p className="font-medium">{customer.email}</p>
+                                <p className="font-medium">{customer.email || 'غير محدد'}</p>
                               </div>
                               <div>
-                                <span className="text-gray-500">العنوان:</span>
-                                <p className="font-medium">{customer.address.area}، {customer.address.state}</p>
+                                <span className="text-gray-500">الجنس:</span>
+                                <p className="font-medium">{customer.gender || 'غير محدد'}</p>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">المحافظة:</span>
+                                <p className="font-medium">{customer.address.governorate || 'غير محدد'}</p>
+                              </div>
+                              <div>
+                                <span className="text-gray-500">المنطقة:</span>
+                                <p className="font-medium">{customer.address.area || 'غير محدد'}</p>
                               </div>
                               <div>
                                 <span className="text-gray-500">آخر طلب:</span>
                                 <p className="font-medium">{customer.lastOrder}</p>
                               </div>
                             </div>
+                            
+                            {/* Detailed Address */}
+                            {(customer.address.block || customer.address.street || customer.address.houseNumber) && (
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs bg-gray-50 p-3 rounded-lg">
+                                <div>
+                                  <span className="text-gray-500">القطعة:</span>
+                                  <p className="font-medium">{customer.address.block || 'غير محدد'}</p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500">الشارع:</span>
+                                  <p className="font-medium">{customer.address.street || 'غير محدد'}</p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500">رقم المنزل:</span>
+                                  <p className="font-medium">{customer.address.houseNumber || 'غير محدد'}</p>
+                                </div>
+                              </div>
+                            )}
                             
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm bg-gray-50 p-3 rounded-lg">
                               <div className="text-center">
