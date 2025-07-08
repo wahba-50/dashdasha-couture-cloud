@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Building2, ArrowLeft, LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageToggle from "./LanguageToggle";
 
@@ -24,10 +24,17 @@ const SystemHeader = ({
   hideSettingsButton = false
 }: SystemHeaderProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useLanguage();
 
   const handleSignOut = () => {
-    navigate('/landing');
+    // If on index page, redirect to system page
+    if (location.pathname === '/') {
+      navigate('/system');
+    } else {
+      // For workshop dashboard and other pages, redirect to landing
+      navigate('/landing');
+    }
   };
 
   return (
