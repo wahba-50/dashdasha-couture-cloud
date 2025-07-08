@@ -26,13 +26,14 @@ const PieceDetails = () => {
       
       for (const key of possibleKeys) {
         const storedData = localStorage.getItem(key);
-        console.log(`Checking localStorage key "${key}":`, storedData);
+        console.log(`Checking localStorage key "${key}":`, storedData ? `Data found (${storedData.length} chars)` : 'No data');
         if (storedData) {
           try {
             const parsedData = JSON.parse(storedData);
+            console.log(`Parsed data for "${key}":`, parsedData);
             if (Array.isArray(parsedData)) {
               orders = parsedData;
-              console.log(`Found orders array in "${key}":`, orders);
+              console.log(`Found orders array in "${key}":`, orders.length, 'orders');
               break;
             } else if (parsedData && typeof parsedData === 'object') {
               // Handle single order object
