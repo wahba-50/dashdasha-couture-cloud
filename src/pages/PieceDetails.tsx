@@ -13,6 +13,9 @@ const PieceDetails = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('useParams result:', useParams());
+    console.log('Window location:', window.location.pathname);
+    
     const fetchPieceData = () => {
       console.log('Looking for pieceId:', pieceId);
       console.log('All localStorage keys:', Object.keys(localStorage));
