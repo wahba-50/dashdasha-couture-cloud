@@ -13,7 +13,7 @@ const PieceDetails = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('useParams result:', useParams());
+    console.log('pieceId from useParams:', pieceId);
     console.log('Window location:', window.location.pathname);
     
     const fetchPieceData = () => {
