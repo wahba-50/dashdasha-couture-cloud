@@ -524,33 +524,104 @@ const Index = () => {
                 <CardTitle>جميع الطلبات ({filteredOrders.length})</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-6">
                    {filteredOrders.map((order) => (
-                     <div key={order.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                         <div className="flex-1">
-                           <div className="flex flex-wrap items-center gap-2 mb-2">
-                             <h4 className="font-semibold">#{order.id}</h4>
-                             <Badge className={getStatusBadge(order.status)}>
-                               {order.status}
-                             </Badge>
+                     <Card key={order.id} className="border hover:shadow-md transition-all duration-200">
+                       <CardContent className="p-6">
+                         {/* Order Header */}
+                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+                           <div className="flex-1">
+                             <div className="flex flex-wrap items-center gap-2 mb-2">
+                               <h3 className="font-bold text-lg text-primary">#{order.id}</h3>
+                               <Badge className={getStatusBadge(order.status)}>
+                                 {order.status}
+                               </Badge>
+                             </div>
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                               <p><span className="text-gray-600">العميل:</span> <span className="font-medium">{order.customerName || order.customer}</span></p>
+                               <p><span className="text-gray-600">التاريخ:</span> <span className="font-medium">{order.createdAt || order.date}</span></p>
+                             </div>
                            </div>
-                           <p className="font-medium">{order.customerName || order.customer}</p>
-                           <p className="text-sm text-gray-600">{order.workshopName || order.workshop}</p>
-                           <p className="text-sm text-gray-500">{order.createdAt || order.date}</p>
-                         </div>
-                         <div className="grid grid-cols-2 gap-4 text-sm">
-                           <div>
-                             <span className="text-gray-500">القطع: </span>
-                             <span className="font-medium">{order.items}</span>
-                           </div>
-                           <div>
-                             <span className="text-gray-500">المجموع: </span>
-                             <span className="font-medium">{order.total.toFixed(3)} د.ك</span>
+                           <div className="text-right">
+                             <p className="text-lg font-bold text-green-600">{order.total.toFixed(3)} د.ك</p>
+                             <p className="text-sm text-gray-500">{order.items} قطعة</p>
                            </div>
                          </div>
-                       </div>
-                     </div>
+
+                         {/* Workshop Info */}
+                         <div className="bg-blue-50 p-3 rounded-lg mb-4">
+                           <p className="text-sm text-gray-600">الورشة:</p>
+                           <p className="font-semibold text-blue-700">{order.workshopName || order.workshop}</p>
+                         </div>
+
+                         {/* Order Pieces Details */}
+                         {order.fullOrderData?.pieces && order.fullOrderData.pieces.length > 0 && (
+                           <div>
+                             <h4 className="font-semibold mb-3 text-gray-800">تفاصيل القطع:</h4>
+                             <div className="grid gap-3">
+                               {order.fullOrderData.pieces.map((piece, index) => (
+                                 <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                                     <div>
+                                       <span className="text-gray-600">نوع القطعة:</span>
+                                       <p className="font-medium">{piece.type}</p>
+                                     </div>
+                                     <div>
+                                       <span className="text-gray-600">القماش:</span>
+                                       <p className="font-medium">{piece.fabric}</p>
+                                     </div>
+                                     <div>
+                                       <span className="text-gray-600">القصة:</span>
+                                       <p className="font-medium">{piece.cut}</p>
+                                     </div>
+                                     <div>
+                                       <span className="text-gray-600">السعر:</span>
+                                       <p className="font-medium text-green-600">{piece.totalPrice?.toFixed(3)} د.ك</p>
+                                     </div>
+                                   </div>
+                                   
+                                   {/* Accessories */}
+                                   {piece.accessories && piece.accessories.length > 0 && (
+                                     <div className="mt-2 pt-2 border-t border-gray-300">
+                                       <span className="text-gray-600 text-xs">الإكسسوارات:</span>
+                                       <div className="flex flex-wrap gap-1 mt-1">
+                                         {piece.accessories.map((acc, accIndex) => (
+                                           <Badge key={accIndex} variant="outline" className="text-xs">
+                                             {acc.name} ({acc.price?.toFixed(3)} د.ك)
+                                           </Badge>
+                                         ))}
+                                       </div>
+                                     </div>
+                                   )}
+
+                                   {/* Manufacturing */}
+                                   {piece.manufacturing && piece.manufacturing.length > 0 && (
+                                     <div className="mt-2 pt-2 border-t border-gray-300">
+                                       <span className="text-gray-600 text-xs">المصنعيات:</span>
+                                       <div className="flex flex-wrap gap-1 mt-1">
+                                         {piece.manufacturing.map((mfg, mfgIndex) => (
+                                           <Badge key={mfgIndex} variant="outline" className="text-xs">
+                                             {mfg.name} ({mfg.price?.toFixed(3)} د.ك)
+                                           </Badge>
+                                         ))}
+                                       </div>
+                                     </div>
+                                   )}
+
+                                   {/* Notes */}
+                                   {piece.notes && (
+                                     <div className="mt-2 pt-2 border-t border-gray-300">
+                                       <span className="text-gray-600 text-xs">ملاحظات:</span>
+                                       <p className="text-xs text-gray-800 mt-1">{piece.notes}</p>
+                                     </div>
+                                   )}
+                                 </div>
+                               ))}
+                             </div>
+                           </div>
+                         )}
+                       </CardContent>
+                     </Card>
                    ))}
                   
                   {filteredOrders.length === 0 && (
