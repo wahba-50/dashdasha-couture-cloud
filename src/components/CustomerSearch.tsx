@@ -71,6 +71,35 @@ const mockCustomers = [
   },
   {
     id: '3',
+    name: 'وهبه',
+    phone: '99887766',
+    email: 'wahba@example.com',
+    gender: 'ذكر',
+    age: 30,
+    address: {
+      country: 'الكويت',
+      governorate: 'العاصمة',
+      block: '5',
+      street: '12',
+      houseNumber: '7'
+    },
+    measurements: {
+      chest: '108',
+      waist: '92',
+      shoulder: '44',
+      length: '149',
+      armLength: '59',
+      neckCircumference: '41',
+      armOpening: '25',
+      bottomWidth: '64',
+      notes: 'العميل يفضل القطع الكلاسيكية'
+    },
+    orderHistory: [
+      { id: 'ORD-006', date: '2024-02-10', total: 38.750, status: 'مكتمل' }
+    ]
+  },
+  {
+    id: '4',
     name: 'خالد عبدالله المطيري',
     phone: '55667788',
     email: '',

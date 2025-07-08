@@ -254,8 +254,18 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
                       fabric: { ...fabric, meters: 1 }
                     })}
                   >
-                    <CardContent className="p-3">
-                      <div className="aspect-square bg-gray-100 rounded-lg mb-2"></div>
+                     <CardContent className="p-3">
+                       <div className="aspect-square bg-gray-100 rounded-lg mb-2 overflow-hidden">
+                         <img 
+                           src={fabric.image} 
+                           alt={fabric.name}
+                           className="w-full h-full object-cover"
+                           onError={(e) => {
+                             const target = e.target as HTMLImageElement;
+                             target.src = '/api/placeholder/100/100';
+                           }}
+                         />
+                       </div>
                       <h4 className="font-medium text-sm">{fabric.name}</h4>
                       <p className="text-xs text-gray-600">{fabric.price.toFixed(3)} د.ك/متر</p>
                       <p className="text-xs text-green-600">متوفر: {fabric.inStock} متر</p>
@@ -317,8 +327,18 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
                 }`}
                 onClick={() => setCurrentItem({...currentItem, cut})}
               >
-                <CardContent className="p-3 text-center">
-                  <div className="aspect-square bg-gray-100 rounded-lg mb-2"></div>
+                 <CardContent className="p-3 text-center">
+                   <div className="aspect-square bg-gray-100 rounded-lg mb-2 overflow-hidden">
+                     <img 
+                       src={cut.image} 
+                       alt={cut.name}
+                       className="w-full h-full object-cover"
+                       onError={(e) => {
+                         const target = e.target as HTMLImageElement;
+                         target.src = '/api/placeholder/150/150';
+                       }}
+                     />
+                   </div>
                   <h4 className="font-medium text-sm">{cut.name}</h4>
                   <p className="text-sm text-primary font-semibold">{cut.price.toFixed(3)} د.ك</p>
                 </CardContent>
@@ -347,8 +367,18 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
                     selectedAcc ? 'ring-2 ring-primary' : ''
                   }`}
                 >
-                  <CardContent className="p-3 text-center">
-                    <div className="aspect-square bg-gray-100 rounded-lg mb-2 w-16 h-16 mx-auto"></div>
+                   <CardContent className="p-3 text-center">
+                     <div className="aspect-square bg-gray-100 rounded-lg mb-2 w-16 h-16 mx-auto overflow-hidden">
+                       <img 
+                         src={accessory.image} 
+                         alt={accessory.name}
+                         className="w-full h-full object-cover"
+                         onError={(e) => {
+                           const target = e.target as HTMLImageElement;
+                           target.src = '/api/placeholder/80/80';
+                         }}
+                       />
+                     </div>
                     <h4 className="font-medium text-xs">{accessory.name}</h4>
                     <p className="text-xs text-primary font-semibold">{accessory.price.toFixed(3)} د.ك</p>
                     
