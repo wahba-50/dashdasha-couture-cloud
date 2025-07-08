@@ -145,7 +145,7 @@ const WorkshopDashboard = () => {
     }
   }, [workshopId]);
 
-  // Generate customers from orders
+  // Generate customers from orders and sync with global customers
   const customers = React.useMemo(() => {
     const customerMap = new Map();
     
@@ -160,14 +160,16 @@ const WorkshopDashboard = () => {
           phone: order.phone,
           email: '', // Not available from orders
           gender: '', // Not available from orders
+          workshop: workshop.name,
           orders: 0,
           lastOrder: order.createdAt,
           totalSpent: 0,
           measurements: order.customerMeasurements || {},
           address: {
             country: 'الكويت',
-            state: '',
+            governorate: '',
             area: '',
+            block: '',
             street: '',
             house: ''
           }
@@ -189,8 +191,29 @@ const WorkshopDashboard = () => {
       }
     });
     
-    return Array.from(customerMap.values());
-  }, [orders]);
+    const currentCustomers = Array.from(customerMap.values());
+
+    // Sync customers to global storage for SaaS dashboard
+    const existingGlobalCustomers = JSON.parse(localStorage.getItem('allCustomers') || '[]');
+    const globalCustomerMap = new Map();
+    
+    // Add existing global customers
+    existingGlobalCustomers.forEach(customer => {
+      const key = `${customer.name}-${customer.phone}`;
+      globalCustomerMap.set(key, customer);
+    });
+    
+    // Add/update customers from current workshop
+    currentCustomers.forEach(customer => {
+      const key = `${customer.name}-${customer.phone}`;
+      globalCustomerMap.set(key, customer);
+    });
+    
+    // Save updated global customers
+    localStorage.setItem('allCustomers', JSON.stringify(Array.from(globalCustomerMap.values())));
+    
+    return currentCustomers;
+  }, [orders, workshop.name]);
 
   const stats = {
     totalOrders: orders.length,

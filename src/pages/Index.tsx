@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -58,140 +58,11 @@ const Index = () => {
     }
   ]);
 
-  // Enhanced customer data with detailed information from all workshops
-  const allCustomers = [
-    { 
-      id: 1, 
-      name: 'أحمد محمد الكندري', 
-      phone: '97712345678', 
-      email: 'ahmed.kندري@gmail.com',
-      age: 35,
-      gender: 'ذكر',
-      workshop: 'ورشة الأناقة الكويتية', 
-      orders: 5, 
-      lastOrder: '2024-07-04', 
-      totalSpent: 234.750,
-      address: {
-        country: 'الكويت',
-        governorate: 'حولي',
-        area: 'الجابرية',
-        block: '1',
-        street: '10',
-        house: '15'
-      },
-      measurements: {
-        chest: '110',
-        waist: '95',
-        shoulder: '45',
-        length: '150',
-        armLength: '60',
-        neckCircumference: '42',
-        armOpening: '25',
-        bottomWidth: '65',
-        notes: 'العميل يفضل القصة الواسعة قليلاً'
-      }
-    },
-    { 
-      id: 2, 
-      name: 'فاطمة علي العتيبي', 
-      phone: '97712345679', 
-      email: 'fatma.ali@hotmail.com',
-      age: 28,
-      gender: 'أنثى',
-      workshop: 'ورشة الأناقة الكويتية', 
-      orders: 3, 
-      lastOrder: '2024-07-02', 
-      totalSpent: 156.250,
-      address: {
-        country: 'الكويت',
-        governorate: 'العاصمة',
-        area: 'قرطبة',
-        block: '2',
-        street: '15',
-        house: '22'
-      },
-      measurements: {
-        chest: '95',
-        waist: '80',
-        shoulder: '40',
-        length: '145',
-        armLength: '55',
-        neckCircumference: '38',
-        armOpening: '22',
-        bottomWidth: '60',
-        notes: 'تفضل القصات العصرية'
-      }
-    },
-    { 
-      id: 3, 
-      name: 'خالد سعد المطيري', 
-      phone: '97712345680', 
-      email: 'khalid.mutairi@outlook.com',
-      age: 42,
-      gender: 'ذكر',
-      workshop: 'تفصيل دشاديش العز', 
-      orders: 2, 
-      lastOrder: '2024-06-28', 
-      totalSpent: 89.500,
-      address: {
-        country: 'الكويت',
-        governorate: 'الجهراء',
-        area: 'النسيم',
-        block: '3',
-        street: '8',
-        house: '45'
-      },
-      measurements: {
-        chest: '115',
-        waist: '100',
-        shoulder: '46',
-        length: '152',
-        armLength: '62',
-        neckCircumference: '44',
-        armOpening: '26',
-        bottomWidth: '68',
-        notes: 'العميل طويل القامة، يحتاج قصة طويلة'
-      }
-    },
-    { 
-      id: 4, 
-      name: 'مريم حسن الرشيد', 
-      phone: '97712345681', 
-      email: 'mariam.rashid@gmail.com',
-      age: 31,
-      gender: 'أنثى',
-      workshop: 'ورشة الفخامة النسائية', 
-      orders: 8, 
-      lastOrder: '2024-07-05', 
-      totalSpent: 445.250,
-      address: {
-        country: 'الكويت',
-        governorate: 'الأحمدي',
-        area: 'الفحيحيل',
-        block: '4',
-        street: '20',
-        house: '12'
-      },
-      measurements: {
-        chest: '90',
-        waist: '75',
-        shoulder: '38',
-        length: '140',
-        armLength: '53',
-        neckCircumference: '36',
-        armOpening: '20',
-        bottomWidth: '58',
-        notes: 'تفضل الألوان الفاتحة والقصات الأنيقة'
-      }
-    }
-  ];
+  // Dynamic customer data from all workshops - loaded from localStorage
+  const [allCustomers, setAllCustomers] = useState([]);
 
-  const allOrders = [
-    { id: 'ORD-001', customer: 'أحمد محمد الكندري', workshop: 'ورشة الأناقة الكويتية', items: 2, total: 45.500, status: 'جديد', date: '2024-07-04' },
-    { id: 'ORD-002', customer: 'فاطمة علي العتيبي', workshop: 'ورشة الأناقة الكويتية', items: 1, total: 28.750, status: 'جاري الإنتاج', date: '2024-07-02' },
-    { id: 'ORD-003', customer: 'خالد سعد المطيري', workshop: 'تفصيل دشاديش العز', items: 3, total: 67.250, status: 'مكتمل', date: '2024-06-28' },
-    { id: 'ORD-004', customer: 'مريم حسن الرشيد', workshop: 'ورشة الفخامة النسائية', items: 2, total: 89.750, status: 'جاري الإنتاج', date: '2024-07-03' }
-  ];
+  // Dynamic orders data from all workshops - loaded from localStorage
+  const [allOrders, setAllOrders] = useState([]);
 
   const [externalServices, setExternalServices] = useState([
     { id: 1, name: 'خدمة التوصيل السريع', price: 2.500, type: 'delivery', active: true },
@@ -199,12 +70,23 @@ const Index = () => {
     { id: 3, name: 'الكي المتخصص', price: 0.750, type: 'ironing', active: true }
   ]);
 
+  // Load data from localStorage on component mount
+  useEffect(() => {
+    // Load all customers from localStorage
+    const savedCustomers = JSON.parse(localStorage.getItem('allCustomers') || '[]');
+    setAllCustomers(savedCustomers);
+
+    // Load all orders from localStorage  
+    const savedOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
+    setAllOrders(savedOrders);
+  }, []);
+
   const stats = {
     totalWorkshops: workshops.length,
     totalUsers: workshops.reduce((sum, w) => sum + w.users, 0),
-    totalCustomers: workshops.reduce((sum, w) => sum + w.customers, 0),
-    totalOrders: workshops.reduce((sum, w) => sum + w.orders, 0),
-    totalRevenue: workshops.reduce((sum, w) => sum + w.revenue, 0)
+    totalCustomers: allCustomers.length,
+    totalOrders: allOrders.length,
+    totalRevenue: allOrders.reduce((sum, order) => sum + order.total, 0)
   };
 
   const filteredWorkshops = workshops.filter(workshop =>
@@ -219,7 +101,9 @@ const Index = () => {
   );
 
   const filteredOrders = allOrders.filter(order =>
-    order.id.includes(searchTerm) || order.customer.includes(searchTerm) || order.workshop.includes(searchTerm)
+    order.id.includes(searchTerm) || 
+    (order.customerName || order.customer || '').includes(searchTerm) || 
+    (order.workshopName || order.workshop || '').includes(searchTerm)
   );
 
   const getStatusBadge = (status: string) => {
@@ -587,33 +471,33 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {filteredOrders.map((order) => (
-                    <div key={order.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex flex-wrap items-center gap-2 mb-2">
-                            <h4 className="font-semibold">#{order.id}</h4>
-                            <Badge className={getStatusBadge(order.status)}>
-                              {order.status}
-                            </Badge>
-                          </div>
-                          <p className="font-medium">{order.customer}</p>
-                          <p className="text-sm text-gray-600">{order.workshop}</p>
-                          <p className="text-sm text-gray-500">{order.date}</p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="text-gray-500">القطع: </span>
-                            <span className="font-medium">{order.items}</span>
-                          </div>
-                          <div>
-                            <span className="text-gray-500">المجموع: </span>
-                            <span className="font-medium">{order.total.toFixed(3)} د.ك</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                   {filteredOrders.map((order) => (
+                     <div key={order.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                         <div className="flex-1">
+                           <div className="flex flex-wrap items-center gap-2 mb-2">
+                             <h4 className="font-semibold">#{order.id}</h4>
+                             <Badge className={getStatusBadge(order.status)}>
+                               {order.status}
+                             </Badge>
+                           </div>
+                           <p className="font-medium">{order.customerName || order.customer}</p>
+                           <p className="text-sm text-gray-600">{order.workshopName || order.workshop}</p>
+                           <p className="text-sm text-gray-500">{order.createdAt || order.date}</p>
+                         </div>
+                         <div className="grid grid-cols-2 gap-4 text-sm">
+                           <div>
+                             <span className="text-gray-500">القطع: </span>
+                             <span className="font-medium">{order.items}</span>
+                           </div>
+                           <div>
+                             <span className="text-gray-500">المجموع: </span>
+                             <span className="font-medium">{order.total.toFixed(3)} د.ك</span>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                   ))}
                   
                   {filteredOrders.length === 0 && (
                     <div className="text-center py-12 text-gray-500">
