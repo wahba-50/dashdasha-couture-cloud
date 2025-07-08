@@ -122,9 +122,9 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
       reader.onload = (e) => {
         const imageUrl = e.target?.result as string;
         if (isEditing && editingProduct) {
-          setEditingProduct({ ...editingProduct, image: imageUrl });
+          setEditingProduct(prev => prev ? { ...prev, image: imageUrl } : null);
         } else {
-          setNewProduct({ ...newProduct, image: imageUrl });
+          setNewProduct(prev => ({ ...prev, image: imageUrl }));
         }
       };
       reader.readAsDataURL(file);
@@ -175,16 +175,19 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
     setProducts(products.filter(p => p.id !== id));
   };
 
-  const handleEditProductChange = (partialProduct: Partial<Product>) => {
+  const handleNewProductChange = (field: keyof Product, value: any) => {
+    setNewProduct(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleEditProductChange = (field: keyof Product, value: any) => {
     if (editingProduct) {
-      setEditingProduct({ ...editingProduct, ...partialProduct });
+      setEditingProduct(prev => prev ? { ...prev, [field]: value } : null);
     }
   };
 
-  const ProductForm = ({ product, onSave, onCancel, isEditing = false }: { 
+  const ProductForm = ({ product, onChange, isEditing = false }: { 
     product: Partial<Product>, 
-    onSave: (product: Partial<Product>) => void,
-    onCancel: () => void,
+    onChange: (field: keyof Product, value: any) => void,
     isEditing?: boolean
   }) => (
     <div className="space-y-4 p-1">
@@ -194,7 +197,7 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
           <Input
             id="name"
             value={product.name || ''}
-            onChange={(e) => onSave({ ...product, name: e.target.value })}
+            onChange={(e) => onChange('name', e.target.value)}
             placeholder="اسم المنتج"
           />
         </div>
@@ -203,7 +206,7 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
           <Input
             id="nameEn"
             value={product.nameEn || ''}
-            onChange={(e) => onSave({ ...product, nameEn: e.target.value })}
+            onChange={(e) => onChange('nameEn', e.target.value)}
             placeholder="Product Name"
           />
         </div>
@@ -212,7 +215,7 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <Label htmlFor="type">النوع *</Label>
-          <Select value={product.type} onValueChange={(value) => onSave({ ...product, type: value as any })}>
+          <Select value={product.type} onValueChange={(value) => onChange('type', value)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -232,13 +235,13 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
             type="number"
             step="0.001"
             value={product.price || ''}
-            onChange={(e) => onSave({ ...product, price: parseFloat(e.target.value) || 0 })}
+            onChange={(e) => onChange('price', parseFloat(e.target.value) || 0)}
             placeholder="0.000"
           />
         </div>
         <div>
           <Label htmlFor="unit">الوحدة *</Label>
-          <Select value={product.unit} onValueChange={(value) => onSave({ ...product, unit: value })}>
+          <Select value={product.unit} onValueChange={(value) => onChange('unit', value)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -290,7 +293,7 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
             id="stock"
             type="number"
             value={product.stock || ''}
-            onChange={(e) => onSave({ ...product, stock: parseInt(e.target.value) || 0 })}
+            onChange={(e) => onChange('stock', parseInt(e.target.value) || 0)}
             placeholder="0"
           />
         </div>
@@ -300,7 +303,7 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
             <Input
               id="color"
               value={product.color || ''}
-              onChange={(e) => onSave({ ...product, color: e.target.value })}
+              onChange={(e) => onChange('color', e.target.value)}
               placeholder="اللون"
             />
           </div>
@@ -314,7 +317,7 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
             <Input
               id="material"
               value={product.material || ''}
-              onChange={(e) => onSave({ ...product, material: e.target.value })}
+              onChange={(e) => onChange('material', e.target.value)}
               placeholder="مثل: قطن، حرير، كتان"
             />
           </div>
@@ -323,7 +326,7 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
             <Input
               id="category"
               value={product.category || ''}
-              onChange={(e) => onSave({ ...product, category: e.target.value })}
+              onChange={(e) => onChange('category', e.target.value)}
               placeholder="مثل: صيفي، شتوي، فاخر"
             />
           </div>
@@ -335,7 +338,7 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
         <Textarea
           id="description"
           value={product.description || ''}
-          onChange={(e) => onSave({ ...product, description: e.target.value })}
+          onChange={(e) => onChange('description', e.target.value)}
           placeholder="وصف المنتج..."
           rows={3}
         />
@@ -364,8 +367,7 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
             </DialogHeader>
             <ProductForm
               product={newProduct}
-              onSave={setNewProduct}
-              onCancel={() => setIsAddingProduct(false)}
+              onChange={handleNewProductChange}
             />
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button onClick={handleAddProduct}>إضافة المنتج</Button>
@@ -471,8 +473,7 @@ const ProductManagement = ({ onClose }: ProductManagementProps) => {
                           </DialogHeader>
                           <ProductForm
                             product={editingProduct || product}
-                            onSave={handleEditProductChange}
-                            onCancel={() => setEditingProduct(null)}
+                            onChange={handleEditProductChange}
                             isEditing={true}
                           />
                           <div className="flex justify-end gap-2 pt-4 border-t">
