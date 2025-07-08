@@ -521,9 +521,9 @@ ${customer.address.area} - ${customer.address.street}
                               <div>
                                 <span className="text-gray-500">التاريخ والوقت:</span>
                                 <p className="font-semibold">
-                                  {new Date(order.createdAt).toLocaleDateString('ar-SA')} 
+                                  {new Date(order.createdAt).toLocaleDateString('en-GB')} 
                                   <span className="text-xs text-gray-500 ml-1">
-                                    {new Date(order.createdAt).toLocaleTimeString('ar-SA', { 
+                                    {new Date(order.createdAt).toLocaleTimeString('en-US', { 
                                       hour: '2-digit', 
                                       minute: '2-digit',
                                       hour12: true

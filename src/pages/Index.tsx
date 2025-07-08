@@ -632,9 +632,9 @@ const Index = () => {
                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                                <p><span className="text-gray-600">العميل:</span> <span className="font-medium">{order.customerName || order.customer}</span></p>
                                 <p><span className="text-gray-600">التاريخ والوقت:</span> <span className="font-medium">
-                                  {new Date(order.createdAt || order.date).toLocaleDateString('ar-SA')}
+                                  {new Date(order.createdAt || order.date).toLocaleDateString('en-GB')}
                                   <span className="text-xs text-gray-500 ml-1">
-                                    {new Date(order.createdAt || order.date).toLocaleTimeString('ar-SA', { 
+                                    {new Date(order.createdAt || order.date).toLocaleTimeString('en-US', { 
                                       hour: '2-digit', 
                                       minute: '2-digit',
                                       hour12: true
@@ -1077,9 +1077,9 @@ const Index = () => {
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
                         <p><span className="text-gray-600">التاريخ والوقت:</span> <span className="font-medium">
-                          {new Date(order.createdAt).toLocaleDateString('ar-SA')}
+                          {new Date(order.createdAt).toLocaleDateString('en-GB')}
                           <span className="text-xs text-gray-500 ml-1">
-                            {new Date(order.createdAt).toLocaleTimeString('ar-SA', { 
+                            {new Date(order.createdAt).toLocaleTimeString('en-US', { 
                               hour: '2-digit', 
                               minute: '2-digit',
                               hour12: true
