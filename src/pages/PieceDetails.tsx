@@ -14,17 +14,29 @@ const PieceDetails = () => {
 
   useEffect(() => {
     const fetchPieceData = () => {
+      console.log('Looking for pieceId:', pieceId);
+      
       // Get the stored order data from localStorage
       const storedOrders = localStorage.getItem('orders');
+      console.log('Stored orders from localStorage:', storedOrders);
+      
       if (storedOrders) {
         const orders = JSON.parse(storedOrders);
+        console.log('Parsed orders:', orders);
         
         // Find the order that contains this piece
         for (const order of orders) {
+          console.log('Checking order:', order.id, 'QR codes:', order.qrCodes);
+          
           if (order.qrCodes && order.qrCodes.includes(pieceId)) {
+            console.log('Found order with matching QR code:', order.id);
+            
             // Find the specific item details for this piece
             const pieceItem = order.itemDetails?.find((item: any) => item.qrCode === pieceId);
             const fullItem = order.fullOrderData?.items?.find((item: any) => item.qrCode === pieceId);
+            
+            console.log('Piece item found:', pieceItem);
+            console.log('Full item found:', fullItem);
             
             if (pieceItem) {
               const pieceData = {
@@ -48,6 +60,7 @@ const PieceDetails = () => {
                 timestamp: new Date().toISOString()
               };
               
+              console.log('Setting piece data:', pieceData);
               setPieceData(pieceData);
               setLoading(false);
               return;
@@ -56,6 +69,7 @@ const PieceDetails = () => {
         }
       }
       
+      console.log('No piece data found for:', pieceId);
       // If no data found, set pieceData to null to show not found message
       setPieceData(null);
       setLoading(false);
