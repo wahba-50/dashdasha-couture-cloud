@@ -90,87 +90,92 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
 
           {/* QR Codes Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:grid-cols-2 print:gap-4">
-            {order.itemDetails?.map((item: any, index: number) => (
-              <Card key={index} className="border-2 print:border-black print:shadow-none">
-                <CardContent className="p-6 print:p-4">
-                  {/* Real QR Code */}
-                  <div className="text-center mb-4">
-                    <div className="w-32 h-32 mx-auto mb-2 flex items-center justify-center">
-                      {qrCodeUrls[item.qrCode] ? (
-                        <img 
-                          src={qrCodeUrls[item.qrCode]} 
-                          alt={`QR Code ${item.qrCode}`}
-                          className="w-full h-full"
-                        />
-                      ) : (
-                        <div className="w-full h-full border-2 border-dashed border-gray-300 flex items-center justify-center print:border-black">
-                          <span className="text-xs text-gray-400 print:text-black">جاري التحميل...</span>
-                        </div>
-                      )}
-                    </div>
-                    <Badge className="font-mono text-lg px-3 py-1 print:border print:border-black print:bg-white print:text-black">
-                      {item.qrCode}
-                    </Badge>
-                  </div>
-
-                  {/* Item Details */}
-                  <div className="space-y-3 text-sm print:text-xs">
-                    <div className="border-t pt-3 print:border-black">
-                      <div className="grid grid-cols-1 gap-2">
-                        <div>
-                          <span className="font-semibold">نوع القماش:</span>
-                          <p className="mt-1">
-                            {item.fabricType === 'customer' 
-                              ? `قماش العميل${item.fabric?.specifications ? ` - ${item.fabric.specifications}` : ''}`
-                              : `${item.fabric}${item.fabricCode ? ` - كود: ${item.fabricCode}` : ''}${item.fabricColor ? ` - لون: ${item.fabricColor}` : ''}`
-                            }
-                          </p>
-                        </div>
-                        <div>
-                          <span className="font-semibold">نوع القصة:</span>
-                          <p className="mt-1">{item.cut}</p>
-                        </div>
-                        {item.accessories && item.accessories.length > 0 && (
-                          <div>
-                            <span className="font-semibold">الإكسسوارات:</span>
-                            <div className="mt-1 space-y-1">
-                              {item.accessories.map((accessory: any, accIndex: number) => (
-                                <p key={accIndex} className="text-xs">
-                                  {accessory.name} - عدد: {accessory.quantity || 1}
-                                </p>
-                              ))}
-                            </div>
+            {order.itemDetails?.map((item: any, index: number) => {
+              // Get the full item details from fullOrderData for accessories
+              const fullItem = order.fullOrderData?.items?.find((fullItem: any) => fullItem.qrCode === item.qrCode);
+              
+              return (
+                <Card key={index} className="border-2 print:border-black print:shadow-none">
+                  <CardContent className="p-6 print:p-4">
+                    {/* Real QR Code */}
+                    <div className="text-center mb-4">
+                      <div className="w-32 h-32 mx-auto mb-2 flex items-center justify-center">
+                        {qrCodeUrls[item.qrCode] ? (
+                          <img 
+                            src={qrCodeUrls[item.qrCode]} 
+                            alt={`QR Code ${item.qrCode}`}
+                            className="w-full h-full"
+                          />
+                        ) : (
+                          <div className="w-full h-full border-2 border-dashed border-gray-300 flex items-center justify-center print:border-black">
+                            <span className="text-xs text-gray-400 print:text-black">جاري التحميل...</span>
                           </div>
                         )}
-                        <div>
-                          <span className="font-semibold">رقم الطلب:</span>
-                          <p className="mt-1">#{order.id}</p>
-                        </div>
-                        <div>
-                          <span className="font-semibold">تاريخ التسليم:</span>
-                          <p className="mt-1">{order.deliveryDate}</p>
-                        </div>
-                        <div>
-                          <span className="font-semibold">العميل:</span>
-                          <p className="mt-1">{order.customerName}</p>
-                        </div>
-                        <div>
-                          <span className="font-semibold">الهاتف:</span>
-                          <p className="mt-1">{order.phone}</p>
+                      </div>
+                      <Badge className="font-mono text-lg px-3 py-1 print:border print:border-black print:bg-white print:text-black">
+                        {item.qrCode}
+                      </Badge>
+                    </div>
+
+                    {/* Item Details */}
+                    <div className="space-y-3 text-sm print:text-xs">
+                      <div className="border-t pt-3 print:border-black">
+                        <div className="grid grid-cols-1 gap-2">
+                          <div>
+                            <span className="font-semibold">نوع القماش:</span>
+                            <p className="mt-1">
+                              {item.fabricType === 'customer' 
+                                ? `قماش العميل${item.fabric?.specifications ? ` - ${item.fabric.specifications}` : ''}`
+                                : `${item.fabric}${item.fabricCode ? ` - كود: ${item.fabricCode}` : ''}${item.fabricColor ? ` - لون: ${item.fabricColor}` : ''}`
+                              }
+                            </p>
+                          </div>
+                          <div>
+                            <span className="font-semibold">نوع القصة:</span>
+                            <p className="mt-1">{item.cut}</p>
+                          </div>
+                          {fullItem?.accessories && fullItem.accessories.length > 0 && (
+                            <div>
+                              <span className="font-semibold">الإكسسوارات:</span>
+                              <div className="mt-1 space-y-1">
+                                {fullItem.accessories.map((accessory: any, accIndex: number) => (
+                                  <p key={accIndex} className="text-xs">
+                                    {accessory.name} - عدد: {accessory.quantity || 1}
+                                  </p>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          <div>
+                            <span className="font-semibold">رقم الطلب:</span>
+                            <p className="mt-1">#{order.id}</p>
+                          </div>
+                          <div>
+                            <span className="font-semibold">تاريخ التسليم:</span>
+                            <p className="mt-1">{order.deliveryDate}</p>
+                          </div>
+                          <div>
+                            <span className="font-semibold">العميل:</span>
+                            <p className="mt-1">{order.customerName}</p>
+                          </div>
+                          <div>
+                            <span className="font-semibold">الهاتف:</span>
+                            <p className="mt-1">{order.phone}</p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Footer for each code */}
-                  <div className="mt-4 pt-3 border-t text-xs text-center text-gray-500 print:border-black print:text-black">
-                    <p>تاريخ الطباعة: {new Date().toLocaleDateString('ar-KW')}</p>
-                    <p className="font-semibold">قطعة {index + 1} من {order.items}</p>
-                    <p className="mt-1 text-[10px]">امسح الكود لعرض جميع التفاصيل والقياسات</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    {/* Footer for each code */}
+                    <div className="mt-4 pt-3 border-t text-xs text-center text-gray-500 print:border-black print:text-black">
+                      <p>تاريخ الطباعة: {new Date().toLocaleDateString('ar-KW')}</p>
+                      <p className="font-semibold">قطعة {index + 1} من {order.items}</p>
+                      <p className="mt-1 text-[10px]">امسح الكود لعرض جميع التفاصيل والقياسات</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
           {/* Print Footer */}
