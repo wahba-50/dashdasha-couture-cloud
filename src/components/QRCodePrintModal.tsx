@@ -125,7 +125,7 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
                             <span className="font-semibold">نوع القماش:</span>
                             <p className="mt-1">
                               {item.fabricType === 'customer' 
-                                ? `قماش العميل${item.fabric?.specifications ? ` - ${item.fabric.specifications}` : ''}`
+                                ? `قماش العميل${item.customerFabricDetails || item.fabric?.specifications || item.fabric || '' ? ` - ${item.customerFabricDetails || item.fabric?.specifications || item.fabric || ''}` : ''}`
                                 : `${item.fabric}${item.fabricCode ? ` - كود: ${item.fabricCode}` : ''}${item.fabricColor ? ` - لون: ${item.fabricColor}` : ''}`
                               }
                             </p>
