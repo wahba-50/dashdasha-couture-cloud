@@ -13,38 +13,51 @@ const PieceDetails = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // In a real app, this would fetch from an API
-    // For now, we'll simulate the data that would be stored with the QR code
     const fetchPieceData = () => {
-      // This simulates getting data from a database or API
-      const mockData = {
-        orderId: 'ORD-001',
-        itemCode: pieceId,
-        customerName: 'أحمد محمد الكندري',
-        customerPhone: '+96597712345678',
-        fabric: 'قماش قطني فاخر',
-        cut: 'قصة كلاسيكية',
-        deliveryDate: '2024-07-15',
-        createdAt: '2024-07-04',
-        workshopName: "ورشة الأناقة الكويتية",
-        workshopPhone: "+965 2262 8945",
-        workshopAddress: "حولي، شارع تونس، مجمع الأناقة التجاري",
-        measurements: {
-          chest: 95,
-          waist: 85,
-          shoulder: 45,
-          neck: 38,
-          length: 145,
-          sleeve: 60,
-          armhole: 42
-        },
-        status: 'جديد',
-        cutter: null,
-        totalAmount: 45.500,
-        timestamp: new Date().toISOString()
-      };
+      // Get the stored order data from localStorage
+      const storedOrders = localStorage.getItem('orders');
+      if (storedOrders) {
+        const orders = JSON.parse(storedOrders);
+        
+        // Find the order that contains this piece
+        for (const order of orders) {
+          if (order.qrCodes && order.qrCodes.includes(pieceId)) {
+            // Find the specific item details for this piece
+            const pieceItem = order.itemDetails?.find((item: any) => item.qrCode === pieceId);
+            const fullItem = order.fullOrderData?.items?.find((item: any) => item.qrCode === pieceId);
+            
+            if (pieceItem) {
+              const pieceData = {
+                orderId: order.id,
+                itemCode: pieceId,
+                customerName: order.customerName,
+                customerPhone: order.phone,
+                fabric: pieceItem.fabric,
+                fabricSpecifications: fullItem?.fabric?.specifications || '',
+                cut: pieceItem.cut,
+                accessories: fullItem?.accessories || [],
+                deliveryDate: order.deliveryDate,
+                createdAt: order.createdAt,
+                workshopName: "ورشة الأناقة الكويتية",
+                workshopPhone: "+965 2262 8945",
+                workshopAddress: "حولي، شارع تونس، مجمع الأناقة التجاري",
+                measurements: order.customerMeasurements || {},
+                status: order.status,
+                cutter: order.cutter,
+                totalAmount: order.total,
+                timestamp: new Date().toISOString()
+              };
+              
+              setPieceData(pieceData);
+              setLoading(false);
+              return;
+            }
+          }
+        }
+      }
       
-      setPieceData(mockData);
+      // If no data found, set pieceData to null to show not found message
+      setPieceData(null);
       setLoading(false);
     };
 
@@ -203,51 +216,59 @@ const PieceDetails = () => {
             <div>
               <span className="text-gray-600 text-xs sm:text-sm">نوع القماش:</span>
               <p className="font-semibold text-sm sm:text-base">{pieceData.fabric}</p>
+              {pieceData.fabricSpecifications && (
+                <p className="text-xs text-gray-600 mt-1">{pieceData.fabricSpecifications}</p>
+              )}
             </div>
             <div>
               <span className="text-gray-600 text-xs sm:text-sm">نوع القصة:</span>
               <p className="font-semibold text-sm sm:text-base">{pieceData.cut}</p>
             </div>
+            {pieceData.accessories && pieceData.accessories.length > 0 && (
+              <div>
+                <span className="text-gray-600 text-xs sm:text-sm">الإكسسوارات:</span>
+                <div className="mt-1 space-y-1">
+                  {pieceData.accessories.map((accessory: any, index: number) => (
+                    <div key={index} className="text-xs bg-gray-50 p-2 rounded">
+                      <span className="font-medium">{accessory.name}</span>
+                      {accessory.quantity && <span className="text-gray-600"> - عدد: {accessory.quantity}</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Customer Measurements */}
-        <Card>
-          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Ruler className="w-4 h-4 sm:w-5 sm:h-5" />
-              قياسات العميل
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
-              <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-600">الصدر</p>
-                <p className="font-bold text-sm sm:text-lg">{pieceData.measurements.chest} سم</p>
+        {pieceData.measurements && Object.keys(pieceData.measurements).length > 0 && (
+          <Card>
+            <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Ruler className="w-4 h-4 sm:w-5 sm:h-5" />
+                قياسات العميل
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
+                {Object.entries(pieceData.measurements)
+                  .filter(([key, value]) => key !== 'notes' && value && value.toString().trim())
+                  .map(([key, value]) => (
+                    <div key={key} className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-600">{key}</p>
+                      <p className="font-bold text-sm sm:text-lg">{String(value)} سم</p>
+                    </div>
+                  ))}
               </div>
-              <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-600">الخصر</p>
-                <p className="font-bold text-sm sm:text-lg">{pieceData.measurements.waist} سم</p>
-              </div>
-              <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-600">الكتف</p>
-                <p className="font-bold text-sm sm:text-lg">{pieceData.measurements.shoulder} سم</p>
-              </div>
-              <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-600">الرقبة</p>
-                <p className="font-bold text-sm sm:text-lg">{pieceData.measurements.neck} سم</p>
-              </div>
-              <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-600">الطول</p>
-                <p className="font-bold text-sm sm:text-lg">{pieceData.measurements.length} سم</p>
-              </div>
-              <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-600">الكم</p>
-                <p className="font-bold text-sm sm:text-lg">{pieceData.measurements.sleeve} سم</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              {pieceData.measurements.notes && (
+                <div className="mt-4 p-3 bg-yellow-50 rounded-lg border">
+                  <p className="text-xs text-gray-600 mb-1">ملاحظات القياسات:</p>
+                  <p className="text-sm font-medium">{pieceData.measurements.notes}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Timestamp */}
         <Card>
