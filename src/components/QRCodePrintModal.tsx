@@ -124,10 +124,26 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
                           <div>
                             <span className="font-semibold">نوع القماش:</span>
                             <p className="mt-1">
-                              {item.fabricType === 'customer' 
-                                ? `قماش العميل${item.customerFabricDetails || item.fabric?.specifications || item.fabric || '' ? ` - ${item.customerFabricDetails || item.fabric?.specifications || item.fabric || ''}` : ''}`
-                                : `${item.fabric}${item.fabricCode ? ` - كود: ${item.fabricCode}` : ''}${item.fabricColor ? ` - لون: ${item.fabricColor}` : ''}`
-                              }
+                              {(() => {
+                                // Debug log to see available data
+                                console.log('Item data:', item);
+                                console.log('Full item data:', fullItem);
+                                
+                                if (item.fabricType === 'customer') {
+                                  const details = item.customerFabricDetails || 
+                                                fullItem?.customerFabricDetails || 
+                                                item.fabric?.specifications || 
+                                                fullItem?.fabric?.specifications ||
+                                                item.fabric?.details ||
+                                                fullItem?.fabric?.details ||
+                                                item.fabricDetails ||
+                                                fullItem?.fabricDetails ||
+                                                '';
+                                  return `قماش العميل${details ? ` - ${details}` : ''}`;
+                                } else {
+                                  return `${item.fabric}${item.fabricCode ? ` - كود: ${item.fabricCode}` : ''}${item.fabricColor ? ` - لون: ${item.fabricColor}` : ''}`;
+                                }
+                              })()}
                             </p>
                           </div>
                           <div>
