@@ -247,7 +247,7 @@ const WorkshopDashboard = () => {
                          order.phone.includes(searchTerm);
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     return matchesSearch && matchesStatus;
-  });
+  }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const filteredCustomers = customers.filter(customer =>
     customer.name.includes(searchTerm) || 
