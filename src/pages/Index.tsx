@@ -76,6 +76,21 @@ const Index = () => {
 
   // Load data from localStorage on component mount
   useEffect(() => {
+    // Load workshops from localStorage
+    const savedWorkshops = JSON.parse(localStorage.getItem('workshops') || '[]');
+    if (savedWorkshops.length > 0) {
+      const mergedWorkshops = [...workshops];
+      savedWorkshops.forEach((savedWorkshop: any) => {
+        const existingIndex = mergedWorkshops.findIndex(w => w.id === savedWorkshop.id);
+        if (existingIndex === -1) {
+          mergedWorkshops.push(savedWorkshop);
+        } else {
+          mergedWorkshops[existingIndex] = savedWorkshop;
+        }
+      });
+      setWorkshops(mergedWorkshops);
+    }
+
     // Load all orders from localStorage  
     const savedOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
     setAllOrders(savedOrders);
@@ -189,18 +204,26 @@ const Index = () => {
         break;
       case 'enter':
         if (workshopId) {
-          navigate(`/workshop/${workshopId}/dashboard`);
+          const workshop = workshops.find(w => w.id === workshopId);
+          if (workshop) {
+            // Store the workshop name for the dashboard
+            localStorage.setItem('currentWorkshopName', workshop.name);
+            navigate(`/workshop/${workshopId}/dashboard`);
+          }
         }
         break;
       case 'toggle':
         if (workshopId) {
-          setWorkshops(prevWorkshops => 
-            prevWorkshops.map(workshop => 
+          setWorkshops(prevWorkshops => {
+            const updatedWorkshops = prevWorkshops.map(workshop => 
               workshop.id === workshopId 
                 ? { ...workshop, status: workshop.status === 'نشط' ? 'غير نشط' : 'نشط' }
                 : workshop
-            )
-          );
+            );
+            // Save updated workshops to localStorage
+            localStorage.setItem('workshops', JSON.stringify(updatedWorkshops));
+            return updatedWorkshops;
+          });
         }
         break;
       default:
@@ -514,15 +537,6 @@ const Index = () => {
                             >
                               <Ruler className="w-4 h-4" />
                               عرض القياسات
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleViewCustomerDetails(customer)}
-                              className="w-full flex items-center gap-2"
-                            >
-                              <Eye className="w-4 h-4" />
-                              عرض التفاصيل
                             </Button>
                           </div>
                         </div>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -65,8 +66,34 @@ const CreateWorkshop = () => {
       return;
     }
 
-    console.log('Creating workshop:', formData);
-    // Here you would typically send the data to your backend
+    // Create workshop object
+    const newWorkshop = {
+      id: Date.now(), // Simple ID generation
+      name: formData.name,
+      type: formData.type === 'men' ? 'رجالي' : formData.type === 'women' ? 'حريمي' : 'حريمي ورجالي',
+      address: `${formData.address.country}، ${formData.address.governorate}، القطعة ${formData.address.block}، الشارع ${formData.address.street}، المبنى ${formData.address.building}`,
+      users: 1,
+      customers: 0,
+      orders: 0,
+      status: "نشط",
+      revenue: 0,
+      description: formData.description,
+      credentials: {
+        username: formData.username,
+        password: formData.password
+      }
+    };
+
+    // Get existing workshops from localStorage
+    const existingWorkshops = JSON.parse(localStorage.getItem('workshops') || '[]');
+    
+    // Add new workshop
+    const updatedWorkshops = [...existingWorkshops, newWorkshop];
+    
+    // Save to localStorage
+    localStorage.setItem('workshops', JSON.stringify(updatedWorkshops));
+
+    console.log('Creating workshop:', newWorkshop);
     alert('تم إنشاء الورشة بنجاح!');
     navigate('/');
   };
