@@ -631,7 +631,16 @@ const Index = () => {
                              </div>
                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                                <p><span className="text-gray-600">العميل:</span> <span className="font-medium">{order.customerName || order.customer}</span></p>
-                               <p><span className="text-gray-600">التاريخ:</span> <span className="font-medium">{order.createdAt || order.date}</span></p>
+                                <p><span className="text-gray-600">التاريخ والوقت:</span> <span className="font-medium">
+                                  {new Date(order.createdAt || order.date).toLocaleDateString('ar-SA')}
+                                  <span className="text-xs text-gray-500 ml-1">
+                                    {new Date(order.createdAt || order.date).toLocaleTimeString('ar-SA', { 
+                                      hour: '2-digit', 
+                                      minute: '2-digit',
+                                      hour12: true
+                                    })}
+                                  </span>
+                                </span></p>
                              </div>
                            </div>
                            <div className="text-right">
@@ -1067,7 +1076,16 @@ const Index = () => {
                         </Badge>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
-                        <p><span className="text-gray-600">التاريخ:</span> <span className="font-medium">{order.createdAt}</span></p>
+                        <p><span className="text-gray-600">التاريخ والوقت:</span> <span className="font-medium">
+                          {new Date(order.createdAt).toLocaleDateString('ar-SA')}
+                          <span className="text-xs text-gray-500 ml-1">
+                            {new Date(order.createdAt).toLocaleTimeString('ar-SA', { 
+                              hour: '2-digit', 
+                              minute: '2-digit',
+                              hour12: true
+                            })}
+                          </span>
+                        </span></p>
                         <p><span className="text-gray-600">عدد القطع:</span> <span className="font-medium">{order.items}</span></p>
                         <p><span className="text-gray-600">المبلغ:</span> <span className="font-medium text-green-600">{order.total.toFixed(3)} د.ك</span></p>
                       </div>

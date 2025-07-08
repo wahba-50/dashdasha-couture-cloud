@@ -519,8 +519,17 @@ ${customer.address.area} - ${customer.address.street}
                                 <p className="font-semibold">{order.deliveryDate}</p>
                               </div>
                               <div>
-                                <span className="text-gray-500">التاريخ:</span>
-                                <p className="font-semibold">{order.createdAt}</p>
+                                <span className="text-gray-500">التاريخ والوقت:</span>
+                                <p className="font-semibold">
+                                  {new Date(order.createdAt).toLocaleDateString('ar-SA')} 
+                                  <span className="text-xs text-gray-500 ml-1">
+                                    {new Date(order.createdAt).toLocaleTimeString('ar-SA', { 
+                                      hour: '2-digit', 
+                                      minute: '2-digit',
+                                      hour12: true
+                                    })}
+                                  </span>
+                                </p>
                               </div>
                             </div>
 
