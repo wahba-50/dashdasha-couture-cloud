@@ -627,7 +627,7 @@ const NewOrder = () => {
                             <span className="font-bold text-primary">{item.totalPrice.toFixed(3)} د.ك</span>
                           </div>
                           <div className="text-sm text-gray-600 space-y-1">
-                            <div>القماش: {item.fabricType === 'customer' ? 'قماش العميل' : item.fabric?.name}</div>
+                            <div>القماش: {item.fabricType === 'customer' ? `قماش العميل${item.fabric?.specifications ? ` - ${item.fabric.specifications}` : ''}` : item.fabric?.name}</div>
                             <div>القصة: {item.cut.name}</div>
                             {item.accessories.length > 0 && (
                               <div>الإكسسوارات: {item.accessories.map((acc: any) => `${acc.name} (${acc.quantity})`).join(', ')}</div>
