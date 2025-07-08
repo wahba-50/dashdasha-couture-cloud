@@ -125,6 +125,10 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
                             <span className="font-semibold">نوع القماش:</span>
                             <p className="mt-1">
                               {(() => {
+                                console.log('Checking fabric type:', item.fabricType);
+                                console.log('Full item fabric:', fullItem?.fabric);
+                                console.log('Item fabric:', item.fabric);
+                                
                                 if (item.fabricType === 'customer') {
                                   // Get fabric specifications from fullItem first, then fallback to item
                                   const specifications = fullItem?.fabric?.specifications || 
@@ -132,6 +136,7 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
                                                        fullItem?.customerFabricDetails || 
                                                        item.customerFabricDetails ||
                                                        '';
+                                  console.log('Found specifications:', specifications);
                                   return `قماش العميل${specifications ? ` - ${specifications}` : ''}`;
                                 } else {
                                   return `${item.fabric}${item.fabricCode ? ` - كود: ${item.fabricCode}` : ''}${item.fabricColor ? ` - لون: ${item.fabricColor}` : ''}`;
