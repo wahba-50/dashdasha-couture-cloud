@@ -13,6 +13,7 @@ interface SystemHeaderProps {
   showSignOutButton?: boolean;
   actions?: React.ReactNode;
   hideSettingsButton?: boolean;
+  onBackClick?: () => void;
 }
 
 const SystemHeader = ({ 
@@ -21,7 +22,8 @@ const SystemHeader = ({
   showBackButton = false, 
   showSignOutButton = false,
   actions,
-  hideSettingsButton = false
+  hideSettingsButton = false,
+  onBackClick
 }: SystemHeaderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,6 +39,14 @@ const SystemHeader = ({
     }
   };
 
+  const handleBackClick = () => {
+    if (onBackClick) {
+      onBackClick();
+    } else {
+      navigate(-1);
+    }
+  };
+
   return (
     <header className="bg-white shadow-sm border-b-2 border-primary sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">
@@ -46,7 +56,7 @@ const SystemHeader = ({
               <Button 
                 variant="ghost" 
                 size="icon"
-                onClick={() => navigate(-1)}
+                onClick={handleBackClick}
                 className="shrink-0"
               >
                 <ArrowLeft className="w-5 h-5" />

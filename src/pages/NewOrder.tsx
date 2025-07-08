@@ -520,6 +520,14 @@ const NewOrder = () => {
     }
   };
 
+  const handleBackToWorkshop = () => {
+    if (workshopId) {
+      navigate(`/workshop/${workshopId}/dashboard`);
+    } else {
+      navigate(-1);
+    }
+  };
+
   const steps = [
     { number: 1, title: 'بيانات العميل', completed: currentStep > 1 },
     { number: 2, title: 'تفاصيل الطلب', completed: currentStep > 2 },
@@ -532,6 +540,7 @@ const NewOrder = () => {
         title="إنشاء طلب جديد"
         subtitle={`الخطوة ${currentStep} من 3`}
         showBackButton={true}
+        onBackClick={handleBackToWorkshop}
       />
 
       <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8">
