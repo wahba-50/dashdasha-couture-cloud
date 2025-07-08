@@ -183,15 +183,15 @@ const Index = () => {
         (type === 'orders' && (item.id.includes(searchTerm) || (item.customerName || item.customer || '').includes(searchTerm) || (item.workshopName || item.workshop || '').includes(searchTerm)));
 
       // Status filter
-      const statusMatch = filters.status === '' || item.status === filters.status;
+      const statusMatch = filters.status === '' || filters.status === 'all' || item.status === filters.status;
 
       // Type filter
-      const typeMatch = filters.type === '' || 
+      const typeMatch = filters.type === '' || filters.type === 'all' || 
         (type === 'workshops' && item.type === filters.type) ||
         (type === 'customers' && item.gender === filters.type);
 
       // Workshop filter for customers and orders
-      const workshopMatch = filters.workshop === '' || 
+      const workshopMatch = filters.workshop === '' || filters.workshop === 'all' || 
         (type === 'customers' && item.workshop === filters.workshop) ||
         (type === 'orders' && (item.workshopName || item.workshop) === filters.workshop);
 
@@ -798,7 +798,7 @@ const Index = () => {
                     <SelectValue placeholder="اختر الحالة" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع الحالات</SelectItem>
+                    <SelectItem value="all">جميع الحالات</SelectItem>
                     <SelectItem value="نشط">نشط</SelectItem>
                     <SelectItem value="غير نشط">غير نشط</SelectItem>
                     <SelectItem value="جديد">جديد</SelectItem>
@@ -816,7 +816,7 @@ const Index = () => {
                     <SelectValue placeholder="اختر النوع" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع الأنواع</SelectItem>
+                    <SelectItem value="all">جميع الأنواع</SelectItem>
                     {selectedTab === 'workshops' && (
                       <>
                         <SelectItem value="رجالي">رجالي</SelectItem>
@@ -844,7 +844,7 @@ const Index = () => {
                     <SelectValue placeholder="اختر الورشة" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع الورش</SelectItem>
+                    <SelectItem value="all">جميع الورش</SelectItem>
                     {workshops.map((workshop) => (
                       <SelectItem key={workshop.id} value={workshop.name}>
                         {workshop.name}
