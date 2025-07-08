@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -147,31 +147,44 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
 
   const totalOrderAmount = orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
-  // Isolated textarea component with ref-based approach to prevent re-rendering
-  const CustomerFabricTextarea = ({ initialValue, onValueChange }: { initialValue: string; onValueChange: (value: string) => void }) => {
-    const textareaRef = React.useRef<HTMLTextAreaElement>(null);
-    
-    React.useEffect(() => {
-      if (textareaRef.current && textareaRef.current.value !== initialValue) {
-        textareaRef.current.value = initialValue;
-      }
-    }, [initialValue]);
+  // Memoized component to prevent re-renders on parent state changes
+  const CustomerFabricTextarea = React.memo(({ 
+    initialValue, 
+    onValueChange 
+  }: { 
+    initialValue: string; 
+    onValueChange: (value: string) => void 
+  }) => {
+    const [localValue, setLocalValue] = useState(initialValue);
 
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      onValueChange(e.target.value);
-    };
+    const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const newValue = e.target.value;
+      setLocalValue(newValue);
+      onValueChange(newValue);
+    }, [onValueChange]);
 
     return (
       <textarea
-        ref={textareaRef}
         id="fabricSpecs"
         placeholder="وصف نوع ولون وخامة القماش..."
-        defaultValue={initialValue}
+        value={localValue}
         onChange={handleChange}
         className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mt-1"
       />
     );
-  };
+  });
+
+  const handleFabricSpecsChange = useCallback((specifications: string) => {
+    setCurrentItem(prev => ({
+      ...prev,
+      fabric: {
+        id: 'customer-fabric',
+        name: 'قماش العميل',
+        price: 0,
+        specifications
+      }
+    }));
+  }, []);
 
   const ItemBuilder = () => (
     <div className="space-y-6">
@@ -243,17 +256,7 @@ const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
                 <Label htmlFor="fabricSpecs">مواصفات قماش العميل</Label>
                 <CustomerFabricTextarea
                   initialValue={currentItem.fabric?.specifications || ''}
-                  onValueChange={(specifications) => {
-                    setCurrentItem(prev => ({
-                      ...prev,
-                      fabric: {
-                        id: 'customer-fabric',
-                        name: 'قماش العميل',
-                        price: 0,
-                        specifications
-                      }
-                    }));
-                  }}
+                  onValueChange={handleFabricSpecsChange}
                 />
               </div>
             </TabsContent>
