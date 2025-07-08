@@ -17,17 +17,21 @@ const PieceDetails = () => {
       try {
         // Get all orders from localStorage
         const existingOrders = JSON.parse(localStorage.getItem('workshopOrders') || '[]');
+        console.log('All orders:', existingOrders);
+        console.log('Looking for pieceId:', pieceId);
         
         // Find the order and item that contains this piece ID
         let foundPiece = null;
         let foundOrder = null;
         
         for (const order of existingOrders) {
+          console.log('Checking order:', order.id, 'itemDetails:', order.itemDetails);
           // Check if this pieceId exists in this order's itemDetails
           const item = order.itemDetails?.find((item: any) => item.qrCode === pieceId);
           if (item) {
             foundPiece = item;
             foundOrder = order;
+            console.log('Found piece:', foundPiece, 'in order:', foundOrder.id);
             break;
           }
         }
@@ -41,8 +45,8 @@ const PieceDetails = () => {
             itemCode: pieceId,
             customerName: foundOrder.customerName,
             customerPhone: foundOrder.phone,
-            fabric: foundPiece.fabric,
-            cut: foundPiece.cut,
+            fabric: foundPiece.fabric || 'غير محدد',
+            cut: foundPiece.cut || 'غير محدد',
             deliveryDate: foundOrder.deliveryDate,
             createdAt: foundOrder.createdAt,
             workshopName: "ورشة الأناقة الكويتية",
@@ -64,8 +68,10 @@ const PieceDetails = () => {
             fullItem: fullItem // Include full item details for additional info like accessories
           };
           
+          console.log('Final pieceData:', pieceData);
           setPieceData(pieceData);
         } else {
+          console.log('Piece not found. foundPiece:', foundPiece, 'foundOrder:', foundOrder);
           setPieceData(null);
         }
       } catch (error) {
