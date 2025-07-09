@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Users, ShoppingCart, Plus, Eye, Search, Filter, Phone, Mail, MapPin, Ruler, Calendar, User, Power, PowerOff } from "lucide-react";
+import { Building2, Users, ShoppingCart, Plus, Eye, Search, Filter, Phone, Mail, MapPin, Ruler, Calendar, User, Power, PowerOff, Download } from "lucide-react";
+import * as XLSX from 'xlsx';
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import SystemHeader from "@/components/SystemHeader";
@@ -320,6 +321,54 @@ const Index = () => {
     });
   };
 
+  const handleExportCustomers = () => {
+    // Prepare data for Excel export
+    const exportData = filteredCustomers.map(customer => ({
+      'اسم العميل': customer.name,
+      'رقم الهاتف': customer.phone,
+      'البريد الإلكتروني': customer.email || 'غير محدد',
+      'الجنس': customer.gender || 'غير محدد',
+      'العمر': customer.age || 'غير محدد',
+      'الورشة': customer.workshop,
+      'الدولة': customer.address?.country || 'غير محدد',
+      'المحافظة': customer.address?.governorate || 'غير محدد',
+      'المنطقة': customer.address?.area || 'غير محدد',
+      'القطعة': customer.address?.block || 'غير محدد',
+      'الشارع': customer.address?.street || 'غير محدد',
+      'رقم المنزل': customer.address?.houseNumber || 'غير محدد',
+      'عدد الطلبات': customer.orders,
+      'تاريخ آخر طلب': customer.lastOrder,
+      'إجمالي الإنفاق (د.ك)': customer.totalSpent.toFixed(3),
+      'متوسط قيمة الطلب (د.ك)': (customer.totalSpent / customer.orders).toFixed(3),
+      'قياس الصدر (سم)': customer.measurements?.chest || 'غير محدد',
+      'قياس الخصر (سم)': customer.measurements?.waist || 'غير محدد',
+      'قياس الكتف (سم)': customer.measurements?.shoulder || 'غير محدد',
+      'قياس الرقبة (سم)': customer.measurements?.neck || 'غير محدد',
+      'الطول (سم)': customer.measurements?.length || 'غير محدد',
+      'قياس الكم (سم)': customer.measurements?.sleeve || 'غير محدد',
+      'فتحة الكم (سم)': customer.measurements?.armhole || 'غير محدد',
+      'طول الكم (سم)': customer.measurements?.armLength || 'غير محدد',
+      'محيط الرقبة (سم)': customer.measurements?.neckCircumference || 'غير محدد',
+      'فتحة الذراع (سم)': customer.measurements?.armOpening || 'غير محدد',
+      'عرض القاع (سم)': customer.measurements?.bottomWidth || 'غير محدد',
+      'ملاحظات القياسات': customer.measurements?.notes || 'غير محدد'
+    }));
+
+    // Create workbook and worksheet
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'العملاء');
+    
+    // Generate filename with current date
+    const currentDate = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+    const filename = `تقرير_العملاء_${currentDate}.xlsx`;
+    
+    // Download the file
+    XLSX.writeFile(workbook, filename);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-amber-50">
       <SystemHeader
@@ -491,7 +540,17 @@ const Index = () => {
           <TabsContent value="customers">
             <Card>
               <CardHeader>
-                <CardTitle>جميع العملاء ({filteredCustomers.length})</CardTitle>
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <span>جميع العملاء ({filteredCustomers.length})</span>
+                  <Button 
+                    onClick={handleExportCustomers} 
+                    size="sm"
+                    className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    تصدير إكسل
+                  </Button>
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
