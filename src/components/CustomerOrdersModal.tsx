@@ -124,15 +124,15 @@ const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
                 </div>
                 <div className="text-center bg-green-50 p-2 rounded">
                   <p className="text-gray-500">إجمالي الإنفاق</p>
-                  <p className="font-bold text-green-600">{customer.totalSpent.toFixed(3)} د.ك</p>
+                  <p className="font-bold text-green-600">{(customer.totalSpent || 0).toFixed(3)} د.ك</p>
                 </div>
                 <div className="text-center bg-purple-50 p-2 rounded">
                   <p className="text-gray-500">متوسط الطلب</p>
-                  <p className="font-bold text-purple-600">{(customer.totalSpent / customer.orders).toFixed(3)} د.ك</p>
+                  <p className="font-bold text-purple-600">{((customer.totalSpent || 0) / (customer.orders || 1)).toFixed(3)} د.ك</p>
                 </div>
                 <div className="text-center bg-amber-50 p-2 rounded">
                   <p className="text-gray-500">آخر طلب</p>
-                  <p className="font-bold text-amber-600">{customer.lastOrder}</p>
+                  <p className="font-bold text-amber-600">{customer.lastOrder || 'غير محدد'}</p>
                 </div>
               </div>
             </CardContent>
