@@ -507,7 +507,7 @@ const WorkshopDashboard = () => {
 
                           <div className="flex-1 space-y-3 order-1 lg:order-2">
                             {/* Order Header */}
-                            <div className="flex flex-wrap items-center gap-2 rtl:justify-start ltr:justify-start">
+                            <div className="flex flex-wrap items-center gap-2 rtl:justify-end ltr:justify-start">
                               <h3 className="font-bold text-lg text-primary rtl:text-right ltr:text-left">#{order.id}</h3>
                               <Badge className={`${getStatusColor(order.status)} border`}>
                                 {order.status}
@@ -644,7 +644,7 @@ const WorkshopDashboard = () => {
                           </div>
 
                           <div className="flex-1 space-y-3 order-1 lg:order-2">
-                            <div className="flex items-center gap-2 rtl:justify-start ltr:justify-start">
+                            <div className="flex items-center gap-2 rtl:justify-end ltr:justify-start">
                               <h3 className="font-bold text-lg rtl:text-right ltr:text-left">{customer.name}</h3>
                               <Badge variant="outline" className="text-xs">
                                 {customer.gender}
