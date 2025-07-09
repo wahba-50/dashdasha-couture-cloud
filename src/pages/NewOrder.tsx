@@ -57,40 +57,61 @@ const NewOrder = () => {
   const initialOrderData = getInitialOrderData();
   const initialStep = isRepeated && initialOrderData.items && initialOrderData.items.length > 0 ? 2 : 1;
 
-  const [currentStep, setCurrentStep] = useState(initialStep);
-  const [orderData, setOrderData] = useState(initialOrderData);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [orderData, setOrderData] = useState({
+    customer: null,
+    items: [],
+    discount: { type: 'amount', value: 0 },
+    deliveryDate: '',
+    notes: '',
+    payment: {
+      type: 'cash',
+      receivedAmount: 0,
+      remainingAmount: 0
+    }
+  });
 
   // Use useEffect to ensure proper initialization for repeated orders
   useEffect(() => {
-    console.log('useEffect - isRepeated:', isRepeated);
+    console.log('useEffect triggered - isRepeated:', isRepeated);
     if (isRepeated) {
       const repeatedData = sessionStorage.getItem('repeatedOrderData');
-      console.log('useEffect - repeatedData:', repeatedData);
+      console.log('useEffect - repeatedData exists:', !!repeatedData);
       
       if (repeatedData) {
         try {
           const parsedData = JSON.parse(repeatedData);
           console.log('useEffect - parsedData:', parsedData);
+          console.log('useEffect - parsedData.items.length:', parsedData.items?.length);
           
           if (parsedData.items && parsedData.items.length > 0) {
-            console.log('useEffect - Setting order data and step');
+            console.log('useEffect - About to set order data and step');
+            
+            // Force state updates
             setOrderData(parsedData);
             setCurrentStep(2);
+            
+            console.log('useEffect - State updates called');
             
             // Clear sessionStorage after successful initialization
             sessionStorage.removeItem('repeatedOrderData');
             console.log('useEffect - SessionStorage cleared');
+          } else {
+            console.log('useEffect - No items found in parsed data');
           }
         } catch (error) {
           console.error('useEffect - Error parsing repeated order data:', error);
         }
+      } else {
+        console.log('useEffect - No repeated data in sessionStorage');
       }
+    } else {
+      console.log('useEffect - Not a repeated order');
     }
   }, [isRepeated]);
 
-  console.log('NewOrder component - currentStep:', currentStep, 'isRepeated:', isRepeated);
-  console.log('NewOrder component - orderData:', orderData);
-  console.log('NewOrder component - initialStep:', initialStep, 'initialOrderData.items.length:', initialOrderData.items?.length);
+  console.log('NewOrder render - currentStep:', currentStep, 'isRepeated:', isRepeated);
+  console.log('NewOrder render - orderData.items.length:', orderData.items?.length);
 
   const handleCustomerNext = (customerData: any) => {
     setOrderData({ ...orderData, customer: customerData });
