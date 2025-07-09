@@ -58,8 +58,15 @@ const NewOrder = () => {
   const initialOrderData = getInitialOrderData();
   const initialStep = isRepeated && initialOrderData.items && initialOrderData.items.length > 0 ? 2 : 1;
 
-  const [currentStep, setCurrentStep] = useState(initialStep);
-  const [orderData, setOrderData] = useState<any>(initialOrderData);
+  const [currentStep, setCurrentStep] = useState(() => {
+    const step = isRepeated && initialOrderData.items && initialOrderData.items.length > 0 ? 2 : 1;
+    console.log('useState currentStep callback - step:', step);
+    return step;
+  });
+  const [orderData, setOrderData] = useState(() => {
+    console.log('useState orderData callback - initialOrderData:', initialOrderData);
+    return initialOrderData;
+  });
 
   console.log('NewOrder component - currentStep:', currentStep, 'isRepeated:', isRepeated);
   console.log('NewOrder component - orderData:', orderData);
