@@ -94,10 +94,25 @@ const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
           id: piece.id,
           qrCode: piece.qrCode,
           fabricType: piece.fabricType,
-          fabric: piece.fabricType === 'workshop' ? { name: piece.fabric } : null,
-          cut: { name: piece.cut },
-          accessories: piece.accessories.map(acc => ({ name: acc, quantity: 1 })),
-          labors: piece.labors.map(labor => ({ name: labor })),
+          fabric: piece.fabricType === 'workshop' ? { 
+            name: piece.fabric,
+            price: 0 // Default price, will be set in OrderForm
+          } : null,
+          cut: { 
+            name: piece.cut,
+            price: 0 // Default price, will be set in OrderForm
+          },
+          accessories: piece.accessories.map((acc, index) => ({ 
+            id: `acc_${index}`,
+            name: acc, 
+            price: 0, // Default price, will be set in OrderForm
+            quantity: 1 
+          })),
+          labors: piece.labors.map((labor, index) => ({ 
+            id: `labor_${index}`,
+            name: labor,
+            price: 0 // Default price, will be set in OrderForm
+          })),
           totalPrice: piece.price,
           specifications: piece.specifications
         })),
