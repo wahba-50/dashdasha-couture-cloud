@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,7 @@ const NewOrder = () => {
   const isRepeated = searchParams.get('repeated') === 'true';
   const { t } = useLanguage();
   
-  // Check for repeated order data and set initial state accordingly
+  // Don't clear sessionStorage immediately - let useEffect handle it
   const getInitialOrderData = () => {
     console.log('getInitialOrderData - isRepeated:', isRepeated);
     if (isRepeated) {
@@ -29,8 +29,7 @@ const NewOrder = () => {
         try {
           const parsedData = JSON.parse(repeatedData);
           console.log('parsedData:', parsedData);
-          // Clear the session storage after using it
-          sessionStorage.removeItem('repeatedOrderData');
+          // Don't clear sessionStorage yet - let useEffect handle it
           return parsedData;
         } catch (error) {
           console.error('Error parsing repeated order data:', error);
@@ -58,15 +57,36 @@ const NewOrder = () => {
   const initialOrderData = getInitialOrderData();
   const initialStep = isRepeated && initialOrderData.items && initialOrderData.items.length > 0 ? 2 : 1;
 
-  const [currentStep, setCurrentStep] = useState(() => {
-    const step = isRepeated && initialOrderData.items && initialOrderData.items.length > 0 ? 2 : 1;
-    console.log('useState currentStep callback - step:', step);
-    return step;
-  });
-  const [orderData, setOrderData] = useState(() => {
-    console.log('useState orderData callback - initialOrderData:', initialOrderData);
-    return initialOrderData;
-  });
+  const [currentStep, setCurrentStep] = useState(initialStep);
+  const [orderData, setOrderData] = useState(initialOrderData);
+
+  // Use useEffect to ensure proper initialization for repeated orders
+  useEffect(() => {
+    console.log('useEffect - isRepeated:', isRepeated);
+    if (isRepeated) {
+      const repeatedData = sessionStorage.getItem('repeatedOrderData');
+      console.log('useEffect - repeatedData:', repeatedData);
+      
+      if (repeatedData) {
+        try {
+          const parsedData = JSON.parse(repeatedData);
+          console.log('useEffect - parsedData:', parsedData);
+          
+          if (parsedData.items && parsedData.items.length > 0) {
+            console.log('useEffect - Setting order data and step');
+            setOrderData(parsedData);
+            setCurrentStep(2);
+            
+            // Clear sessionStorage after successful initialization
+            sessionStorage.removeItem('repeatedOrderData');
+            console.log('useEffect - SessionStorage cleared');
+          }
+        } catch (error) {
+          console.error('useEffect - Error parsing repeated order data:', error);
+        }
+      }
+    }
+  }, [isRepeated]);
 
   console.log('NewOrder component - currentStep:', currentStep, 'isRepeated:', isRepeated);
   console.log('NewOrder component - orderData:', orderData);
