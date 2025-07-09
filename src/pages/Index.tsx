@@ -445,7 +445,7 @@ const Index = () => {
                 placeholder={`${t('common.search')}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pr-10"
+                className="rtl:pr-10 rtl:pl-3 ltr:pl-10 ltr:pr-3"
               />
             </div>
             <Button 
