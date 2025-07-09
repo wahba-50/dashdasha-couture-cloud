@@ -474,25 +474,8 @@ const Index = () => {
                   {filteredWorkshops.map((workshop) => (
                     <div key={workshop.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex flex-wrap items-center gap-2 mb-2 rtl:justify-start ltr:justify-start">
-                            <h3 className="font-semibold text-lg rtl:text-right ltr:text-left">{workshop.name}</h3>
-                            <Badge variant="secondary">{workshop.type}</Badge>
-                            <Badge className={getStatusBadge(workshop.status)}>
-                              {workshop.status}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-3">{workshop.address}</p>
-                          
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-gray-600">
-                            <span>المستخدمين: {workshop.users}</span>
-                            <span>العملاء: {workshop.customers}</span>
-                            <span>الطلبات: {workshop.orders}</span>
-                            <span>الإيرادات: {workshop.revenue.toFixed(3)} د.ك</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-col sm:flex-row gap-2">
+                        {/* Action Buttons - Moved to left side */}
+                        <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-48 order-2 lg:order-1">
                           <Button 
                             size="sm" 
                             variant="outline"
@@ -529,8 +512,26 @@ const Index = () => {
                             {t('workshop.enter')}
                           </Button>
                         </div>
+
+                        <div className="flex-1 space-y-3 order-1 lg:order-2">
+                          <div className="flex flex-wrap items-center gap-2 mb-2 rtl:justify-end ltr:justify-start">
+                            <h3 className="font-semibold text-lg rtl:text-right ltr:text-left">{workshop.name}</h3>
+                            <Badge variant="secondary">{workshop.type}</Badge>
+                            <Badge className={getStatusBadge(workshop.status)}>
+                              {workshop.status}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3 rtl:text-right ltr:text-left">{workshop.address}</p>
+                          
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-gray-600 rtl:text-right ltr:text-left">
+                            <span>المستخدمين: {workshop.users}</span>
+                            <span>العملاء: {workshop.customers}</span>
+                            <span>الطلبات: {workshop.orders}</span>
+                            <span>الإيرادات: {workshop.revenue.toFixed(3)} د.ك</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                     </div>
                   ))}
                 </div>
               </CardContent>
@@ -557,10 +558,23 @@ const Index = () => {
                   {filteredCustomers.map((customer) => (
                     <Card key={customer.id} className="border hover:shadow-md transition-all duration-200">
                       <CardContent className="p-4">
-                        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                          <div className="flex-1 space-y-4">
+                         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                          {/* Action Buttons - Moved to left side */}
+                          <div className="flex flex-col gap-2 w-full lg:w-48 order-2 lg:order-1">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => handleViewCustomerDetails(customer)}
+                              className="w-full flex items-center gap-2"
+                            >
+                              <Ruler className="w-4 h-4" />
+                              عرض القياسات
+                            </Button>
+                          </div>
+
+                          <div className="flex-1 space-y-4 order-1 lg:order-2">
                             {/* Customer Header */}
-                            <div className="flex flex-wrap items-center gap-2 rtl:justify-start ltr:justify-start">
+                            <div className="flex flex-wrap items-center gap-2 rtl:justify-end ltr:justify-start">
                               <h4 className="font-bold text-lg text-primary rtl:text-right ltr:text-left">{customer.name}</h4>
                               <Badge variant="outline" className="text-xs">
                                 {customer.gender}
@@ -571,7 +585,7 @@ const Index = () => {
                             </div>
                             
                             {/* Contact Information */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm rtl:text-right ltr:text-left">
                               <div className="flex items-center gap-2 rtl:flex-row-reverse ltr:flex-row">
                                 <Phone className="w-4 h-4 text-gray-500" />
                                 <span className="font-medium">{customer.phone}</span>
@@ -587,13 +601,13 @@ const Index = () => {
                             </div>
 
                             {/* Workshop Information */}
-                            <div className="bg-gray-50 p-3 rounded-lg">
+                            <div className="bg-gray-50 p-3 rounded-lg rtl:text-right ltr:text-left">
                               <p className="text-sm text-gray-600">الورشة المسجل بها:</p>
                               <p className="font-semibold text-primary">{customer.workshop}</p>
                             </div>
                             
                             {/* Order Statistics */}
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm bg-blue-50 p-3 rounded-lg">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm bg-blue-50 p-3 rounded-lg rtl:text-right ltr:text-left">
                               <div className="text-center">
                                 <p className="text-gray-600">الطلبات</p>
                                 <button 
@@ -618,7 +632,7 @@ const Index = () => {
                             </div>
 
                             {/* Address Details */}
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs bg-gray-50 p-3 rounded-lg">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs bg-gray-50 p-3 rounded-lg rtl:text-right ltr:text-left">
                               <div>
                                 <span className="text-gray-500">المحافظة:</span>
                                 <p className="font-medium">{customer.address.governorate}</p>
@@ -640,18 +654,6 @@ const Index = () => {
                                 <p className="font-medium">{customer.address.houseNumber}</p>
                               </div>
                             </div>
-                          </div>
-                          
-                          <div className="flex flex-col gap-2 w-full lg:w-48">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handleViewCustomerDetails(customer)}
-                              className="w-full flex items-center gap-2"
-                            >
-                              <Ruler className="w-4 h-4" />
-                              عرض القياسات
-                            </Button>
                           </div>
                         </div>
                       </CardContent>
