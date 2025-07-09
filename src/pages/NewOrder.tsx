@@ -21,20 +21,26 @@ const NewOrder = () => {
   
   // Check for repeated order data and set initial state accordingly
   const getInitialOrderData = () => {
+    console.log('getInitialOrderData - isRepeated:', isRepeated);
     if (isRepeated) {
       const repeatedData = sessionStorage.getItem('repeatedOrderData');
+      console.log('repeatedData from sessionStorage:', repeatedData);
       if (repeatedData) {
         try {
           const parsedData = JSON.parse(repeatedData);
+          console.log('parsedData:', parsedData);
           // Clear the session storage after using it
           sessionStorage.removeItem('repeatedOrderData');
           return parsedData;
         } catch (error) {
           console.error('Error parsing repeated order data:', error);
         }
+      } else {
+        console.log('No repeated data found in sessionStorage');
       }
     }
     
+    console.log('Returning default order data');
     return {
       customer: null,
       items: [],
@@ -51,6 +57,9 @@ const NewOrder = () => {
 
   const [currentStep, setCurrentStep] = useState(isRepeated ? 2 : 1); // Skip to step 2 if repeated order
   const [orderData, setOrderData] = useState<any>(getInitialOrderData());
+
+  console.log('NewOrder component - currentStep:', currentStep, 'isRepeated:', isRepeated);
+  console.log('NewOrder component - orderData:', orderData);
 
   const handleCustomerNext = (customerData: any) => {
     setOrderData({ ...orderData, customer: customerData });
