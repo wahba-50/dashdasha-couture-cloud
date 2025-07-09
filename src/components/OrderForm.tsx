@@ -46,13 +46,14 @@ interface OrderItem {
 
 interface OrderFormProps {
   customerData: any;
+  initialItems?: OrderItem[];
   onNext: (items: OrderItem[]) => void;
   onPrevious: () => void;
 }
 
-const OrderForm = ({ customerData, onNext, onPrevious }: OrderFormProps) => {
+const OrderForm = ({ customerData, initialItems = [], onNext, onPrevious }: OrderFormProps) => {
   const { t, language } = useLanguage();
-  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [orderItems, setOrderItems] = useState<OrderItem[]>(initialItems);
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [currentItem, setCurrentItem] = useState<Partial<OrderItem>>({
     fabricType: 'workshop'

@@ -671,6 +671,7 @@ const NewOrder = () => {
           {currentStep === 2 && (
             <OrderForm 
               customerData={orderData.customer}
+              initialItems={orderData.items || []}
               onNext={handleItemsNext}
               onPrevious={handlePrevious}
             />
