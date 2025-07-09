@@ -73,7 +73,11 @@ const NewOrder = () => {
 
   // Use useEffect to ensure proper initialization for repeated orders
   useEffect(() => {
+    console.log('=== useEffect RUNNING ===');
     console.log('useEffect triggered - isRepeated:', isRepeated);
+    console.log('useEffect triggered - currentStep:', currentStep);
+    console.log('useEffect triggered - orderData.items.length:', orderData.items?.length);
+    
     if (isRepeated) {
       const repeatedData = sessionStorage.getItem('repeatedOrderData');
       console.log('useEffect - repeatedData exists:', !!repeatedData);
@@ -84,7 +88,7 @@ const NewOrder = () => {
           console.log('useEffect - parsedData:', parsedData);
           console.log('useEffect - parsedData.items.length:', parsedData.items?.length);
           
-          if (parsedData.items && parsedData.items.length > 0) {
+          if (parsedData.items && parsedData.items.length > 0 && currentStep !== 2) {
             console.log('useEffect - About to set order data and step');
             
             // Force state updates
@@ -97,7 +101,10 @@ const NewOrder = () => {
             sessionStorage.removeItem('repeatedOrderData');
             console.log('useEffect - SessionStorage cleared');
           } else {
-            console.log('useEffect - No items found in parsed data');
+            console.log('useEffect - Conditions not met:', {
+              hasItems: parsedData.items?.length > 0,
+              currentStepNot2: currentStep !== 2
+            });
           }
         } catch (error) {
           console.error('useEffect - Error parsing repeated order data:', error);
@@ -108,7 +115,7 @@ const NewOrder = () => {
     } else {
       console.log('useEffect - Not a repeated order');
     }
-  }, [isRepeated]);
+  }); // Remove dependency array to force it to run every render
 
   console.log('NewOrder render - currentStep:', currentStep, 'isRepeated:', isRepeated);
   console.log('NewOrder render - orderData.items.length:', orderData.items?.length);
