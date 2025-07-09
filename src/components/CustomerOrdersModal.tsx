@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Calendar, DollarSign, Package, User, Banknote, CreditCard } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import { ShoppingCart, Calendar, DollarSign, Package, User, Banknote, CreditCard, RefreshCw, QrCode, Shirt, Eye, CheckSquare } from "lucide-react";
 
 interface CustomerOrdersModalProps {
   customer: any;
@@ -17,10 +20,72 @@ const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
   isOpen,
   onClose
 }) => {
+  const [selectedOrderForRepeat, setSelectedOrderForRepeat] = useState<any>(null);
+  const [selectedPieces, setSelectedPieces] = useState<string[]>([]);
+  
   if (!customer) return null;
 
   const customerOrders = orders.filter(order => order.customerName === customer.name)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  // Mock pieces data for demonstration - in real app this would come from the order
+  const getOrderPieces = (order: any) => [
+    {
+      id: '1',
+      qrCode: order.qrCodes[0] || 'QR001',
+      fabric: 'قماش قطني فاخر',
+      fabricType: 'workshop',
+      cut: 'قصة دشداشة كلاسيكية',
+      accessories: ['أزرار ذهبية × 2'],
+      labors: ['مصنعية قص وتفصيل'],
+      price: 45.500,
+      specifications: 'قماش قطني عالي الجودة، قصة تقليدية كويتية'
+    },
+    ...(order.itemDetails?.map((item: any, index: number) => ({
+      id: `${index + 2}`,
+      qrCode: item.qrCode || `QR00${index + 2}`,
+      fabric: item.fabric || 'قماش العميل',
+      fabricType: item.fabric === 'قماش العميل' ? 'customer' : 'workshop',
+      cut: item.cut || 'قصة كلاسيكية',
+      accessories: ['أزرار × 2'],
+      labors: ['مصنعية'],
+      price: order.total / order.items,
+      specifications: `${item.fabric || 'قماش العميل'} - ${item.cut || 'قصة كلاسيكية'}`
+    })) || [])
+  ];
+
+  const handleRepeatOrder = (order: any) => {
+    setSelectedOrderForRepeat(order);
+    setSelectedPieces([]);
+  };
+
+  const handlePieceToggle = (pieceId: string) => {
+    setSelectedPieces(prev => 
+      prev.includes(pieceId) 
+        ? prev.filter(id => id !== pieceId)
+        : [...prev, pieceId]
+    );
+  };
+
+  const handleConfirmRepeat = () => {
+    if (selectedPieces.length > 0 && selectedOrderForRepeat) {
+      const orderPieces = getOrderPieces(selectedOrderForRepeat);
+      const selectedPieceDetails = orderPieces.filter(piece => selectedPieces.includes(piece.id));
+      
+      // Here you would navigate to the new order page with pre-filled data
+      console.log('Repeating pieces:', selectedPieceDetails);
+      
+      // Reset state
+      setSelectedOrderForRepeat(null);
+      setSelectedPieces([]);
+      onClose();
+    }
+  };
+
+  const handleCancelRepeat = () => {
+    setSelectedOrderForRepeat(null);
+    setSelectedPieces([]);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -176,6 +241,18 @@ const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
                           </div>
                         </div>
                       )}
+
+                      {/* Repeat Order Button */}
+                      <div className="border-t pt-3 flex justify-end">
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleRepeatOrder(order)}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          <RefreshCw className="w-3 h-3 mr-1" />
+                          إعادة هذا الطلب
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -188,6 +265,154 @@ const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
             )}
           </div>
         </div>
+        
+        {/* Piece Selection Modal */}
+        {selectedOrderForRepeat && (
+          <Dialog open={!!selectedOrderForRepeat} onOpenChange={handleCancelRepeat}>
+            <DialogContent className="max-w-3xl mx-auto max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-right">
+                  <CheckSquare className="w-5 h-5" />
+                  اختيار القطع لإعادة الطلب #{selectedOrderForRepeat.id}
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                <div className="bg-blue-50 p-3 rounded-lg text-sm">
+                  <p className="text-blue-800">اختر القطع التي تريد إعادة طلبها من هذا الطلب:</p>
+                </div>
+
+                {/* Pieces Grid */}
+                <div className="space-y-3">
+                  {getOrderPieces(selectedOrderForRepeat).map((piece) => (
+                    <Card 
+                      key={piece.id} 
+                      className={`cursor-pointer transition-all duration-200 ${
+                        selectedPieces.includes(piece.id) 
+                          ? 'border-blue-500 bg-blue-50' 
+                          : 'hover:shadow-md'
+                      }`}
+                      onClick={() => handlePieceToggle(piece.id)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <Checkbox 
+                            checked={selectedPieces.includes(piece.id)}
+                            onChange={() => handlePieceToggle(piece.id)}
+                            className="mt-1"
+                          />
+                          
+                          <div className="flex-1 space-y-3">
+                            {/* Piece Header */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <QrCode className="w-4 h-4 text-gray-500" />
+                                <Badge variant="outline" className="font-mono text-xs">
+                                  {piece.qrCode}
+                                </Badge>
+                                <Badge className={`text-xs ${
+                                  piece.fabricType === 'workshop' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-orange-100 text-orange-800'
+                                }`}>
+                                  {piece.fabricType === 'workshop' ? 'قماش الورشة' : 'قماش العميل'}
+                                </Badge>
+                              </div>
+                              <div className="text-primary font-bold text-sm">
+                                {piece.price.toFixed(3)} د.ك
+                              </div>
+                            </div>
+
+                            {/* Piece Details */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <Shirt className="w-3 h-3 text-gray-400" />
+                                  <span className="text-gray-500">القماش:</span>
+                                  <span className="font-medium">{piece.fabric}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Shirt className="w-3 h-3 text-gray-400" />
+                                  <span className="text-gray-500">القصة:</span>
+                                  <span className="font-medium">{piece.cut}</span>
+                                </div>
+                              </div>
+                              
+                              <div className="space-y-2">
+                                <div>
+                                  <span className="text-gray-500 text-xs">الإكسسوارات:</span>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {piece.accessories.map((acc, index) => (
+                                      <Badge key={index} variant="outline" className="text-xs">
+                                        {acc}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500 text-xs">المصنعيات:</span>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {piece.labors.map((labor, index) => (
+                                      <Badge key={index} variant="outline" className="text-xs">
+                                        {labor}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Specifications */}
+                            <div className="bg-gray-50 p-2 rounded text-xs">
+                              <span className="text-gray-500">المواصفات:</span>
+                              <p className="mt-1 text-gray-700">{piece.specifications}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Selection Summary */}
+                {selectedPieces.length > 0 && (
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-green-800">
+                        تم اختيار {selectedPieces.length} قطعة
+                      </span>
+                      <span className="font-bold text-green-600">
+                        المجموع: {getOrderPieces(selectedOrderForRepeat)
+                          .filter(piece => selectedPieces.includes(piece.id))
+                          .reduce((sum, piece) => sum + piece.price, 0)
+                          .toFixed(3)} د.ك
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button 
+                    onClick={handleConfirmRepeat}
+                    disabled={selectedPieces.length === 0}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    تأكيد إعادة الطلب ({selectedPieces.length} قطعة)
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleCancelRepeat}
+                    className="flex-1"
+                  >
+                    إلغاء
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </DialogContent>
     </Dialog>
   );

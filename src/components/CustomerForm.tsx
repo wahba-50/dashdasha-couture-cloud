@@ -218,13 +218,26 @@ const CustomerForm = ({ onNext, workshopId }: CustomerFormProps) => {
                 <Phone className="w-4 h-4" />
                 رقم الهاتف *
               </Label>
-              <Input
-                id="phone"
-                value={customerData.phone}
-                onChange={(e) => updateField('phone', e.target.value)}
-                placeholder="12345678"
-                className={errors.phone ? 'border-red-500' : ''}
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <span className="text-lg">🇰🇼</span>
+                    <span>+965</span>
+                  </div>
+                </div>
+                <Input
+                  id="phone"
+                  value={customerData.phone}
+                  onChange={(e) => {
+                    // Only allow numbers and limit to 8 digits
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 8);
+                    updateField('phone', value);
+                  }}
+                  placeholder="12345678"
+                  className={`pl-20 ${errors.phone ? 'border-red-500' : ''}`}
+                  maxLength={8}
+                />
+              </div>
               {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
             </div>
 
