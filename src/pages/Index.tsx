@@ -229,6 +229,7 @@ const Index = () => {
 
   const handleWorkshopAction = (action: string, workshopId?: number) => {
     console.log(`Workshop action: ${action}, ID: ${workshopId}`);
+    console.log('Available workshops:', workshops);
     switch (action) {
       case 'add':
         navigate('/workshop/new');
@@ -240,13 +241,20 @@ const Index = () => {
         }
         break;
       case 'enter':
+        console.log('Entering workshop with ID:', workshopId);
         if (workshopId) {
           const workshop = workshops.find(w => w.id === workshopId);
+          console.log('Found workshop:', workshop);
           if (workshop) {
             // Store the workshop name for the dashboard
             localStorage.setItem('currentWorkshopName', workshop.name);
+            console.log('Navigating to:', `/workshop/${workshopId}/dashboard`);
             navigate(`/workshop/${workshopId}/dashboard`);
+          } else {
+            console.error('Workshop not found with ID:', workshopId);
           }
+        } else {
+          console.error('No workshop ID provided');
         }
         break;
       case 'toggle':
