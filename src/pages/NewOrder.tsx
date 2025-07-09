@@ -55,11 +55,15 @@ const NewOrder = () => {
     };
   };
 
-  const [currentStep, setCurrentStep] = useState(isRepeated ? 2 : 1); // Skip to step 2 if repeated order
-  const [orderData, setOrderData] = useState<any>(getInitialOrderData());
+  const initialOrderData = getInitialOrderData();
+  const initialStep = isRepeated && initialOrderData.items && initialOrderData.items.length > 0 ? 2 : 1;
+
+  const [currentStep, setCurrentStep] = useState(initialStep);
+  const [orderData, setOrderData] = useState<any>(initialOrderData);
 
   console.log('NewOrder component - currentStep:', currentStep, 'isRepeated:', isRepeated);
   console.log('NewOrder component - orderData:', orderData);
+  console.log('NewOrder component - initialStep:', initialStep, 'initialOrderData.items.length:', initialOrderData.items?.length);
 
   const handleCustomerNext = (customerData: any) => {
     setOrderData({ ...orderData, customer: customerData });
