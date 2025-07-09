@@ -440,7 +440,7 @@ const Index = () => {
           {/* Search Bar */}
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
             <div className="relative flex-1 w-full">
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute rtl:right-3 ltr:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
                 placeholder={`${t('common.search')}...`}
                 value={searchTerm}
@@ -475,8 +475,8 @@ const Index = () => {
                     <div key={workshop.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div className="flex-1">
-                          <div className="flex flex-wrap items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-lg">{workshop.name}</h3>
+                          <div className="flex flex-wrap items-center gap-2 mb-2 rtl:justify-start ltr:justify-start">
+                            <h3 className="font-semibold text-lg rtl:text-right ltr:text-left">{workshop.name}</h3>
                             <Badge variant="secondary">{workshop.type}</Badge>
                             <Badge className={getStatusBadge(workshop.status)}>
                               {workshop.status}
@@ -542,14 +542,14 @@ const Index = () => {
               <CardHeader>
                 <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <span>جميع العملاء ({filteredCustomers.length})</span>
-                  <Button 
-                    onClick={handleExportCustomers} 
-                    size="sm"
-                    className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    تصدير إكسل
-                  </Button>
+                    <Button 
+                      onClick={handleExportCustomers} 
+                      size="sm"
+                      className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
+                    >
+                      <Download className="w-4 h-4 rtl:ml-2 ltr:mr-2" />
+                      تصدير إكسل
+                    </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -560,8 +560,8 @@ const Index = () => {
                         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                           <div className="flex-1 space-y-4">
                             {/* Customer Header */}
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h4 className="font-bold text-lg text-primary">{customer.name}</h4>
+                            <div className="flex flex-wrap items-center gap-2 rtl:justify-start ltr:justify-start">
+                              <h4 className="font-bold text-lg text-primary rtl:text-right ltr:text-left">{customer.name}</h4>
                               <Badge variant="outline" className="text-xs">
                                 {customer.gender}
                               </Badge>
@@ -572,15 +572,15 @@ const Index = () => {
                             
                             {/* Contact Information */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 rtl:flex-row-reverse ltr:flex-row">
                                 <Phone className="w-4 h-4 text-gray-500" />
                                 <span className="font-medium">{customer.phone}</span>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 rtl:flex-row-reverse ltr:flex-row">
                                 <Mail className="w-4 h-4 text-gray-500" />
                                 <span className="font-medium">{customer.email}</span>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 rtl:flex-row-reverse ltr:flex-row">
                                 <MapPin className="w-4 h-4 text-gray-500" />
                                 <span className="font-medium">{customer.address.area}، {customer.address.governorate}</span>
                               </div>

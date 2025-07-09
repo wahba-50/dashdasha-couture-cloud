@@ -417,12 +417,12 @@ const WorkshopDashboard = () => {
           {(selectedTab === 'orders' || selectedTab === 'customers') && (
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               <div className="relative flex-1 w-full">
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute rtl:right-3 ltr:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   placeholder={`البحث في ${selectedTab === 'orders' ? 'الطلبات' : 'العملاء'}...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pr-10"
+                  className="rtl:pr-10 ltr:pl-10"
                 />
               </div>
               
@@ -448,7 +448,7 @@ const WorkshopDashboard = () => {
           <TabsContent value="orders" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex items-center justify-between rtl:text-right ltr:text-left">
                   <span>الطلبات ({filteredOrders.length})</span>
                   <Badge variant="secondary" className="text-xs">
                     إجمالي القيمة: {filteredOrders.reduce((sum, order) => sum + order.total, 0).toFixed(3)} د.ك
@@ -463,8 +463,8 @@ const WorkshopDashboard = () => {
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                           <div className="flex-1 space-y-3">
                             {/* Order Header */}
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="font-bold text-lg text-primary">#{order.id}</h3>
+                            <div className="flex flex-wrap items-center gap-2 rtl:justify-start ltr:justify-start">
+                              <h3 className="font-bold text-lg text-primary rtl:text-right ltr:text-left">#{order.id}</h3>
                               <Badge className={`${getStatusColor(order.status)} border`}>
                                 {order.status}
                               </Badge>
@@ -477,8 +477,8 @@ const WorkshopDashboard = () => {
                             
                             {/* Customer Info */}
                             <div className="space-y-1">
-                              <p className="font-medium text-gray-800">{order.customerName}</p>
-                              <p className="text-sm text-gray-600">{order.phone}</p>
+                              <p className="font-medium text-gray-800 rtl:text-right ltr:text-left">{order.customerName}</p>
+                              <p className="text-sm text-gray-600 rtl:text-right ltr:text-left">{order.phone}</p>
                             </div>
                             
                             {/* Order Details */}
@@ -615,7 +615,7 @@ const WorkshopDashboard = () => {
           <TabsContent value="customers">
             <Card>
               <CardHeader>
-                <CardTitle>العملاء ({filteredCustomers.length})</CardTitle>
+                <CardTitle className="rtl:text-right ltr:text-left">العملاء ({filteredCustomers.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -624,8 +624,8 @@ const WorkshopDashboard = () => {
                       <CardContent className="p-4">
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                           <div className="flex-1 space-y-3">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-bold text-lg">{customer.name}</h3>
+                            <div className="flex items-center gap-2 rtl:justify-start ltr:justify-start">
+                              <h3 className="font-bold text-lg rtl:text-right ltr:text-left">{customer.name}</h3>
                               <Badge variant="outline" className="text-xs">
                                 {customer.gender}
                               </Badge>
