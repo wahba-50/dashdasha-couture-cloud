@@ -527,19 +527,19 @@ const WorkshopDashboard = () => {
                             
                             {/* Order Details */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-                              <div>
+                              <div className="rtl:text-right ltr:text-left">
                                 <span className="text-gray-500">القطع:</span>
                                 <p className="font-semibold">{order.items}</p>
                               </div>
-                              <div>
+                              <div className="rtl:text-right ltr:text-left">
                                 <span className="text-gray-500">المجموع:</span>
                                 <p className="font-semibold text-primary">{order.total.toFixed(3)} د.ك</p>
                               </div>
-                              <div>
+                              <div className="rtl:text-right ltr:text-left">
                                 <span className="text-gray-500">التسليم:</span>
                                 <p className="font-semibold">{order.deliveryDate}</p>
                               </div>
-                              <div>
+                              <div className="rtl:text-right ltr:text-left">
                                 <span className="text-gray-500">التاريخ والوقت:</span>
                                 <p className="font-semibold">
                                   {new Date(order.createdAt).toLocaleDateString('en-GB')} 
@@ -558,9 +558,9 @@ const WorkshopDashboard = () => {
                             {order.payment && (
                               <div className="bg-gray-50 p-3 rounded-lg">
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-                                  <div>
+                                  <div className="rtl:text-right ltr:text-left">
                                     <span className="text-gray-500">طريقة الدفع:</span>
-                                    <p className="font-semibold flex items-center">
+                                    <p className="font-semibold flex items-center rtl:justify-start ltr:justify-start">
                                       {order.payment.type === 'cash' ? (
                                         <>
                                           <Banknote className="w-3 h-3 rtl:ml-1 ltr:mr-1" />
@@ -574,11 +574,11 @@ const WorkshopDashboard = () => {
                                       )}
                                     </p>
                                   </div>
-                                  <div>
+                                  <div className="rtl:text-right ltr:text-left">
                                     <span className="text-gray-500">المبلغ المستلم:</span>
                                     <p className="font-semibold text-green-600">{order.payment.receivedAmount?.toFixed(3)} د.ك</p>
                                   </div>
-                                  <div>
+                                  <div className="rtl:text-right ltr:text-left">
                                     <span className="text-gray-500">المبلغ المتبقي:</span>
                                     <p className="font-semibold text-red-600">{order.payment.remainingAmount?.toFixed(3)} د.ك</p>
                                   </div>
@@ -652,27 +652,27 @@ const WorkshopDashboard = () => {
                             </div>
                             
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-                              <div>
+                              <div className="rtl:text-right ltr:text-left">
                                 <span className="text-gray-500">الهاتف:</span>
                                 <p className="font-medium">{customer.phone}</p>
                               </div>
-                              <div>
+                              <div className="rtl:text-right ltr:text-left">
                                 <span className="text-gray-500">البريد:</span>
                                 <p className="font-medium">{customer.email || 'غير محدد'}</p>
                               </div>
-                              <div>
+                              <div className="rtl:text-right ltr:text-left">
                                 <span className="text-gray-500">الجنس:</span>
                                 <p className="font-medium">{customer.gender || 'غير محدد'}</p>
                               </div>
-                              <div>
+                              <div className="rtl:text-right ltr:text-left">
                                 <span className="text-gray-500">المحافظة:</span>
                                 <p className="font-medium">{customer.address.governorate || 'غير محدد'}</p>
                               </div>
-                              <div>
+                              <div className="rtl:text-right ltr:text-left">
                                 <span className="text-gray-500">المنطقة:</span>
                                 <p className="font-medium">{customer.address.area || 'غير محدد'}</p>
                               </div>
-                              <div>
+                              <div className="rtl:text-right ltr:text-left">
                                 <span className="text-gray-500">آخر طلب:</span>
                                 <p className="font-medium">{customer.lastOrder}</p>
                               </div>
@@ -681,15 +681,15 @@ const WorkshopDashboard = () => {
                             {/* Detailed Address */}
                             {(customer.address.block || customer.address.street || customer.address.houseNumber) && (
                               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs bg-gray-50 p-3 rounded-lg">
-                                <div>
+                                <div className="rtl:text-right ltr:text-left">
                                   <span className="text-gray-500">القطعة:</span>
                                   <p className="font-medium">{customer.address.block || 'غير محدد'}</p>
                                 </div>
-                                <div>
+                                <div className="rtl:text-right ltr:text-left">
                                   <span className="text-gray-500">الشارع:</span>
                                   <p className="font-medium">{customer.address.street || 'غير محدد'}</p>
                                 </div>
-                                <div>
+                                <div className="rtl:text-right ltr:text-left">
                                   <span className="text-gray-500">رقم المنزل:</span>
                                   <p className="font-medium">{customer.address.houseNumber || 'غير محدد'}</p>
                                 </div>
