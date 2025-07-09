@@ -13,6 +13,8 @@ import StatsCard from "@/components/StatsCard";
 import ProductManagement from "@/components/ProductManagement";
 import OrderDetailsModal from "@/components/OrderDetailsModal";
 import QRCodePrintModal from "@/components/QRCodePrintModal";
+import CustomerMeasurementsModal from "@/components/CustomerMeasurementsModal";
+import CustomerOrdersModal from "@/components/CustomerOrdersModal";
 
 const WorkshopDashboard = () => {
   const navigate = useNavigate();
@@ -24,6 +26,8 @@ const WorkshopDashboard = () => {
   const [isProductManagementOpen, setIsProductManagementOpen] = useState(false);
   const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<any>(null);
   const [selectedOrderForPrint, setSelectedOrderForPrint] = useState<any>(null);
+  const [selectedCustomerForMeasurements, setSelectedCustomerForMeasurements] = useState<any>(null);
+  const [selectedCustomerForOrders, setSelectedCustomerForOrders] = useState<any>(null);
 
   const workshop = {
     id: workshopId,
@@ -253,7 +257,7 @@ const WorkshopDashboard = () => {
     customer.name.includes(searchTerm) || 
     customer.phone.includes(searchTerm) ||
     (customer.email && customer.email.includes(searchTerm))
-  );
+  ).sort((a, b) => new Date(b.lastOrder).getTime() - new Date(a.lastOrder).getTime());
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -318,38 +322,11 @@ const WorkshopDashboard = () => {
   };
 
   const handleViewCustomerDetails = (customer: any) => {
-    // Create a dialog or modal to show customer measurements and details
-    const measurementsText = `
-قياسات العميل: ${customer.name}
-
-الصدر: ${customer.measurements.chest} سم
-الخصر: ${customer.measurements.waist} سم
-الكتف: ${customer.measurements.shoulder} سم
-الرقبة: ${customer.measurements.neck} سم
-الطول: ${customer.measurements.length} سم
-
-العنوان الكامل:
-${customer.address.country} - ${customer.address.state}
-${customer.address.area} - ${customer.address.street}
-منزل رقم: ${customer.address.house}
-    `;
-    
-    alert(measurementsText);
+    setSelectedCustomerForMeasurements(customer);
   };
 
   const handleViewCustomerOrders = (customer: any) => {
-    // Show customer's previous orders
-    const customerOrders = orders.filter(order => order.customerName === customer.name);
-    const ordersText = customerOrders.length > 0 
-      ? customerOrders.map(order => `
-الطلب: ${order.id}
-التاريخ: ${order.createdAt}
-القيمة: ${order.total.toFixed(3)} د.ك
-الحالة: ${order.status}
-      `).join('\n---\n')
-      : 'لا توجد طلبات سابقة لهذا العميل';
-    
-    alert(`الطلبات السابقة للعميل: ${customer.name}\n\n${ordersText}`);
+    setSelectedCustomerForOrders(customer);
   };
 
   return (
@@ -860,6 +837,21 @@ ${customer.address.area} - ${customer.address.street}
         order={selectedOrderForPrint}
         isOpen={!!selectedOrderForPrint}
         onClose={() => setSelectedOrderForPrint(null)}
+      />
+
+      {/* Customer Measurements Modal */}
+      <CustomerMeasurementsModal
+        customer={selectedCustomerForMeasurements}
+        isOpen={!!selectedCustomerForMeasurements}
+        onClose={() => setSelectedCustomerForMeasurements(null)}
+      />
+
+      {/* Customer Orders Modal */}
+      <CustomerOrdersModal
+        customer={selectedCustomerForOrders}
+        orders={orders}
+        isOpen={!!selectedCustomerForOrders}
+        onClose={() => setSelectedCustomerForOrders(null)}
       />
     </div>
   );
