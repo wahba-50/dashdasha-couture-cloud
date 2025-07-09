@@ -483,12 +483,12 @@ const Index = () => {
                     <div key={workshop.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         {/* Action Buttons - Moved to left side */}
-                        <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-48 order-2 lg:order-1">
+                        <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-48 order-2 lg:order-1 relative z-10">
                           <Button 
                             size="sm" 
                             variant="outline"
                             onClick={() => handleWorkshopAction('view', workshop.id)}
-                            className="w-full sm:w-auto"
+                            className="w-full sm:w-auto relative z-10"
                           >
                             <Eye className="w-4 h-4 mr-1" />
                             {t('workshop.details')}
@@ -497,7 +497,7 @@ const Index = () => {
                             size="sm" 
                             variant="outline"
                             onClick={() => handleWorkshopAction('toggle', workshop.id)}
-                            className={`w-full sm:w-auto ${workshop.status === 'نشط' ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700'}`}
+                            className={`w-full sm:w-auto relative z-10 ${workshop.status === 'نشط' ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700'}`}
                           >
                             {workshop.status === 'نشط' ? (
                               <>
@@ -515,7 +515,7 @@ const Index = () => {
                             size="sm" 
                             onClick={() => handleWorkshopAction('enter', workshop.id)}
                             disabled={workshop.status !== 'نشط'}
-                            className="w-full sm:w-auto"
+                            className="w-full sm:w-auto relative z-10 pointer-events-auto"
                           >
                             {t('workshop.enter')}
                           </Button>
