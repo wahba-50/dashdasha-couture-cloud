@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { Search, User, Phone, MapPin, History, Ruler, RotateCcw } from "lucide-react";
 import CustomerMeasurements from './CustomerMeasurements';
+import CustomerOrdersModal from './CustomerOrdersModal';
 
 // Get customers from actual workshop data
 const getWorkshopCustomers = (workshopId?: string) => {
@@ -109,13 +110,67 @@ const CustomerSearch = ({ onCustomerSelect, workshopId }: CustomerSearchProps) =
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
-  const [showReorderDialog, setShowReorderDialog] = useState(false);
-  const [selectedOrderForReorder, setSelectedOrderForReorder] = useState<any>(null);
-  const [reorderQuantity, setReorderQuantity] = useState('');
-  const [reorderDeliveryDate, setReorderDeliveryDate] = useState('');
+  const [showOrdersModal, setShowOrdersModal] = useState(false);
   
   // Get actual customers from workshop data
   const customers = React.useMemo(() => getWorkshopCustomers(workshopId), [workshopId]);
+
+  // Mock orders data for the CustomerOrdersModal
+  const mockOrders = [
+    {
+      id: 'ORD-001',
+      customerName: 'أحمد محمد الكندري',
+      phone: '+96597712345678',
+      total: 45.500,
+      status: 'جديد',
+      deliveryDate: '2024-07-15',
+      createdAt: '2024-07-04',
+      items: 2,
+      cutter: 'محمد أحمد',
+      qrCodes: ['QR001A', 'QR001B'],
+      payment: {
+        type: 'cash',
+        receivedAmount: 20.000,
+        remainingAmount: 25.500
+      },
+      itemDetails: [
+        {
+          qrCode: 'QR001A',
+          fabric: 'قماش قطني فاخر',
+          cut: 'قصة دشداشة كلاسيكية'
+        },
+        {
+          qrCode: 'QR001B', 
+          fabric: 'قماش العميل',
+          cut: 'قصة عصرية'
+        }
+      ]
+    },
+    {
+      id: 'ORD-600992',
+      customerName: 'أحمد محمد الكندري',
+      phone: '+96597712345678',
+      total: 44.250,
+      status: 'جديد',
+      deliveryDate: '2025-07-10',
+      createdAt: '2025-07-06',
+      items: 1,
+      cutter: 'علي محمد',
+      qrCodes: ['QR600992A'],
+      payment: {
+        type: 'card',
+        receivedAmount: 44.250,
+        remainingAmount: 0
+      },
+      itemDetails: [
+        {
+          qrCode: 'QR600992A',
+          fabric: 'قماش حريري',
+          cut: 'قصة دشداشة كلاسيكية'
+        }
+      ]
+    }
+  ];
 
   // Simulate elastic search with actual customer data
   useEffect(() => {
@@ -145,42 +200,8 @@ const CustomerSearch = ({ onCustomerSelect, workshopId }: CustomerSearchProps) =
     }
   };
 
-  const handleReorder = (order: any) => {
-    setSelectedOrderForReorder(order);
-    setReorderQuantity('');
-    setReorderDeliveryDate('');
-    setShowReorderDialog(true);
-  };
-
-  const handleConfirmReorder = () => {
-    if (!selectedOrderForReorder || !reorderQuantity || !reorderDeliveryDate) {
-      alert('يرجى ملء جميع الحقول');
-      return;
-    }
-
-    const newOrder = {
-      ...selectedOrderForReorder,
-      id: `ORD-${Date.now()}`, // Generate new order ID
-      items: parseInt(reorderQuantity),
-      deliveryDate: reorderDeliveryDate,
-      createdAt: new Date().toISOString().split('T')[0],
-      status: 'جديد',
-      total: selectedOrderForReorder.total * (parseInt(reorderQuantity) / selectedOrderForReorder.items) // Adjust total based on quantity
-    };
-
-    console.log('New reorder created:', newOrder);
-    alert(`تم إنشاء طلب جديد برقم ${newOrder.id}\nالكمية: ${reorderQuantity}\nتاريخ التسليم: ${reorderDeliveryDate}`);
-    
-    setShowReorderDialog(false);
-    setShowDetails(false);
-    setSearchTerm('');
-    setSearchResults([]);
-    
-    // Pass the reordered data to parent component
-    onCustomerSelect({
-      ...selectedCustomer,
-      newOrder: newOrder
-    });
+  const handleOpenOrdersModal = () => {
+    setShowOrdersModal(true);
   };
 
   return (
@@ -343,32 +364,14 @@ const CustomerSearch = ({ onCustomerSelect, workshopId }: CustomerSearchProps) =
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {selectedCustomer.orderHistory.map((order: any) => (
-                      <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex-1">
-                          <p className="font-medium">{order.id}</p>
-                          <p className="text-sm text-gray-600">{order.date}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="font-bold">{order.total.toFixed(3)} د.ك</p>
-                          <Badge variant={order.status === 'مكتمل' ? 'default' : 'secondary'}>
-                            {order.status}
-                          </Badge>
-                        </div>
-                        <div className="ml-4">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleReorder(order)}
-                            className="flex items-center gap-1"
-                          >
-                            <RotateCcw className="w-3 h-3" />
-                            إعادة طلب
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="text-center py-6">
+                    <Button 
+                      onClick={handleOpenOrdersModal}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <History className="w-4 h-4 mr-2" />
+                      عرض تاريخ الطلبات والتفاصيل
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -386,64 +389,13 @@ const CustomerSearch = ({ onCustomerSelect, workshopId }: CustomerSearchProps) =
         </DialogContent>
       </Dialog>
 
-      {/* Reorder Dialog */}
-      <Dialog open={showReorderDialog} onOpenChange={setShowReorderDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <RotateCcw className="w-5 h-5" />
-              إعادة طلب
-            </DialogTitle>
-          </DialogHeader>
-          
-          {selectedOrderForReorder && (
-            <div className="space-y-4">
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="font-medium">الطلب الأصلي: {selectedOrderForReorder.id}</p>
-                <p className="text-sm text-gray-600">التاريخ: {selectedOrderForReorder.date}</p>
-                <p className="text-sm text-gray-600">القيمة: {selectedOrderForReorder.total.toFixed(3)} د.ك</p>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor="reorder-quantity">عدد القطع *</Label>
-                  <Input
-                    id="reorder-quantity"
-                    type="number"
-                    min="1"
-                    value={reorderQuantity}
-                    onChange={(e) => setReorderQuantity(e.target.value)}
-                    placeholder="أدخل عدد القطع"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="reorder-delivery">تاريخ التسليم المتوقع *</Label>
-                  <Input
-                    id="reorder-delivery"
-                    type="date"
-                    value={reorderDeliveryDate}
-                    onChange={(e) => setReorderDeliveryDate(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button onClick={handleConfirmReorder} className="flex-1">
-                  تأكيد إعادة الطلب
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowReorderDialog(false)}
-                  className="flex-1"
-                >
-                  إلغاء
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Customer Orders Modal */}
+      <CustomerOrdersModal
+        customer={selectedCustomer}
+        orders={mockOrders}
+        isOpen={showOrdersModal}
+        onClose={() => setShowOrdersModal(false)}
+      />
     </>
   );
 };
