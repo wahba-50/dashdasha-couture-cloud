@@ -16,20 +16,41 @@ const NewOrder = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const workshopId = searchParams.get('workshopId');
+  const isRepeated = searchParams.get('repeated') === 'true';
   const { t } = useLanguage();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [orderData, setOrderData] = useState<any>({
-    customer: null,
-    items: [],
-    discount: { type: 'amount', value: 0 },
-    deliveryDate: '',
-    notes: '',
-    payment: {
-      type: 'cash',
-      receivedAmount: 0,
-      remainingAmount: 0
+  
+  // Check for repeated order data and set initial state accordingly
+  const getInitialOrderData = () => {
+    if (isRepeated) {
+      const repeatedData = sessionStorage.getItem('repeatedOrderData');
+      if (repeatedData) {
+        try {
+          const parsedData = JSON.parse(repeatedData);
+          // Clear the session storage after using it
+          sessionStorage.removeItem('repeatedOrderData');
+          return parsedData;
+        } catch (error) {
+          console.error('Error parsing repeated order data:', error);
+        }
+      }
     }
-  });
+    
+    return {
+      customer: null,
+      items: [],
+      discount: { type: 'amount', value: 0 },
+      deliveryDate: '',
+      notes: '',
+      payment: {
+        type: 'cash',
+        receivedAmount: 0,
+        remainingAmount: 0
+      }
+    };
+  };
+
+  const [currentStep, setCurrentStep] = useState(isRepeated ? 2 : 1); // Skip to step 2 if repeated order
+  const [orderData, setOrderData] = useState<any>(getInitialOrderData());
 
   const handleCustomerNext = (customerData: any) => {
     setOrderData({ ...orderData, customer: customerData });

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, Calendar, DollarSign, Package, User, Banknote, CreditCard, RefreshCw, QrCode, Shirt, Eye, CheckSquare } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 interface CustomerOrdersModalProps {
   customer: any;
@@ -20,6 +21,9 @@ const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
   isOpen,
   onClose
 }) => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const workshopId = searchParams.get('workshopId');
   const [selectedOrderForRepeat, setSelectedOrderForRepeat] = useState<any>(null);
   const [selectedPieces, setSelectedPieces] = useState<string[]>([]);
   
@@ -67,15 +71,54 @@ const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
     );
   };
 
+  const generateNewQRCode = () => {
+    return `QR${Date.now().toString().slice(-6)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
+  };
+
   const handleConfirmRepeat = () => {
     if (selectedPieces.length > 0 && selectedOrderForRepeat) {
       const orderPieces = getOrderPieces(selectedOrderForRepeat);
       const selectedPieceDetails = orderPieces.filter(piece => selectedPieces.includes(piece.id));
       
-      // Here you would navigate to the new order page with pre-filled data
-      console.log('Repeating pieces:', selectedPieceDetails);
+      // Generate new QR codes for the repeated pieces
+      const repeatedPieces = selectedPieceDetails.map(piece => ({
+        ...piece,
+        qrCode: generateNewQRCode(), // Generate new QR code
+        id: generateNewQRCode() // Generate new ID as well
+      }));
+
+      // Create order data format that matches the NewOrder page expectations
+      const orderData = {
+        customer: customer,
+        items: repeatedPieces.map(piece => ({
+          id: piece.id,
+          qrCode: piece.qrCode,
+          fabricType: piece.fabricType,
+          fabric: piece.fabricType === 'workshop' ? { name: piece.fabric } : null,
+          cut: { name: piece.cut },
+          accessories: piece.accessories.map(acc => ({ name: acc, quantity: 1 })),
+          labors: piece.labors.map(labor => ({ name: labor })),
+          totalPrice: piece.price,
+          specifications: piece.specifications
+        })),
+        discount: { type: 'amount', value: 0 },
+        deliveryDate: '',
+        notes: `طلب معاد من الطلب #${selectedOrderForRepeat.id}`,
+        payment: {
+          type: 'cash',
+          receivedAmount: 0,
+          remainingAmount: 0
+        }
+      };
+
+      // Store the repeated order data in sessionStorage to pass to NewOrder page
+      sessionStorage.setItem('repeatedOrderData', JSON.stringify(orderData));
       
-      // Reset state
+      // Navigate to new order page
+      const navPath = workshopId ? `/new-order?workshopId=${workshopId}&repeated=true` : `/new-order?repeated=true`;
+      navigate(navPath);
+      
+      // Reset state and close modal
       setSelectedOrderForRepeat(null);
       setSelectedPieces([]);
       onClose();
