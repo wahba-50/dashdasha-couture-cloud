@@ -461,7 +461,51 @@ const WorkshopDashboard = () => {
                     <Card key={order.id} className="border hover:shadow-md transition-all duration-200">
                       <CardContent className="p-4">
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                          <div className="flex-1 space-y-3">
+                          {/* Action Buttons - Moved to left side */}
+                          <div className="flex flex-col sm:flex-row lg:flex-col gap-2 lg:w-48 order-2 lg:order-1">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handlePrintQR(order)}
+                              className="w-full"
+                            >
+                              <QrCode className="w-3 h-3 rtl:ml-1 ltr:mr-1" />
+                              طباعة الأكواد
+                            </Button>
+                            
+                            {order.status === 'جديد' && (
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleStartProduction(order.id)}
+                                className="w-full bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Play className="w-3 h-3 rtl:ml-1 ltr:mr-1" />
+                                بدء الإنتاج
+                              </Button>
+                            )}
+                            
+                            {order.status === 'جاري الإنتاج' && (
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleCompleteProduction(order.id)}
+                                className="w-full bg-green-600 hover:bg-green-700"
+                              >
+                                <CheckCircle className="w-3 h-3 rtl:ml-1 ltr:mr-1" />
+                                إنتهاء الإنتاج
+                              </Button>
+                            )}
+                            
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleViewOrderDetails(order)}
+                              className="w-full"
+                            >
+                              عرض التفاصيل
+                            </Button>
+                          </div>
+
+                          <div className="flex-1 space-y-3 order-1 lg:order-2">
                             {/* Order Header */}
                             <div className="flex flex-wrap items-center gap-2 rtl:justify-start ltr:justify-start">
                               <h3 className="font-bold text-lg text-primary rtl:text-right ltr:text-left">#{order.id}</h3>
@@ -519,12 +563,12 @@ const WorkshopDashboard = () => {
                                     <p className="font-semibold flex items-center">
                                       {order.payment.type === 'cash' ? (
                                         <>
-                                          <Banknote className="w-3 h-3 mr-1" />
+                                          <Banknote className="w-3 h-3 rtl:ml-1 ltr:mr-1" />
                                           نقدي
                                         </>
                                       ) : (
                                         <>
-                                          <CreditCard className="w-3 h-3 mr-1" />
+                                          <CreditCard className="w-3 h-3 rtl:ml-1 ltr:mr-1" />
                                           إلكتروني
                                         </>
                                       )}
@@ -550,50 +594,6 @@ const WorkshopDashboard = () => {
                                 </Badge>
                               ))}
                             </div>
-                          </div>
-                          
-                          {/* Action Buttons */}
-                          <div className="flex flex-col sm:flex-row lg:flex-col gap-2 lg:w-48">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handlePrintQR(order)}
-                              className="w-full"
-                            >
-                              <QrCode className="w-3 h-3 mr-1" />
-                              طباعة الأكواد
-                            </Button>
-                            
-                            {order.status === 'جديد' && (
-                              <Button 
-                                size="sm" 
-                                onClick={() => handleStartProduction(order.id)}
-                                className="w-full bg-blue-600 hover:bg-blue-700"
-                              >
-                                <Play className="w-3 h-3 mr-1" />
-                                بدء الإنتاج
-                              </Button>
-                            )}
-                            
-                            {order.status === 'جاري الإنتاج' && (
-                              <Button 
-                                size="sm" 
-                                onClick={() => handleCompleteProduction(order.id)}
-                                className="w-full bg-green-600 hover:bg-green-700"
-                              >
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                إنتهاء الإنتاج
-                              </Button>
-                            )}
-                            
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleViewOrderDetails(order)}
-                              className="w-full"
-                            >
-                              عرض التفاصيل
-                            </Button>
                           </div>
                         </div>
                       </CardContent>
@@ -623,7 +623,27 @@ const WorkshopDashboard = () => {
                     <Card key={customer.id} className="border hover:shadow-md transition-all duration-200">
                       <CardContent className="p-4">
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                          <div className="flex-1 space-y-3">
+                          {/* Action Buttons - Moved to left side */}
+                          <div className="flex flex-col gap-2 w-full lg:w-48 order-2 lg:order-1">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => handleViewCustomerDetails(customer)}
+                              className="w-full"
+                            >
+                              عرض القياسات
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleViewCustomerOrders(customer)}
+                              className="w-full"
+                            >
+                              الطلبات السابقة
+                            </Button>
+                          </div>
+
+                          <div className="flex-1 space-y-3 order-1 lg:order-2">
                             <div className="flex items-center gap-2 rtl:justify-start ltr:justify-start">
                               <h3 className="font-bold text-lg rtl:text-right ltr:text-left">{customer.name}</h3>
                               <Badge variant="outline" className="text-xs">
@@ -690,25 +710,6 @@ const WorkshopDashboard = () => {
                                 <p className="font-bold">{(customer.totalSpent / customer.orders).toFixed(3)} د.ك</p>
                               </div>
                             </div>
-                          </div>
-                          
-                          <div className="flex flex-col gap-2 w-full lg:w-48">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => handleViewCustomerDetails(customer)}
-                              className="w-full"
-                            >
-                              عرض القياسات
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleViewCustomerOrders(customer)}
-                              className="w-full"
-                            >
-                              الطلبات السابقة
-                            </Button>
                           </div>
                         </div>
                       </CardContent>
