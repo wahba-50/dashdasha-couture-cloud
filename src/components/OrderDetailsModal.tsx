@@ -284,7 +284,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
                         <div className="flex flex-wrap gap-1">
                           {item.accessories.map((accessory: any, accIndex: number) => (
                             <Badge key={accIndex} variant="secondary" className="text-xs">
-                              {typeof accessory === 'string' ? accessory : accessory.name}
+                              {typeof accessory === 'string' ? accessory : `${accessory.name} (${accessory.quantity || 1})`}
                             </Badge>
                           ))}
                         </div>
