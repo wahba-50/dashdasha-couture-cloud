@@ -256,8 +256,8 @@ const Index = () => {
   };
 
   const filteredWorkshops = applyFilters(workshops, 'workshops');
-  const filteredCustomers = applyFilters(allCustomers, 'customers');
-  const filteredOrders = applyFilters(allOrders, 'orders');
+  const filteredCustomers = applyFilters(allCustomers, 'customers').sort((a, b) => new Date(b.lastOrder).getTime() - new Date(a.lastOrder).getTime());
+  const filteredOrders = applyFilters(allOrders, 'orders').sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const getStatusBadge = (status: string) => {
     const variants = {
@@ -415,6 +415,71 @@ const Index = () => {
     // Generate filename with current date
     const currentDate = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
     const filename = `تقرير_العملاء_${currentDate}.xlsx`;
+    
+    // Download the file
+    XLSX.writeFile(workbook, filename);
+  };
+
+  const handleExportOrders = () => {
+    // Prepare comprehensive order data for Excel export
+    const exportData = filteredOrders.map(order => {
+      const orderData = order.fullOrderData || {};
+      const pieces = orderData.items || order.itemDetails || [];
+      
+      return pieces.map((piece, index) => ({
+        'رقم الطلب': order.id,
+        'اسم العميل': order.customerName,
+        'تاريخ الطلب': order.createdAt,
+        'وقت الطلب': new Date(order.createdAt).toLocaleTimeString('ar-KW'),
+        'إجمالي الطلب (د.ك)': order.total.toFixed(3),
+        'اسم الورشة': order.workshopName || 'غير محدد',
+        'حالة الطلب': order.status || 'غير محدد',
+        'رقم الهاتف': order.phone,
+        'تاريخ التسليم': order.deliveryDate,
+        
+        // Customer measurements
+        'قياس الصدر (سم)': order.customerMeasurements?.chest || 'غير محدد',
+        'قياس الخصر (سم)': order.customerMeasurements?.waist || 'غير محدد',
+        'قياس الكتف (سم)': order.customerMeasurements?.shoulder || 'غير محدد',
+        'الطول (سم)': order.customerMeasurements?.length || 'غير محدد',
+        'طول الكم (سم)': order.customerMeasurements?.armLength || 'غير محدد',
+        'محيط الرقبة (سم)': order.customerMeasurements?.neckCircumference || 'غير محدد',
+        'فتحة الكم (سم)': order.customerMeasurements?.armOpening || 'غير محدد',
+        'عرض الأسفل (سم)': order.customerMeasurements?.bottomWidth || 'غير محدد',
+        'ملاحظات القياسات': order.customerMeasurements?.notes || 'غير محدد',
+        
+        // Piece details
+        'رقم القطعة': index + 1,
+        'نوع القطعة': piece.type || 'غير محدد',
+        'القص': piece.cut || 'غير محدد',
+        'نوع القماش': piece.fabricType === 'customer' ? 'قماش العميل' : 'قماش الورشة',
+        'تفاصيل القماش': piece.fabricType === 'customer' ? 
+          `${piece.clientFabric?.type || ''} - ${piece.clientFabric?.color || ''} - ${piece.clientFabric?.description || ''}` :
+          piece.fabricName || 'غير محدد',
+        'الإكسسوارات': piece.accessories ? piece.accessories.map(acc => 
+          typeof acc === 'object' ? `${acc.name} (${acc.quantity})` : acc
+        ).join(', ') : 'لا يوجد',
+        'العمليات': piece.labors ? piece.labors.map(labor => 
+          typeof labor === 'object' ? `${labor.name} (${labor.quantity})` : labor
+        ).join(', ') : 'لا يوجد',
+        'سعر القطعة (د.ك)': piece.price ? parseFloat(piece.price.toString()).toFixed(3) : '0.000',
+        'المقاس': piece.size || 'غير محدد',
+        'الستايل': piece.style || 'غير محدد',
+        'ملاحظات القطعة': piece.notes || 'لا يوجد',
+        'تعليمات خاصة': piece.specialInstructions || 'لا يوجد'
+      }));
+    }).flat();
+
+    // Create workbook and worksheet
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'الطلبات');
+    
+    // Generate filename with current date
+    const currentDate = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+    const filename = `تقرير_الطلبات_${currentDate}.xlsx`;
     
     // Download the file
     XLSX.writeFile(workbook, filename);
@@ -725,7 +790,17 @@ const Index = () => {
           <TabsContent value="orders">
             <Card>
               <CardHeader>
-                <CardTitle>جميع الطلبات ({filteredOrders.length})</CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle>جميع الطلبات ({filteredOrders.length})</CardTitle>
+                  <Button 
+                    onClick={handleExportOrders} 
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    تصدير Excel
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
