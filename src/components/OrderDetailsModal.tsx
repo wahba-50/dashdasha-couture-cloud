@@ -15,6 +15,19 @@ interface OrderDetailsModalProps {
 const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) => {
   if (!order) return null;
 
+  // Translation mapping for measurement fields
+  const measurementTranslations: Record<string, string> = {
+    chest: 'قياس الصدر',
+    waist: 'قياس الخصر', 
+    shoulder: 'قياس الكتف',
+    length: 'قياس الطول',
+    armLength: 'قياس طول الكم',
+    neckCircumference: 'قياس محيط الرقبة',
+    armOpening: 'قياس فتحة الكم',
+    bottomWidth: 'قياس عرض الأسفل',
+    notes: 'ملاحظات'
+  };
+
   // Debug logging
   console.log('Order data:', order);
   console.log('Item details:', order.itemDetails);
@@ -119,7 +132,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm">
                   {Object.entries(order.customerMeasurements).map(([key, value]) => (
                     <div key={key} className="flex flex-col">
-                      <span className="text-gray-600 font-medium">{key}:</span>
+                      <span className="text-gray-600 font-medium">{measurementTranslations[key] || key}:</span>
                       <span className="font-semibold">{value as string}</span>
                     </div>
                   ))}
