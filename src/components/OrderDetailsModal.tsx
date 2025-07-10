@@ -18,6 +18,13 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
   // Debug logging
   console.log('Order data:', order);
   console.log('Item details:', order.itemDetails);
+  
+  // Log each item structure
+  order.itemDetails?.forEach((item: any, index: number) => {
+    console.log(`Item ${index + 1}:`, item);
+    console.log(`Item ${index + 1} accessories:`, item.accessories);
+    console.log(`Item ${index + 1} all keys:`, Object.keys(item));
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
