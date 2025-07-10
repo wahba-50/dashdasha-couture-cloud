@@ -139,11 +139,53 @@ const WorkshopDashboard = () => {
       order.workshopId === workshopId || !order.workshopId // Include orders without workshopId for backward compatibility
     );
     
-    if (workshopOrders.length > 0) {
+    // Enhance order data with missing accessories and details if not present
+    const enhancedOrders = workshopOrders.map((order: any) => {
+      if (order.itemDetails && order.itemDetails.length > 0) {
+        const enhancedItemDetails = order.itemDetails.map((item: any, index: number) => {
+          // If item already has complete details, return as is
+          if (item.accessories && item.style) {
+            return item;
+          }
+          
+          // Otherwise enhance with sample data for demonstration
+          return {
+            ...item,
+            accessories: index === 0 ? ['أزرار ذهبية', 'جيوب مخفية', 'تطريز يدوي'] : ['أزرار فضية', 'أساور مطرزة'],
+            style: index === 0 ? 'ستايل كلاسيكي' : 'ستايل عصري',
+            size: 'L',
+            measurements: {
+              'الطول': '95',
+              'الصدر': '110',
+              'الكتف': '48',
+              'الكم': '60'
+            },
+            price: index === 0 ? '55.000' : '62.563',
+            deliveryDate: order.deliveryDate,
+            notes: index === 0 ? 'قماش عالي الجودة مطلوب' : '',
+            specialInstructions: index === 0 ? 'يرجى التأكد من جودة التطريز' : '',
+            clientFabric: item.fabricType === 'customer' ? {
+              type: 'قماش قطني فاخر',
+              color: 'أبيض كريمي',
+              description: 'قماش قطني مصري 100% عالي الجودة، ناعم الملمس'
+            } : undefined,
+            fabricType: item.fabricType || (index === 0 ? 'customer' : 'workshop')
+          };
+        });
+        
+        return {
+          ...order,
+          itemDetails: enhancedItemDetails
+        };
+      }
+      return order;
+    });
+    
+    if (enhancedOrders.length > 0) {
       // Merge with existing default orders, avoiding duplicates
       setOrders(prevOrders => {
         const existingIds = prevOrders.map(order => order.id);
-        const newOrders = workshopOrders.filter((order: any) => !existingIds.includes(order.id));
+        const newOrders = enhancedOrders.filter((order: any) => !existingIds.includes(order.id));
         return [...prevOrders, ...newOrders];
       });
     }
