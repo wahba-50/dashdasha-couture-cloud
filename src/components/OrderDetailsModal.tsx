@@ -159,7 +159,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4">تفاصيل القطع</h3>
               <div className="space-y-6">
-                {order.itemDetails?.map((item: any, index: number) => (
+                {(order.fullOrderData?.items || order.itemDetails)?.map((item: any, index: number) => (
                   <div key={index} className="border rounded-lg p-4 bg-gray-50">
                     <div className="flex items-center justify-between mb-4">
                       <Badge variant="outline" className="font-mono text-sm">
@@ -173,7 +173,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
                       <div className="space-y-2">
                         <div>
                           <span className="text-gray-600 font-medium">نوع القماش:</span>
-                          <p className="font-medium">{item.fabricType === 'customer' ? 'قماش العميل' : item.fabric}</p>
+                          <p className="font-medium">{item.fabricType === 'customer' ? 'قماش العميل' : (item.fabric?.name || item.fabric)}</p>
                         </div>
                         {item.fabricType === 'customer' && item.clientFabric && (
                           <>
@@ -215,7 +215,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
                       <div className="space-y-2">
                         <div>
                           <span className="text-gray-600 font-medium">نوع القصة:</span>
-                          <p className="font-medium">{item.cut}</p>
+                          <p className="font-medium">{item.cut?.name || item.cut}</p>
                         </div>
                         {item.style && (
                           <div>
@@ -246,10 +246,10 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
                             </div>
                           </div>
                         )}
-                        {item.price && (
+                        {(item.price || item.totalPrice) && (
                           <div>
                             <span className="text-gray-600 font-medium">السعر:</span>
-                            <p className="font-medium">{item.price} د.ك</p>
+                            <p className="font-medium">{item.totalPrice?.toFixed(3) || item.price} د.ك</p>
                           </div>
                         )}
                         {item.deliveryDate && (
@@ -282,9 +282,23 @@ const OrderDetailsModal = ({ order, isOpen, onClose }: OrderDetailsModalProps) =
                       <div className="mt-4 pt-3 border-t border-gray-200">
                         <span className="text-gray-600 font-medium mb-2 block">الإكسسوارات:</span>
                         <div className="flex flex-wrap gap-1">
-                          {item.accessories.map((accessory: string, accIndex: number) => (
+                          {item.accessories.map((accessory: any, accIndex: number) => (
                             <Badge key={accIndex} variant="secondary" className="text-xs">
-                              {accessory}
+                              {typeof accessory === 'string' ? accessory : accessory.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Labors Section */}
+                    {item.labors && item.labors.length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-gray-200">
+                        <span className="text-gray-600 font-medium mb-2 block">الأعمال:</span>
+                        <div className="flex flex-wrap gap-1">
+                          {item.labors.map((labor: any, laborIndex: number) => (
+                            <Badge key={laborIndex} variant="outline" className="text-xs">
+                              {labor.name} ({labor.price} د.ك)
                             </Badge>
                           ))}
                         </div>
