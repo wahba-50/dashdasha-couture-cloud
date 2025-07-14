@@ -42,8 +42,12 @@ const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
         fabric: item.fabric || 'قماش العميل',
         fabricType: item.fabric === 'قماش العميل' ? 'customer' : 'workshop',
         cut: item.cut || 'قصة كلاسيكية',
-        accessories: ['أزرار × 2'],
-        labors: ['مصنعية'],
+        accessories: item.accessories ? item.accessories.map((acc: any) => 
+          typeof acc === 'string' ? acc : `${acc.name} (${acc.quantity || 1})`
+        ) : ['لا يوجد'],
+        labors: item.labors ? item.labors.map((labor: any) => 
+          typeof labor === 'string' ? labor : labor.name
+        ) : ['مصنعية'],
         price: order.total / order.items,
         specifications: `${item.fabric || 'قماش العميل'} - ${item.cut || 'قصة كلاسيكية'}`
       }));
