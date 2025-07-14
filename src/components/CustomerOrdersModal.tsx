@@ -34,8 +34,26 @@ const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
 
   // Get actual pieces data from the order
   const getOrderPieces = (order: any) => {
-    if (order.itemDetails && order.itemDetails.length > 0) {
-      // If we have itemDetails, use those
+    // First try to use fullOrderData.items if available (most complete data)
+    if (order.fullOrderData && order.fullOrderData.items && order.fullOrderData.items.length > 0) {
+      return order.fullOrderData.items.map((item: any, index: number) => ({
+        id: `${index + 1}`,
+        qrCode: item.qrCode || order.qrCodes[index] || `QR00${index + 1}`,
+        fabric: item.fabricType === 'customer' ? 'قماش العميل' : (item.fabric?.name || 'قماش الورشة'),
+        fabricType: item.fabricType || 'workshop',
+        cut: item.cut?.name || 'قصة كلاسيكية',
+        accessories: item.accessories ? item.accessories.map((acc: any) => 
+          typeof acc === 'string' ? acc : `${acc.name} (${acc.quantity || 1})`
+        ) : ['لا يوجد'],
+        labors: item.labors ? item.labors.map((labor: any) => 
+          typeof labor === 'string' ? labor : labor.name
+        ) : ['مصنعية'],
+        price: item.totalPrice || (order.total / order.items),
+        specifications: `${item.fabricType === 'customer' ? 'قماش العميل' : (item.fabric?.name || 'قماش الورشة')} - ${item.cut?.name || 'قصة كلاسيكية'}`
+      }));
+    }
+    // Fallback to itemDetails if available
+    else if (order.itemDetails && order.itemDetails.length > 0) {
       return order.itemDetails.map((item: any, index: number) => ({
         id: `${index + 1}`,
         qrCode: item.qrCode || order.qrCodes[index] || `QR00${index + 1}`,
@@ -51,8 +69,9 @@ const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
         price: order.total / order.items,
         specifications: `${item.fabric || 'قماش العميل'} - ${item.cut || 'قصة كلاسيكية'}`
       }));
-    } else {
-      // If no itemDetails, create pieces based on order.items count and qrCodes
+    } 
+    // Last resort: create pieces based on basic order data
+    else {
       const pieceCount = order.items || 1;
       return Array.from({ length: pieceCount }, (_, index) => ({
         id: `${index + 1}`,
