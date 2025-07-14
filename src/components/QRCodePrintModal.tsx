@@ -23,8 +23,8 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
       const urls: { [key: string]: string } = {};
       
       for (const item of order.itemDetails || []) {
-        // Create URL that points to the piece details page
-        const pieceUrl = `${window.location.origin}/piece/${item.qrCode}`;
+        // Create URL that points to the piece details page with workshop info
+        const pieceUrl = `${window.location.origin}/piece/${item.qrCode}?workshop=${encodeURIComponent(window.location.pathname.split('/')[2])}`;
         
         try {
           const qrCodeDataURL = await QRCode.toDataURL(pieceUrl, {
