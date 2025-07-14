@@ -169,6 +169,7 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
                                     chest: 'الصدر',
                                     waist: 'الخصر',
                                     shoulders: 'الأكتاف',
+                                    shoulder: 'الأكتاف',
                                     sleeves: 'الأكمام',
                                     neck: 'الرقبة',
                                     back: 'الظهر',
@@ -176,7 +177,11 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
                                     hips: 'الأرداف',
                                     thighs: 'الفخذين',
                                     length: 'الطول',
-                                    inseam: 'الداخلي'
+                                    inseam: 'الداخلي',
+                                    armLength: 'طول الذراع',
+                                    armOpening: 'فتحة الذراع',
+                                    neckCircumference: 'محيط الرقبة',
+                                    bottomWidth: 'عرض القاع'
                                   };
                                   
                                   if (value && value !== '' && value !== '0') {
