@@ -13,101 +13,43 @@ const PieceDetails = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const findPieceData = () => {
-      try {
-        // Get workshop ID from URL params
-        const urlParams = new URLSearchParams(window.location.search);
-        const workshopId = urlParams.get('workshop');
-        
-        // Load workshop orders from localStorage
-        const workshopOrdersKey = workshopId ? `workshopOrders_${workshopId}` : 'workshopOrders';
-        const orders = JSON.parse(localStorage.getItem(workshopOrdersKey) || '[]');
-        
-        // Also check the main orders storage
-        const allOrders = JSON.parse(localStorage.getItem('allWorkshopOrders') || '[]');
-        
-        // Find the piece with matching QR code
-        let foundPiece = null;
-        let foundOrder = null;
-        let foundWorkshop = null;
-
-        // Search in workshop-specific orders first
-        for (const order of orders) {
-          if (order.itemDetails) {
-            const piece = order.itemDetails.find((item: any) => item.qrCode === pieceId);
-            if (piece) {
-              foundPiece = piece;
-              foundOrder = order;
-              foundWorkshop = {
-                id: workshopId,
-                name: "ورشة الأناقة الكويتية",
-                address: "حولي، شارع تونس، مجمع الأناقة التجاري",
-                phone: "+965 2262 8945"
-              };
-              break;
-            }
-          }
-        }
-
-        // If not found, search in all orders
-        if (!foundPiece) {
-          for (const workshop of allOrders) {
-            for (const order of workshop.orders || []) {
-              if (order.itemDetails) {
-                const piece = order.itemDetails.find((item: any) => item.qrCode === pieceId);
-                if (piece) {
-                  foundPiece = piece;
-                  foundOrder = order;
-                  foundWorkshop = workshop;
-                  break;
-                }
-              }
-            }
-            if (foundPiece) break;
-          }
-        }
-
-        if (foundPiece && foundOrder) {
-          // Get full item details from fullOrderData if available
-          const fullItem = foundOrder.fullOrderData?.items?.find((item: any) => item.qrCode === pieceId);
-          
-          // Create the piece data object
-          const pieceData = {
-            orderId: foundOrder.id,
-            itemCode: pieceId,
-            customerName: foundOrder.customerName,
-            customerPhone: foundOrder.phone,
-            fabric: foundPiece.fabric,
-            cut: foundPiece.cut,
-            deliveryDate: foundOrder.deliveryDate,
-            createdAt: foundOrder.createdAt,
-            workshopName: foundWorkshop?.name || "ورشة الأناقة الكويتية",
-            workshopPhone: foundWorkshop?.phone || "+965 2262 8945",
-            workshopAddress: foundWorkshop?.address || "حولي، شارع تونس، مجمع الأناقة التجاري",
-            measurements: foundOrder.measurements || {},
-            status: foundOrder.status || 'جديد',
-            cutter: foundOrder.cutter || null,
-            totalAmount: foundOrder.total || 0,
-            timestamp: foundOrder.createdAt || new Date().toISOString(),
-            fullDetails: fullItem,
-            accessories: fullItem?.accessories || [],
-            labors: fullItem?.labors || [],
-            fabricCode: foundPiece.fabricCode,
-            fabricColor: foundPiece.fabricColor,
-            fabricType: foundPiece.fabricType
-          };
-          
-          setPieceData(pieceData);
-        }
-      } catch (error) {
-        console.error('Error loading piece data:', error);
-      } finally {
-        setLoading(false);
-      }
+    // In a real app, this would fetch from an API
+    // For now, we'll simulate the data that would be stored with the QR code
+    const fetchPieceData = () => {
+      // This simulates getting data from a database or API
+      const mockData = {
+        orderId: 'ORD-001',
+        itemCode: pieceId,
+        customerName: 'أحمد محمد الكندري',
+        customerPhone: '+96597712345678',
+        fabric: 'قماش قطني فاخر',
+        cut: 'قصة كلاسيكية',
+        deliveryDate: '2024-07-15',
+        createdAt: '2024-07-04',
+        workshopName: "ورشة الأناقة الكويتية",
+        workshopPhone: "+965 2262 8945",
+        workshopAddress: "حولي، شارع تونس، مجمع الأناقة التجاري",
+        measurements: {
+          chest: 95,
+          waist: 85,
+          shoulder: 45,
+          neck: 38,
+          length: 145,
+          sleeve: 60,
+          armhole: 42
+        },
+        status: 'جديد',
+        cutter: null,
+        totalAmount: 45.500,
+        timestamp: new Date().toISOString()
+      };
+      
+      setPieceData(mockData);
+      setLoading(false);
     };
 
     if (pieceId) {
-      findPieceData();
+      setTimeout(fetchPieceData, 500); // Simulate loading time
     }
   }, [pieceId]);
 
@@ -260,118 +202,52 @@ const PieceDetails = () => {
           <CardContent className="p-4 sm:p-6 pt-0 space-y-2 sm:space-y-3">
             <div>
               <span className="text-gray-600 text-xs sm:text-sm">نوع القماش:</span>
-              <p className="font-semibold text-sm sm:text-base">
-                {(() => {
-                  // Check fabric type from various sources
-                  const fabricType = pieceData.fabricType || pieceData.fullDetails?.fabricType;
-                  const isCustomerFabric = fabricType === 'customer' || 
-                                          pieceData.fullDetails?.fabric?.specifications ||
-                                          (typeof pieceData.fabric === 'string' && pieceData.fabric.includes('قماش العميل'));
-                  
-                  if (isCustomerFabric) {
-                    const specifications = pieceData.fullDetails?.fabric?.specifications || 
-                                         pieceData.fabric?.specifications || 
-                                         pieceData.fullDetails?.customerFabricDetails || 
-                                         pieceData.customerFabricDetails ||
-                                         '';
-                    return `قماش العميل${specifications ? ` - ${specifications}` : ''}`;
-                  } else {
-                    // Handle workshop fabric - check if fabric is an object or string
-                    let fabricName = '';
-                    if (typeof pieceData.fabric === 'object' && pieceData.fabric?.name) {
-                      fabricName = pieceData.fabric.name;
-                    } else if (typeof pieceData.fabric === 'string') {
-                      fabricName = pieceData.fabric;
-                    } else if (pieceData.fullDetails?.fabric?.name) {
-                      fabricName = pieceData.fullDetails.fabric.name;
-                    }
-                    
-                    return `${fabricName}${pieceData.fabricCode ? ` - كود: ${pieceData.fabricCode}` : ''}${pieceData.fabricColor ? ` - لون: ${pieceData.fabricColor}` : ''}`;
-                  }
-                })()}
-              </p>
+              <p className="font-semibold text-sm sm:text-base">{pieceData.fabric}</p>
             </div>
             <div>
               <span className="text-gray-600 text-xs sm:text-sm">نوع القصة:</span>
               <p className="font-semibold text-sm sm:text-base">{pieceData.cut}</p>
             </div>
-            
-            {/* Accessories */}
-            {pieceData.accessories && pieceData.accessories.length > 0 && (
-              <div>
-                <span className="text-gray-600 text-xs sm:text-sm">الإكسسوارات:</span>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {pieceData.accessories.map((accessory: any, index: number) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {accessory.name} - عدد: {accessory.quantity || 1}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Labors */}
-            {pieceData.labors && pieceData.labors.length > 0 && (
-              <div>
-                <span className="text-gray-600 text-xs sm:text-sm">الأعمال الإضافية:</span>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {pieceData.labors.map((labor: any, index: number) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {labor.name} - السعر: {labor.price} د.ك
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
 
         {/* Customer Measurements */}
-        {pieceData.measurements && Object.keys(pieceData.measurements).length > 0 && (
-          <Card>
-            <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Ruler className="w-4 h-4 sm:w-5 sm:h-5" />
-                قياسات العميل
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6 pt-0">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
-                {Object.entries(pieceData.measurements).map(([key, value]) => {
-                  if (!value) return null;
-                  
-                  const measurementLabels: { [key: string]: string } = {
-                    chest: 'قياس الصدر',
-                    waist: 'قياس الخصر',
-                    hips: 'قياس الأرداف',
-                    shoulder: 'قياس الكتف',
-                    armLength: 'طول الذراع',
-                    thighLength: 'طول الفخذ',
-                    totalLength: 'الطول الكامل',
-                    neckCircumference: 'محيط الرقبة',
-                    wristCircumference: 'محيط المعصم',
-                    bicepCircumference: 'محيط العضد',
-                    waistHeight: 'ارتفاع الخصر',
-                    pantLength: 'طول البنطلون',
-                    inseam: 'الطول الداخلي',
-                    rise: 'ارتفاع المنشعب',
-                    neck: 'الرقبة',
-                    length: 'الطول',
-                    sleeve: 'الكم',
-                    armhole: 'فتحة الذراع'
-                  };
-                  
-                  return (
-                    <div key={key} className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-600">{measurementLabels[key] || key}</p>
-                      <p className="font-bold text-sm sm:text-lg">{String(value)} سم</p>
-                    </div>
-                  );
-                })}
+        <Card>
+          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Ruler className="w-4 h-4 sm:w-5 sm:h-5" />
+              قياسات العميل
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6 pt-0">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
+              <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+                <p className="text-xs text-gray-600">الصدر</p>
+                <p className="font-bold text-sm sm:text-lg">{pieceData.measurements.chest} سم</p>
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+                <p className="text-xs text-gray-600">الخصر</p>
+                <p className="font-bold text-sm sm:text-lg">{pieceData.measurements.waist} سم</p>
+              </div>
+              <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+                <p className="text-xs text-gray-600">الكتف</p>
+                <p className="font-bold text-sm sm:text-lg">{pieceData.measurements.shoulder} سم</p>
+              </div>
+              <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+                <p className="text-xs text-gray-600">الرقبة</p>
+                <p className="font-bold text-sm sm:text-lg">{pieceData.measurements.neck} سم</p>
+              </div>
+              <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+                <p className="text-xs text-gray-600">الطول</p>
+                <p className="font-bold text-sm sm:text-lg">{pieceData.measurements.length} سم</p>
+              </div>
+              <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+                <p className="text-xs text-gray-600">الكم</p>
+                <p className="font-bold text-sm sm:text-lg">{pieceData.measurements.sleeve} سم</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Timestamp */}
         <Card>
