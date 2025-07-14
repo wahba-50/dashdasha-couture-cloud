@@ -262,8 +262,9 @@ const PieceDetails = () => {
               <span className="text-gray-600 text-xs sm:text-sm">نوع القماش:</span>
               <p className="font-semibold text-sm sm:text-base">
                 {(() => {
-                  const isCustomerFabric = pieceData.fabricType === 'customer' || 
-                                          pieceData.fullDetails?.fabricType === 'customer' ||
+                  // Check fabric type from various sources
+                  const fabricType = pieceData.fabricType || pieceData.fullDetails?.fabricType;
+                  const isCustomerFabric = fabricType === 'customer' || 
                                           pieceData.fullDetails?.fabric?.specifications ||
                                           (typeof pieceData.fabric === 'string' && pieceData.fabric.includes('قماش العميل'));
                   
@@ -275,7 +276,17 @@ const PieceDetails = () => {
                                          '';
                     return `قماش العميل${specifications ? ` - ${specifications}` : ''}`;
                   } else {
-                    return `${pieceData.fabric}${pieceData.fabricCode ? ` - كود: ${pieceData.fabricCode}` : ''}${pieceData.fabricColor ? ` - لون: ${pieceData.fabricColor}` : ''}`;
+                    // Handle workshop fabric - check if fabric is an object or string
+                    let fabricName = '';
+                    if (typeof pieceData.fabric === 'object' && pieceData.fabric?.name) {
+                      fabricName = pieceData.fabric.name;
+                    } else if (typeof pieceData.fabric === 'string') {
+                      fabricName = pieceData.fabric;
+                    } else if (pieceData.fullDetails?.fabric?.name) {
+                      fabricName = pieceData.fullDetails.fabric.name;
+                    }
+                    
+                    return `${fabricName}${pieceData.fabricCode ? ` - كود: ${pieceData.fabricCode}` : ''}${pieceData.fabricColor ? ` - لون: ${pieceData.fabricColor}` : ''}`;
                   }
                 })()}
               </p>
