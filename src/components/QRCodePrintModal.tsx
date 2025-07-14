@@ -125,28 +125,25 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
                             <span className="font-semibold">نوع القماش:</span>
                             <p className="mt-1">
                               {(() => {
-                                // Check if it's customer fabric by looking at fabric name or specifications
-                                const isCustomerFabric = item.fabricType === 'customer' || 
-                                                        fullItem?.fabricType === 'customer' ||
-                                                        fullItem?.fabric?.specifications ||
-                                                        (typeof item.fabric === 'string' && item.fabric.includes('قماش العميل'));
-                                
-                                if (isCustomerFabric) {
+                                // Get fabric info from fullOrderData first, then fallback to itemDetails
+                                if (fullItem?.fabricType === 'customer') {
                                   const specifications = fullItem?.fabric?.specifications || 
-                                                       item.fabric?.specifications || 
                                                        fullItem?.customerFabricDetails || 
-                                                       item.customerFabricDetails ||
                                                        '';
                                   return `قماش العميل${specifications ? ` - ${specifications}` : ''}`;
+                                } else if (fullItem?.fabric?.name) {
+                                  return fullItem.fabric.name;
+                                } else if (item.fabricType === 'customer') {
+                                  return `قماش العميل${item.customerFabricDetails ? ` - ${item.customerFabricDetails}` : ''}`;
                                 } else {
-                                  return `${item.fabric}${item.fabricCode ? ` - كود: ${item.fabricCode}` : ''}${item.fabricColor ? ` - لون: ${item.fabricColor}` : ''}`;
+                                  return item.fabric || 'قماش الورشة';
                                 }
                               })()}
                             </p>
                           </div>
                           <div>
                             <span className="font-semibold">نوع القصة:</span>
-                            <p className="mt-1">{item.cut}</p>
+                            <p className="mt-1">{fullItem?.cut?.name || item.cut}</p>
                           </div>
                           {fullItem?.accessories && fullItem.accessories.length > 0 && (
                             <div>
@@ -160,6 +157,41 @@ const QRCodePrintModal = ({ order, isOpen, onClose }: QRCodePrintModalProps) => 
                               </div>
                             </div>
                           )}
+                          
+                          {/* Customer Measurements */}
+                          {order.customerMeasurements && Object.keys(order.customerMeasurements).length > 0 && (
+                            <div>
+                              <span className="font-semibold">قياسات العميل:</span>
+                              <div className="mt-1 grid grid-cols-2 gap-1 text-xs">
+                                {Object.entries(order.customerMeasurements).map(([key, value]) => {
+                                  const arabicLabels: { [key: string]: string } = {
+                                    height: 'الطول',
+                                    chest: 'الصدر',
+                                    waist: 'الخصر',
+                                    shoulders: 'الأكتاف',
+                                    sleeves: 'الأكمام',
+                                    neck: 'الرقبة',
+                                    back: 'الظهر',
+                                    armhole: 'حفرة الذراع',
+                                    hips: 'الأرداف',
+                                    thighs: 'الفخذين',
+                                    length: 'الطول',
+                                    inseam: 'الداخلي'
+                                  };
+                                  
+                                  if (value && value !== '' && value !== '0') {
+                                    return (
+                                      <p key={key} className="text-[10px]">
+                                        {arabicLabels[key] || key}: {String(value)}
+                                      </p>
+                                    );
+                                  }
+                                  return null;
+                                })}
+                              </div>
+                            </div>
+                          )}
+                          
                           <div>
                             <span className="font-semibold">رقم الطلب:</span>
                             <p className="mt-1">#{order.id}</p>
