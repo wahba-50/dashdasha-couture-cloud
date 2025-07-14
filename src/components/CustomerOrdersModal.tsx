@@ -32,31 +32,37 @@ const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
   const customerOrders = orders.filter(order => order.customerName === customer.name)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  // Mock pieces data for demonstration - in real app this would come from the order
-  const getOrderPieces = (order: any) => [
-    {
-      id: '1',
-      qrCode: order.qrCodes[0] || 'QR001',
-      fabric: 'قماش قطني فاخر',
-      fabricType: 'workshop',
-      cut: 'قصة دشداشة كلاسيكية',
-      accessories: ['أزرار ذهبية × 2'],
-      labors: ['مصنعية قص وتفصيل'],
-      price: 45.500,
-      specifications: 'قماش قطني عالي الجودة، قصة تقليدية كويتية'
-    },
-    ...(order.itemDetails?.map((item: any, index: number) => ({
-      id: `${index + 2}`,
-      qrCode: item.qrCode || `QR00${index + 2}`,
-      fabric: item.fabric || 'قماش العميل',
-      fabricType: item.fabric === 'قماش العميل' ? 'customer' : 'workshop',
-      cut: item.cut || 'قصة كلاسيكية',
-      accessories: ['أزرار × 2'],
-      labors: ['مصنعية'],
-      price: order.total / order.items,
-      specifications: `${item.fabric || 'قماش العميل'} - ${item.cut || 'قصة كلاسيكية'}`
-    })) || [])
-  ];
+  // Get actual pieces data from the order
+  const getOrderPieces = (order: any) => {
+    if (order.itemDetails && order.itemDetails.length > 0) {
+      // If we have itemDetails, use those
+      return order.itemDetails.map((item: any, index: number) => ({
+        id: `${index + 1}`,
+        qrCode: item.qrCode || order.qrCodes[index] || `QR00${index + 1}`,
+        fabric: item.fabric || 'قماش العميل',
+        fabricType: item.fabric === 'قماش العميل' ? 'customer' : 'workshop',
+        cut: item.cut || 'قصة كلاسيكية',
+        accessories: ['أزرار × 2'],
+        labors: ['مصنعية'],
+        price: order.total / order.items,
+        specifications: `${item.fabric || 'قماش العميل'} - ${item.cut || 'قصة كلاسيكية'}`
+      }));
+    } else {
+      // If no itemDetails, create pieces based on order.items count and qrCodes
+      const pieceCount = order.items || 1;
+      return Array.from({ length: pieceCount }, (_, index) => ({
+        id: `${index + 1}`,
+        qrCode: order.qrCodes[index] || `QR00${index + 1}`,
+        fabric: 'قماش قطني فاخر',
+        fabricType: 'workshop',
+        cut: 'قصة دشداشة كلاسيكية',
+        accessories: ['أزرار ذهبية × 2'],
+        labors: ['مصنعية قص وتفصيل'],
+        price: order.total / pieceCount,
+        specifications: 'قماش قطني عالي الجودة، قصة تقليدية كويتية'
+      }));
+    }
+  };
 
   const handleRepeatOrder = (order: any) => {
     setSelectedOrderForRepeat(order);
