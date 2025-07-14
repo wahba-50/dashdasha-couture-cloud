@@ -42,8 +42,8 @@ const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
         fabric: item.fabric || 'قماش العميل',
         fabricType: item.fabric === 'قماش العميل' ? 'customer' : 'workshop',
         cut: item.cut || 'قصة كلاسيكية',
-        accessories: item.accessories || ['أزرار × 2'],
-        labors: item.labors || ['مصنعية'],
+        accessories: ['أزرار × 2'],
+        labors: ['مصنعية'],
         price: order.total / order.items,
         specifications: `${item.fabric || 'قماش العميل'} - ${item.cut || 'قصة كلاسيكية'}`
       }));
@@ -408,7 +408,7 @@ const CustomerOrdersModal: React.FC<CustomerOrdersModalProps> = ({
                                   <div className="flex flex-wrap gap-1 mt-1">
                                     {piece.accessories.map((acc, index) => (
                                       <Badge key={index} variant="outline" className="text-xs">
-                                        {typeof acc === 'string' ? acc : `${acc.name} (${acc.quantity || 1})`}
+                                        {acc}
                                       </Badge>
                                     ))}
                                   </div>
