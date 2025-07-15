@@ -78,6 +78,7 @@ const CreateWorkshop = () => {
       status: "نشط",
       revenue: 0,
       description: formData.description,
+      createdAt: new Date().toISOString(),
       credentials: {
         username: formData.username,
         password: formData.password

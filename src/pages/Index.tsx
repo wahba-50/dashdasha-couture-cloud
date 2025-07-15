@@ -1104,6 +1104,10 @@ const Index = () => {
         workshop={selectedWorkshopForDetails}
         isOpen={!!selectedWorkshopForDetails}
         onClose={() => setSelectedWorkshopForDetails(null)}
+        onUpdate={(updatedWorkshop) => {
+          setWorkshops(prev => prev.map(w => w.id === updatedWorkshop.id ? updatedWorkshop : w));
+          setSelectedWorkshopForDetails(updatedWorkshop);
+        }}
       />
 
       {/* Customer Details Dialog */}
