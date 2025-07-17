@@ -35,7 +35,9 @@ const Index = () => {
     type: '',
     dateFrom: '',
     dateTo: '',
-    workshop: ''
+    workshop: '',
+    deliveryDateFrom: '',
+    deliveryDateTo: ''
   });
 
   const [workshops, setWorkshops] = useState([
@@ -251,7 +253,23 @@ const Index = () => {
         }
       }
 
-      return searchMatch && statusMatch && typeMatch && workshopMatch && dateMatch;
+      // Delivery date filter for orders
+      let deliveryDateMatch = true;
+      if ((filters.deliveryDateFrom || filters.deliveryDateTo) && type === 'orders') {
+        if (item.deliveryDate) {
+          const deliveryDate = new Date(item.deliveryDate);
+          if (filters.deliveryDateFrom) {
+            deliveryDateMatch = deliveryDateMatch && deliveryDate >= new Date(filters.deliveryDateFrom);
+          }
+          if (filters.deliveryDateTo) {
+            deliveryDateMatch = deliveryDateMatch && deliveryDate <= new Date(filters.deliveryDateTo);
+          }
+        } else if (filters.deliveryDateFrom || filters.deliveryDateTo) {
+          deliveryDateMatch = false;
+        }
+      }
+
+      return searchMatch && statusMatch && typeMatch && workshopMatch && dateMatch && deliveryDateMatch;
     });
   };
 
@@ -368,7 +386,9 @@ const Index = () => {
       type: '',
       dateFrom: '',
       dateTo: '',
-      workshop: ''
+      workshop: '',
+      deliveryDateFrom: '',
+      deliveryDateTo: ''
     });
   };
 
@@ -816,19 +836,24 @@ const Index = () => {
                                   {order.status}
                                 </Badge>
                               </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                                <p><span className="text-gray-600">العميل:</span> <span className="font-medium">{order.customerName || order.customer}</span></p>
-                                 <p><span className="text-gray-600">التاريخ والوقت:</span> <span className="font-medium">
-                                   {new Date(order.createdAt || order.date).toLocaleDateString('en-GB')}
-                                   <span className="text-xs text-gray-500 ml-1">
-                                     {new Date(order.createdAt || order.date).toLocaleTimeString('en-US', { 
-                                       hour: '2-digit', 
-                                       minute: '2-digit',
-                                       hour12: true
-                                     })}
-                                   </span>
-                                 </span></p>
-                              </div>
+                               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+                                 <p><span className="text-gray-600">العميل:</span> <span className="font-medium">{order.customerName || order.customer}</span></p>
+                                  <p><span className="text-gray-600">التاريخ والوقت:</span> <span className="font-medium">
+                                    {new Date(order.createdAt || order.date).toLocaleDateString('en-GB')}
+                                    <span className="text-xs text-gray-500 ml-1">
+                                      {new Date(order.createdAt || order.date).toLocaleTimeString('en-US', { 
+                                        hour: '2-digit', 
+                                        minute: '2-digit',
+                                        hour12: true
+                                      })}
+                                    </span>
+                                  </span></p>
+                                  <p><span className="text-gray-600">تاريخ التسليم:</span> 
+                                    <span className="font-medium text-blue-600">
+                                      {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('en-GB') : 'غير محدد'}
+                                    </span>
+                                  </p>
+                               </div>
                             </div>
                             <div className="flex flex-col items-end gap-2">
                               <div className="text-right">
@@ -1081,6 +1106,30 @@ const Index = () => {
                     type="date"
                     value={filters.dateTo}
                     onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value }))}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Delivery Date Range Filter - Orders only */}
+            {selectedTab === 'orders' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="delivery-date-from">من تاريخ التسليم</Label>
+                  <Input
+                    id="delivery-date-from"
+                    type="date"
+                    value={filters.deliveryDateFrom}
+                    onChange={(e) => setFilters(prev => ({ ...prev, deliveryDateFrom: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="delivery-date-to">إلى تاريخ التسليم</Label>
+                  <Input
+                    id="delivery-date-to"
+                    type="date"
+                    value={filters.deliveryDateTo}
+                    onChange={(e) => setFilters(prev => ({ ...prev, deliveryDateTo: e.target.value }))}
                   />
                 </div>
               </div>
