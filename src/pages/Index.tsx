@@ -855,21 +855,21 @@ const Index = () => {
                                   </p>
                                </div>
                              </div>
-                             <div className="flex flex-col items-start lg:items-end gap-2">
-                               <div className="text-left lg:text-right">
-                                 <p className="text-lg font-bold text-green-600">{order.total.toFixed(3)} د.ك</p>
-                                 <p className="text-sm text-gray-500">{order.items} قطعة</p>
-                               </div>
-                               <Button 
-                                 size="sm" 
-                                 variant="outline"
-                                 onClick={() => setSelectedOrderForDetails(order)}
-                                 className="w-full sm:w-auto"
-                               >
-                                 <FileText className="w-4 h-4 ml-1" />
-                                 تفاصيل الطلب
-                               </Button>
-                             </div>
+                              <div className="flex flex-col items-start gap-2">
+                                <div className="text-left lg:text-right">
+                                  <p className="text-lg font-bold text-green-600">{order.total.toFixed(3)} د.ك</p>
+                                  <p className="text-sm text-gray-500">{order.items} قطعة</p>
+                                </div>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => setSelectedOrderForDetails(order)}
+                                  className="w-full sm:w-auto self-start"
+                                >
+                                  <FileText className="w-4 h-4 ml-1" />
+                                  تفاصيل الطلب
+                                </Button>
+                              </div>
                            </div>
 
                           {/* Workshop Info */}
