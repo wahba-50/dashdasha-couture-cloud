@@ -823,24 +823,24 @@ const Index = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                   {filteredOrders.map((order) => (
-                     <Card key={order.id} className="border hover:shadow-md transition-all duration-200">
-                       <CardContent className="p-6">
-                          {/* Order Header */}
-                          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
-                            <div className="flex-1">
-                              <div className="flex flex-wrap items-center gap-2 mb-2">
-                                <h3 className="font-bold text-lg text-primary">#{order.id}</h3>
-                                <Badge className={getStatusBadge(order.status)}>
-                                  {order.status}
-                                </Badge>
-                              </div>
-                               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+                 <div className="space-y-6">
+                    {filteredOrders.map((order) => (
+                      <Card key={order.id} className="border hover:shadow-md transition-all duration-200">
+                        <CardContent className="p-6">
+                           {/* Order Header */}
+                           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+                             <div className="flex-1 text-right">
+                               <div className="flex flex-wrap items-center justify-end gap-2 mb-2">
+                                 <Badge className={getStatusBadge(order.status)}>
+                                   {order.status}
+                                 </Badge>
+                                 <h3 className="font-bold text-lg text-primary">#{order.id}</h3>
+                               </div>
+                               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-right">
                                  <p><span className="text-gray-600">العميل:</span> <span className="font-medium">{order.customerName || order.customer}</span></p>
                                   <p><span className="text-gray-600">التاريخ والوقت:</span> <span className="font-medium">
                                     {new Date(order.createdAt || order.date).toLocaleDateString('en-GB')}
-                                    <span className="text-xs text-gray-500 ml-1">
+                                    <span className="text-xs text-gray-500 mr-1">
                                       {new Date(order.createdAt || order.date).toLocaleTimeString('en-US', { 
                                         hour: '2-digit', 
                                         minute: '2-digit',
@@ -854,29 +854,29 @@ const Index = () => {
                                     </span>
                                   </p>
                                </div>
-                            </div>
-                            <div className="flex flex-col items-end gap-2">
-                              <div className="text-right">
-                                <p className="text-lg font-bold text-green-600">{order.total.toFixed(3)} د.ك</p>
-                                <p className="text-sm text-gray-500">{order.items} قطعة</p>
-                              </div>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => setSelectedOrderForDetails(order)}
-                                className="w-full sm:w-auto"
-                              >
-                                <FileText className="w-4 h-4 mr-1" />
-                                تفاصيل الطلب
-                              </Button>
-                            </div>
-                          </div>
+                             </div>
+                             <div className="flex flex-col items-start lg:items-end gap-2">
+                               <div className="text-left lg:text-right">
+                                 <p className="text-lg font-bold text-green-600">{order.total.toFixed(3)} د.ك</p>
+                                 <p className="text-sm text-gray-500">{order.items} قطعة</p>
+                               </div>
+                               <Button 
+                                 size="sm" 
+                                 variant="outline"
+                                 onClick={() => setSelectedOrderForDetails(order)}
+                                 className="w-full sm:w-auto"
+                               >
+                                 <FileText className="w-4 h-4 ml-1" />
+                                 تفاصيل الطلب
+                               </Button>
+                             </div>
+                           </div>
 
-                         {/* Workshop Info */}
-                         <div className="bg-blue-50 p-3 rounded-lg mb-4">
-                           <p className="text-sm text-gray-600">الورشة:</p>
-                           <p className="font-semibold text-blue-700">{order.workshopName || order.workshop}</p>
-                         </div>
+                          {/* Workshop Info */}
+                          <div className="bg-blue-50 p-3 rounded-lg mb-4 text-right">
+                            <p className="text-sm text-gray-600">الورشة:</p>
+                            <p className="font-semibold text-blue-700">{order.workshopName || order.workshop}</p>
+                          </div>
 
                          {/* Order Pieces Details */}
                          {order.fullOrderData?.pieces && order.fullOrderData.pieces.length > 0 && (
