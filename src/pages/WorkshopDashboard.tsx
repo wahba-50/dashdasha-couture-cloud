@@ -482,16 +482,16 @@ const WorkshopDashboard = () => {
         {/* Main Content Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
-            <TabsTrigger value="orders" className="text-xs sm:text-sm py-2">
+            <TabsTrigger value="orders" className="text-sm sm:text-sm py-2">
               الطلبات ({stats.totalOrders})
             </TabsTrigger>
-            <TabsTrigger value="customers" className="text-xs sm:text-sm py-2">
+            <TabsTrigger value="customers" className="text-sm sm:text-sm py-2">
               العملاء ({stats.totalCustomers})
             </TabsTrigger>
-            <TabsTrigger value="products" className="text-xs sm:text-sm py-2">
+            <TabsTrigger value="products" className="text-sm sm:text-sm py-2">
               المنتجات
             </TabsTrigger>
-            <TabsTrigger value="reports" className="text-xs sm:text-sm py-2">
+            <TabsTrigger value="reports" className="text-sm sm:text-sm py-2">
               التقارير
             </TabsTrigger>
           </TabsList>
