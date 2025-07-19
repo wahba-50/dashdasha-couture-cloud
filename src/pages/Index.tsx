@@ -559,16 +559,16 @@ const Index = () => {
         {/* Main Content */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
-            <TabsTrigger value="workshops" className="text-xs sm:text-sm py-2">
+            <TabsTrigger value="workshops" className="text-sm sm:text-sm py-2">
               {t('dashboard.workshops')}
             </TabsTrigger>
-            <TabsTrigger value="customers" className="text-xs sm:text-sm py-2">
+            <TabsTrigger value="customers" className="text-sm sm:text-sm py-2">
               {t('dashboard.customers')}
             </TabsTrigger>
-            <TabsTrigger value="orders" className="text-xs sm:text-sm py-2">
+            <TabsTrigger value="orders" className="text-sm sm:text-sm py-2">
               {t('dashboard.orders')}
             </TabsTrigger>
-            <TabsTrigger value="services" className="text-xs sm:text-sm py-2">
+            <TabsTrigger value="services" className="text-sm sm:text-sm py-2">
               {t('dashboard.externalServices')}
             </TabsTrigger>
           </TabsList>
