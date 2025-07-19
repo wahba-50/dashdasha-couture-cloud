@@ -13,6 +13,7 @@ interface SystemHeaderProps {
   showSignOutButton?: boolean;
   actions?: React.ReactNode;
   hideSettingsButton?: boolean;
+  hideSignOutIcon?: boolean;
   onBackClick?: () => void;
 }
 
@@ -23,6 +24,7 @@ const SystemHeader = ({
   showSignOutButton = false,
   actions,
   hideSettingsButton = false,
+  hideSignOutIcon = false,
   onBackClick
 }: SystemHeaderProps) => {
   const navigate = useNavigate();
@@ -86,7 +88,7 @@ const SystemHeader = ({
           <div className="flex items-center gap-2 sm:gap-3">
             <LanguageToggle />
             {actions}
-            {!hideSettingsButton && (
+            {!hideSettingsButton && !hideSignOutIcon && (
               <Button 
                 variant="outline" 
                 size="icon" 

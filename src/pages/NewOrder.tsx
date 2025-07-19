@@ -630,6 +630,7 @@ const NewOrder = () => {
         subtitle={`الخطوة ${currentStep} من 3`}
         showBackButton={true}
         onBackClick={handleBackToWorkshop}
+        hideSignOutIcon={true}
       />
 
       <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8">
