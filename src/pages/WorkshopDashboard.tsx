@@ -15,6 +15,7 @@ import OrderDetailsModal from "@/components/OrderDetailsModal";
 import QRCodePrintModal from "@/components/QRCodePrintModal";
 import CustomerMeasurementsModal from "@/components/CustomerMeasurementsModal";
 import CustomerOrdersModal from "@/components/CustomerOrdersModal";
+import CustomerForm from "@/components/CustomerForm";
 
 const WorkshopDashboard = () => {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ const WorkshopDashboard = () => {
   const [selectedOrderForPrint, setSelectedOrderForPrint] = useState<any>(null);
   const [selectedCustomerForMeasurements, setSelectedCustomerForMeasurements] = useState<any>(null);
   const [selectedCustomerForOrders, setSelectedCustomerForOrders] = useState<any>(null);
+  const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
 
   const workshop = {
     id: workshopId,
@@ -371,6 +373,34 @@ const WorkshopDashboard = () => {
     setSelectedCustomerForOrders(customer);
   };
 
+  const handleAddCustomer = (customerData: any) => {
+    // Add customer to localStorage
+    const existingCustomers = JSON.parse(localStorage.getItem('allCustomers') || '[]');
+    const newCustomer = {
+      id: Date.now(),
+      name: customerData.name,
+      phone: customerData.phone,
+      email: customerData.email,
+      gender: customerData.gender,
+      age: customerData.age,
+      workshop: workshop.name,
+      orders: 0,
+      lastOrder: null,
+      totalSpent: 0,
+      measurements: customerData.measurements,
+      address: customerData.address
+    };
+    
+    existingCustomers.push(newCustomer);
+    localStorage.setItem('allCustomers', JSON.stringify(existingCustomers));
+    
+    // Close modal and refresh customers list
+    setIsAddCustomerOpen(false);
+    
+    // Show success message
+    alert('تم إضافة العميل بنجاح!');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-amber-50">
       <SystemHeader
@@ -657,7 +687,16 @@ const WorkshopDashboard = () => {
           <TabsContent value="customers">
             <Card>
               <CardHeader>
-                <CardTitle className="rtl:text-right ltr:text-left">العملاء ({filteredCustomers.length})</CardTitle>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <CardTitle className="rtl:text-right ltr:text-left">العملاء ({filteredCustomers.length})</CardTitle>
+                  <Button 
+                    onClick={() => setIsAddCustomerOpen(true)}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    اضافة عميل
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -896,6 +935,21 @@ const WorkshopDashboard = () => {
         isOpen={!!selectedCustomerForOrders}
         onClose={() => setSelectedCustomerForOrders(null)}
       />
+
+      {/* Add Customer Modal */}
+      <Dialog open={isAddCustomerOpen} onOpenChange={setIsAddCustomerOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold rtl:text-right ltr:text-left">
+              إضافة عميل جديد
+            </DialogTitle>
+          </DialogHeader>
+          <CustomerForm 
+            onNext={handleAddCustomer}
+            workshopId={workshopId}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
