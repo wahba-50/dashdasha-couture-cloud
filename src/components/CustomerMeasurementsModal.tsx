@@ -67,67 +67,67 @@ const CustomerMeasurementsModal: React.FC<CustomerMeasurementsModalProps> = ({
                 {customer.measurements?.chest && (
                   <div className="bg-gray-50 p-2 rounded">
                     <span className="text-gray-500">الصدر:</span>
-                    <p className="font-semibold">{customer.measurements.chest} سم</p>
+                    <p className="font-semibold">{customer.measurements.chest} {customer.measurements?.unit === 'inch' ? 'انش' : 'سم'}</p>
                   </div>
                 )}
                 {customer.measurements?.waist && (
                   <div className="bg-gray-50 p-2 rounded">
                     <span className="text-gray-500">الخصر:</span>
-                    <p className="font-semibold">{customer.measurements.waist} سم</p>
+                    <p className="font-semibold">{customer.measurements.waist} {customer.measurements?.unit === 'inch' ? 'انش' : 'سم'}</p>
                   </div>
                 )}
                 {customer.measurements?.shoulder && (
                   <div className="bg-gray-50 p-2 rounded">
                     <span className="text-gray-500">الكتف:</span>
-                    <p className="font-semibold">{customer.measurements.shoulder} سم</p>
+                    <p className="font-semibold">{customer.measurements.shoulder} {customer.measurements?.unit === 'inch' ? 'انش' : 'سم'}</p>
                   </div>
                 )}
                 {customer.measurements?.neck && (
                   <div className="bg-gray-50 p-2 rounded">
                     <span className="text-gray-500">الرقبة:</span>
-                    <p className="font-semibold">{customer.measurements.neck} سم</p>
+                    <p className="font-semibold">{customer.measurements.neck} {customer.measurements?.unit === 'inch' ? 'انش' : 'سم'}</p>
                   </div>
                 )}
                 {customer.measurements?.length && (
                   <div className="bg-gray-50 p-2 rounded">
                     <span className="text-gray-500">الطول:</span>
-                    <p className="font-semibold">{customer.measurements.length} سم</p>
+                    <p className="font-semibold">{customer.measurements.length} {customer.measurements?.unit === 'inch' ? 'انش' : 'سم'}</p>
                   </div>
                 )}
                 {customer.measurements?.sleeve && (
                   <div className="bg-gray-50 p-2 rounded">
                     <span className="text-gray-500">الكم:</span>
-                    <p className="font-semibold">{customer.measurements.sleeve} سم</p>
+                    <p className="font-semibold">{customer.measurements.sleeve} {customer.measurements?.unit === 'inch' ? 'انش' : 'سم'}</p>
                   </div>
                 )}
                 {customer.measurements?.armhole && (
                   <div className="bg-gray-50 p-2 rounded">
                     <span className="text-gray-500">فتحة الكم:</span>
-                    <p className="font-semibold">{customer.measurements.armhole} سم</p>
+                    <p className="font-semibold">{customer.measurements.armhole} {customer.measurements?.unit === 'inch' ? 'انش' : 'سم'}</p>
                   </div>
                 )}
                 {customer.measurements?.armLength && (
                   <div className="bg-gray-50 p-2 rounded">
                     <span className="text-gray-500">طول الكم:</span>
-                    <p className="font-semibold">{customer.measurements.armLength} سم</p>
+                    <p className="font-semibold">{customer.measurements.armLength} {customer.measurements?.unit === 'inch' ? 'انش' : 'سم'}</p>
                   </div>
                 )}
                 {customer.measurements?.neckCircumference && (
                   <div className="bg-gray-50 p-2 rounded">
                     <span className="text-gray-500">محيط الرقبة:</span>
-                    <p className="font-semibold">{customer.measurements.neckCircumference} سم</p>
+                    <p className="font-semibold">{customer.measurements.neckCircumference} {customer.measurements?.unit === 'inch' ? 'انش' : 'سم'}</p>
                   </div>
                 )}
                 {customer.measurements?.armOpening && (
                   <div className="bg-gray-50 p-2 rounded">
                     <span className="text-gray-500">فتحة الذراع:</span>
-                    <p className="font-semibold">{customer.measurements.armOpening} سم</p>
+                    <p className="font-semibold">{customer.measurements.armOpening} {customer.measurements?.unit === 'inch' ? 'انش' : 'سم'}</p>
                   </div>
                 )}
                 {customer.measurements?.bottomWidth && (
                   <div className="bg-gray-50 p-2 rounded">
                     <span className="text-gray-500">عرض القاع:</span>
-                    <p className="font-semibold">{customer.measurements.bottomWidth} سم</p>
+                    <p className="font-semibold">{customer.measurements.bottomWidth} {customer.measurements?.unit === 'inch' ? 'انش' : 'سم'}</p>
                   </div>
                 )}
               </div>
