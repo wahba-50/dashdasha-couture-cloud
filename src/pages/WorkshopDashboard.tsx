@@ -197,7 +197,17 @@ const WorkshopDashboard = () => {
   const customers = React.useMemo(() => {
     const customerMap = new Map();
     
-    // Process all orders to extract unique customers
+    // First, load existing customers from localStorage who were added directly
+    const existingGlobalCustomers = JSON.parse(localStorage.getItem('allCustomers') || '[]');
+    const workshopCustomers = existingGlobalCustomers.filter(customer => customer.workshop === workshop.name);
+    
+    // Add existing customers from localStorage
+    workshopCustomers.forEach(customer => {
+      const customerKey = `${customer.name}-${customer.phone}`;
+      customerMap.set(customerKey, { ...customer });
+    });
+    
+    // Process all orders to extract unique customers and update existing ones
     orders.forEach(order => {
       const customerKey = `${order.customerName}-${order.phone}`;
       
@@ -234,7 +244,7 @@ const WorkshopDashboard = () => {
       customer.totalSpent += order.total;
       
       // Update last order date if this order is more recent
-      if (new Date(order.createdAt) > new Date(customer.lastOrder)) {
+      if (!customer.lastOrder || new Date(order.createdAt) > new Date(customer.lastOrder)) {
         customer.lastOrder = order.createdAt;
       }
       
@@ -256,14 +266,15 @@ const WorkshopDashboard = () => {
     
     const currentCustomers = Array.from(customerMap.values());
 
-    // Sync customers to global storage for SaaS dashboard
-    const existingGlobalCustomers = JSON.parse(localStorage.getItem('allCustomers') || '[]');
+    // Update global storage with all customers
     const globalCustomerMap = new Map();
     
-    // Add existing global customers
+    // Add existing global customers from other workshops
     existingGlobalCustomers.forEach(customer => {
-      const key = `${customer.name}-${customer.phone}`;
-      globalCustomerMap.set(key, customer);
+      if (customer.workshop !== workshop.name) {
+        const key = `${customer.name}-${customer.phone}`;
+        globalCustomerMap.set(key, customer);
+      }
     });
     
     // Add/update customers from current workshop
