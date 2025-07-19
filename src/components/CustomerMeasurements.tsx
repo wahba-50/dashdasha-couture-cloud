@@ -16,6 +16,7 @@ interface MeasurementsData {
   armOpening: string;
   bottomWidth: string;
   notes: string;
+  unit?: 'cm' | 'inch';
 }
 
 interface CustomerMeasurementsProps {
@@ -25,10 +26,16 @@ interface CustomerMeasurementsProps {
 }
 
 const CustomerMeasurements = ({ measurements, onMeasurementsChange, readOnly = false }: CustomerMeasurementsProps) => {
-  const [unit, setUnit] = useState<'cm' | 'inch'>('cm');
+  const [unit, setUnit] = useState<'cm' | 'inch'>(measurements.unit || 'cm');
 
   const updateMeasurement = (field: keyof MeasurementsData, value: string) => {
-    onMeasurementsChange({ ...measurements, [field]: value });
+    const updatedMeasurements = { ...measurements, unit };
+    if (field === 'unit') {
+      updatedMeasurements.unit = value as 'cm' | 'inch';
+    } else {
+      (updatedMeasurements as any)[field] = value;
+    }
+    onMeasurementsChange(updatedMeasurements);
   };
 
   const convertValue = (value: string, fromUnit: 'cm' | 'inch', toUnit: 'cm' | 'inch'): string => {
@@ -47,17 +54,20 @@ const CustomerMeasurements = ({ measurements, onMeasurementsChange, readOnly = f
   const handleUnitChange = (newUnit: 'cm' | 'inch') => {
     if (newUnit === unit) return;
     
-    const convertedMeasurements = { ...measurements };
-    Object.keys(measurements).forEach(key => {
-      if (key !== 'notes') {
-        convertedMeasurements[key as keyof MeasurementsData] = convertValue(
-          measurements[key as keyof MeasurementsData], 
+    const convertedMeasurements: MeasurementsData = { ...measurements };
+    const measurementFields: (keyof MeasurementsData)[] = ['chest', 'waist', 'shoulder', 'length', 'armLength', 'neckCircumference', 'armOpening', 'bottomWidth'];
+    
+    measurementFields.forEach(field => {
+      if (measurements[field]) {
+        (convertedMeasurements as any)[field] = convertValue(
+          measurements[field], 
           unit, 
           newUnit
         );
       }
     });
     
+    convertedMeasurements.unit = newUnit;
     onMeasurementsChange(convertedMeasurements);
     setUnit(newUnit);
   };
