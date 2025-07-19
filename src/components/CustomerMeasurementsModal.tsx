@@ -16,6 +16,9 @@ const CustomerMeasurementsModal: React.FC<CustomerMeasurementsModalProps> = ({
   onClose
 }) => {
   if (!customer) return null;
+  
+  console.log('Customer measurements unit:', customer.measurements?.unit);
+  console.log('Full customer measurements:', customer.measurements);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
