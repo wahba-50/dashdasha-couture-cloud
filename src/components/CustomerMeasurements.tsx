@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,13 @@ interface CustomerMeasurementsProps {
 
 const CustomerMeasurements = ({ measurements, onMeasurementsChange, readOnly = false }: CustomerMeasurementsProps) => {
   const [unit, setUnit] = useState<'cm' | 'inch'>(measurements.unit || 'cm');
+
+  // Ensure unit is always saved in measurements
+  useEffect(() => {
+    if (!measurements.unit) {
+      onMeasurementsChange({ ...measurements, unit });
+    }
+  }, []);
 
   const updateMeasurement = (field: keyof MeasurementsData, value: string) => {
     const updatedMeasurements = { ...measurements, unit };
