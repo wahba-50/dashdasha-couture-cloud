@@ -95,18 +95,6 @@ const CustomerForm = ({ onNext, workshopId }: CustomerFormProps) => {
     if (!customerData.address.governorate.trim()) {
       newErrors.governorate = 'المحافظة مطلوبة';
     }
-    
-    if (!customerData.address.block.trim()) {
-      newErrors.block = 'رقم القطعة مطلوب';
-    }
-    
-    if (!customerData.address.street.trim()) {
-      newErrors.street = 'الشارع مطلوب';
-    }
-    
-    if (!customerData.address.houseNumber.trim()) {
-      newErrors.houseNumber = 'رقم المنزل مطلوب';
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -337,39 +325,33 @@ const CustomerForm = ({ onNext, workshopId }: CustomerFormProps) => {
               </div>
 
               <div>
-                <Label htmlFor="block">رقم القطعة *</Label>
+                <Label htmlFor="block">رقم القطعة (اختياري)</Label>
                 <Input
                   id="block"
                   value={customerData.address.block}
                   onChange={(e) => updateField('address.block', e.target.value)}
                   placeholder="رقم القطعة"
-                  className={errors.block ? 'border-red-500' : ''}
                 />
-                {errors.block && <p className="text-red-500 text-sm mt-1">{errors.block}</p>}
               </div>
 
               <div>
-                <Label htmlFor="street">الشارع *</Label>
+                <Label htmlFor="street">الشارع (اختياري)</Label>
                 <Input
                   id="street"
                   value={customerData.address.street}
                   onChange={(e) => updateField('address.street', e.target.value)}
                   placeholder="رقم الشارع"
-                  className={errors.street ? 'border-red-500' : ''}
                 />
-                {errors.street && <p className="text-red-500 text-sm mt-1">{errors.street}</p>}
               </div>
 
               <div>
-                <Label htmlFor="houseNumber">رقم المنزل *</Label>
+                <Label htmlFor="houseNumber">رقم المنزل (اختياري)</Label>
                 <Input
                   id="houseNumber"
                   value={customerData.address.houseNumber}
                   onChange={(e) => updateField('address.houseNumber', e.target.value)}
                   placeholder="رقم المنزل"
-                  className={errors.houseNumber ? 'border-red-500' : ''}
                 />
-                {errors.houseNumber && <p className="text-red-500 text-sm mt-1">{errors.houseNumber}</p>}
               </div>
             </div>
           </div>
