@@ -120,7 +120,7 @@ const Index = () => {
 
         {/* Footer */}
         <div className="text-center mt-16 text-gray-500 text-sm">
-          <p>© 2024 نظام التفصيل الذكي - جميع الحقوق محفوظة</p>
+          <p>© 2025 نظام التفصيل الذكي - جميع الحقوق محفوظة</p>
         </div>
       </div>
     </div>
