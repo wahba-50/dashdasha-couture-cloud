@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Building2, Crown } from "lucide-react";
+import { Building2, Crown, Eye, EyeOff } from "lucide-react";
 import LanguageToggle from "@/components/LanguageToggle";
 
 const Index = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const [showSystemOwner, setShowSystemOwner] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-amber-50">
@@ -38,45 +40,47 @@ const Index = () => {
         </div>
 
         {/* Selection Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+        <div className={`grid gap-8 max-w-3xl mx-auto ${showSystemOwner ? 'md:grid-cols-2' : 'md:grid-cols-1 justify-center'}`}>
           {/* SaaS Owner Card */}
-          <Card className="hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/50">
-            <CardHeader className="text-center pb-6">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center mb-4">
-                <Crown className="w-8 h-8 text-white" />
-              </div>
-              <CardTitle className="text-2xl text-gray-900">مالك النظام</CardTitle>
-              <p className="text-gray-600 mt-2">
-                إدارة شاملة للنظام والورش والعملاء
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span>إدارة جميع الورش</span>
+          {showSystemOwner && (
+            <Card className="hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/50">
+              <CardHeader className="text-center pb-6">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center mb-4">
+                  <Crown className="w-8 h-8 text-white" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span>متابعة الطلبات والعملاء</span>
+                <CardTitle className="text-2xl text-gray-900">مالك النظام</CardTitle>
+                <p className="text-gray-600 mt-2">
+                  إدارة شاملة للنظام والورش والعملاء
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <span>إدارة جميع الورش</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <span>متابعة الطلبات والعملاء</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <span>تقارير شاملة وإحصائيات</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <span>إدارة الخدمات الخارجية</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span>تقارير شاملة وإحصائيات</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span>إدارة الخدمات الخارجية</span>
-                </div>
-              </div>
-              <Button 
-                onClick={() => navigate('/system')}
-                className="w-full bg-primary hover:bg-primary/90 text-white py-6 text-lg font-semibold"
-              >
-                دخول كمالك النظام
-              </Button>
-            </CardContent>
-          </Card>
+                <Button 
+                  onClick={() => navigate('/system')}
+                  className="w-full bg-primary hover:bg-primary/90 text-white py-6 text-lg font-semibold"
+                >
+                  دخول كمالك النظام
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Workshop Admin Card */}
           <Card className="hover:shadow-lg transition-all duration-300 border-2 hover:border-amber-500/50">
@@ -119,8 +123,23 @@ const Index = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-16 text-gray-500 text-sm">
-          <p>© 2025 نظام التفصيل الذكي - جميع الحقوق محفوظة</p>
+        <div className="text-center mt-16 space-y-4">
+          {/* Toggle for System Owner */}
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <span className="text-sm text-gray-600">
+              {showSystemOwner ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            </span>
+            <Switch
+              checked={showSystemOwner}
+              onCheckedChange={setShowSystemOwner}
+              className="data-[state=checked]:bg-primary"
+            />
+            <span className="text-sm text-gray-600">إظهار مالك النظام</span>
+          </div>
+          
+          <div className="text-gray-500 text-sm">
+            <p>© 2025 نظام التفصيل الذكي - جميع الحقوق محفوظة</p>
+          </div>
         </div>
       </div>
     </div>
